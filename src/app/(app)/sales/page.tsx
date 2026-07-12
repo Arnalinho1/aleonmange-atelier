@@ -3,6 +3,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { SCREEN_META } from "@/lib/nav";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { enLots } from "@/lib/supabase/lots";
 import type { Emplacement, Vente, VenteLigne } from "@/lib/supabase/database.types";
 import { TrendingUp } from "lucide-react";
 import { SalesBoard, type LigneTendance, type VenteTendance } from "./SalesBoard";
@@ -41,11 +42,10 @@ export default async function SalesPage() {
     }));
 
     if (remises.length > 0) {
-      const { data: l } = await supabase
-        .from("vente_ligne")
-        .select("vente_id, libelle, qte")
-        .in("vente_id", remises.map((x) => x.id));
-      lignes = ((l ?? []) as Pick<VenteLigne, "vente_id" | "libelle" | "qte">[]).map((x) => ({
+      const l = await enLots(remises.map((x) => x.id), (lot) =>
+        supabase.from("vente_ligne").select("vente_id, libelle, qte").in("vente_id", lot)
+      );
+      lignes = (l as Pick<VenteLigne, "vente_id" | "libelle" | "qte">[]).map((x) => ({
         vente_id: x.vente_id,
         libelle: x.libelle,
         qte: x.qte,

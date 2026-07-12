@@ -5,6 +5,7 @@ import { Dot } from "@/components/ui/Badge";
 import { SCREEN_META, CANAL_COLOR, CANAL_LABEL, CATEGORIE_COLOR } from "@/lib/nav";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { enLots } from "@/lib/supabase/lots";
 import { trierInsights, URGENCE_COLOR, URGENCE_LABEL } from "@/lib/insights";
 import { fmtEuro } from "@/lib/calculs";
 import type { Canal, Insight, Vente, VenteLigne } from "@/lib/supabase/database.types";
@@ -59,12 +60,11 @@ export default async function DashboardPage() {
 
     // Top plats du jour (lignes des ventes remises d'aujourd'hui)
     if (ventesJour.length > 0) {
-      const { data: lignes } = await supabase
-        .from("vente_ligne")
-        .select("vente_id, libelle, qte, montant")
-        .in("vente_id", ventesJour.map((x) => x.id));
+      const lignes = await enLots(ventesJour.map((x) => x.id), (lot) =>
+        supabase.from("vente_ligne").select("vente_id, libelle, qte, montant").in("vente_id", lot)
+      );
       const parPlat = new Map<string, { libelle: string; qte: number; montant: number }>();
-      for (const l of (lignes ?? []) as Pick<VenteLigne, "vente_id" | "libelle" | "qte" | "montant">[]) {
+      for (const l of lignes as Pick<VenteLigne, "vente_id" | "libelle" | "qte" | "montant">[]) {
         const cur = parPlat.get(l.libelle) ?? { libelle: l.libelle, qte: 0, montant: 0 };
         cur.qte += l.qte ?? 1;
         cur.montant += l.montant;
@@ -76,19 +76,15 @@ export default async function DashboardPage() {
     ouvertes = (o.data ?? []) as Vente[];
     // Charge par composant des commandes ouvertes
     if (ouvertes.length > 0) {
-      const { data: lignesOuvertes } = await supabase
-        .from("vente_ligne")
-        .select("id, qte, vente_id")
-        .in("vente_id", ouvertes.map((x) => x.id));
-      const qteParLigne = new Map((lignesOuvertes ?? []).map((l) => [l.id, l.qte ?? 1]));
-      const { data: vlc } = (lignesOuvertes ?? []).length
-        ? await supabase
-            .from("vente_ligne_composant")
-            .select("ligne_id, categorie, composant(nom)")
-            .in("ligne_id", (lignesOuvertes ?? []).map((l) => l.id))
-        : { data: [] };
+      const lignesOuvertes = await enLots(ouvertes.map((x) => x.id), (lot) =>
+        supabase.from("vente_ligne").select("id, qte, vente_id").in("vente_id", lot)
+      );
+      const qteParLigne = new Map(lignesOuvertes.map((l) => [l.id, l.qte ?? 1]));
+      const vlc = await enLots(lignesOuvertes.map((l) => l.id), (lot) =>
+        supabase.from("vente_ligne_composant").select("ligne_id, categorie, composant(nom)").in("ligne_id", lot)
+      );
       const map = new Map<string, { nom: string; categorie: string; portions: number }>();
-      for (const row of (vlc ?? []) as { ligne_id: string; categorie: string; composant: { nom: string } | null }[]) {
+      for (const row of vlc as unknown as { ligne_id: string; categorie: string; composant: { nom: string } | null }[]) {
         const nom = row.composant?.nom ?? "Composant retiré";
         const cur = map.get(nom) ?? { nom, categorie: row.categorie, portions: 0 };
         cur.portions += qteParLigne.get(row.ligne_id) ?? 1;
