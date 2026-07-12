@@ -36,6 +36,8 @@ export type Composant = {
   cout_matiere_kg: number | null;
   /** Unité de STOCK (kg | piece | l) — les coûts restent en €/kg (recettes en g). */
   unite: string;
+  /** Poids d'UNE pièce en g (unite=piece) — conversion des sorties recettes ; NULL = non convertible (0012). */
+  poids_piece_g: number | null;
   actif: boolean;
   created_at: string;
 };
@@ -248,6 +250,8 @@ export type VenteLigneComposant = {
   ligne_id: string;
   composant_id: string;
   categorie: CategorieComposant;
+  /** Grammes TOTAUX de la ligne pour ce composant, figés à l'encaissement (0012). NULL avant B8. */
+  quantite_g: number | null;
 };
 
 export type Insight = {

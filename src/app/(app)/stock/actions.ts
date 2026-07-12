@@ -93,7 +93,8 @@ export async function ajusterStock(
 /**
  * Définit / met à jour le seuil bas d'un composant (config PARTAGÉE).
  * Vide = suppression de l'override → retour au défaut par catégorie
- * (seuil effectif, src/lib/stock.ts).
+ * (seuil effectif, src/lib/stock.ts). Pour un composant à la pièce, le même
+ * formulaire porte le poids d'une pièce (conversion des sorties — B8).
  */
 export async function definirSeuil(
   _prev: StockFormState,
@@ -111,6 +112,15 @@ export async function definirSeuil(
     const seuil = Number(raw);
     if (!Number.isFinite(seuil) || seuil < 0) return { error: "Seuil invalide." };
     const { error } = await supabase.from("seuil_stock").upsert({ composant_id: composantId, seuil_bas: seuil });
+    if (error) return { error: error.message };
+  }
+
+  // Poids d'une pièce (présent uniquement pour les composants unite=piece).
+  if (formData.has("poids_piece")) {
+    const rawPoids = String(formData.get("poids_piece") ?? "").replace(",", ".").trim();
+    const poids = rawPoids ? Number(rawPoids) : null;
+    if (poids !== null && (!Number.isFinite(poids) || poids <= 0)) return { error: "Poids par pièce invalide." };
+    const { error } = await supabase.from("composant").update({ poids_piece_g: poids }).eq("id", composantId);
     if (error) return { error: error.message };
   }
 

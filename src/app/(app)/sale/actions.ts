@@ -1,7 +1,8 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import type { Canal, ModeVente, Paiement, Origine } from "@/lib/supabase/database.types";
+import type { Canal, ModeVente, Paiement, Origine, RecetteComposant } from "@/lib/supabase/database.types";
+import { deplierLigneEnGrammes, grammesBowlComposant, grammesVersUnite, type ContexteDepliage } from "@/lib/stock";
 
 export type SaleFormState = { error?: string; ok?: boolean } | undefined;
 
@@ -104,6 +105,29 @@ export async function createVente(
   if (compError) return { error: compError.message };
   const compParId = new Map((composants ?? []).map((x) => [x.id, x]));
 
+  // ── Fiches des produits du panier (B8) : dépliage en grammes — figés sur les
+  // lignes bowl (vlc.quantite_g) et sorties de stock à la remise.
+  const recetteIds = [...new Set((produits ?? []).map((x) => x.recette_id).filter((x): x is string => x != null))];
+  const [{ data: recettes, error: recError }, { data: fiches, error: ficheError }] = recetteIds.length
+    ? await Promise.all([
+        supabase.from("recette").select("id, rendement").in("id", recetteIds),
+        supabase.from("recette_composant").select("*").in("recette_id", recetteIds),
+      ])
+    : [{ data: [], error: null }, { data: [], error: null }];
+  if (recError) return { error: recError.message };
+  if (ficheError) return { error: ficheError.message };
+  const fichesParRecette = new Map<string, RecetteComposant[]>();
+  for (const f of (fiches ?? []) as RecetteComposant[]) {
+    const arr = fichesParRecette.get(f.recette_id) ?? [];
+    arr.push(f);
+    fichesParRecette.set(f.recette_id, arr);
+  }
+  const ctx: ContexteDepliage = {
+    produitParId: new Map((produits ?? []).map((x) => [x.id, x])),
+    recetteParId: new Map((recettes ?? []).map((x) => [x.id, x])),
+    fichesParRecette,
+  };
+
   type LignePrete = {
     type: "bowl" | "produit";
     mode: "unite" | "poids";
@@ -115,7 +139,7 @@ export async function createVente(
     poids_g: number | null;
     prix_kg: number | null;
     montant: number;
-    composants: { composant_id: string; categorie: "proteine" | "feculent" | "legume" | "sauce" }[];
+    composants: { composant_id: string; categorie: "proteine" | "feculent" | "legume" | "sauce"; quantite_g: number | null }[];
   };
 
   const lignes: LignePrete[] = [];
@@ -159,10 +183,19 @@ export async function createVente(
     if (produit.is_bowl) {
       const ids = l.composants ?? [];
       if (ids.length === 0) return { error: `Composez le bowl « ${produit.nom} » (composants manquants).` };
+      const fiche = produit.recette_id ? fichesParRecette.get(produit.recette_id) ?? [] : [];
+      const rendement = produit.recette_id ? ctx.recetteParId.get(produit.recette_id)?.rendement ?? null : null;
       for (const id of ids) {
         const c = compParId.get(id);
         if (!c || !c.actif) return { error: "Un composant du bowl n'existe plus." };
-        comps.push({ composant_id: id, categorie: c.categorie });
+        // Grammes FIGÉS à l'encaissement (B8) : fiche du bowl ; composant
+        // échangé (libre) → grammes du composant de base de la même catégorie.
+        const parPortion = grammesBowlComposant(fiche, rendement, id, c.categorie);
+        comps.push({
+          composant_id: id,
+          categorie: c.categorie,
+          quantite_g: parPortion != null ? Math.round(parPortion * qte * 100) / 100 : null,
+        });
       }
       // Signature (fiche du produit) ou composition libre (dépliée sans parent).
       recetteId = l.composition_libre ? null : produit.recette_id;
@@ -198,10 +231,11 @@ export async function createVente(
 
   // ── Écriture. occurred_at = MAINTENANT, capturé à l'encaissement (jamais dérivé
   // de created_at). fulfillment dérivé du mode_vente saisi (Contrat §01).
+  const occurredAt = new Date().toISOString();
   const { data: vente, error: venteError } = await supabase
     .from("vente")
     .insert({
-      occurred_at: new Date().toISOString(),
+      occurred_at: occurredAt,
       canal: p.canal,
       emplacement_id: p.canal === "truck" ? p.emplacement_id : null,
       montant_total: total,
@@ -249,6 +283,49 @@ export async function createVente(
     if (compInsertError) {
       await supabase.from("vente").delete().eq("id", vente.id);
       return { error: compInsertError.message };
+    }
+  }
+
+  // ── CONSOMMÉ (B8) : une vente instantanée naît « remis » → les sorties de
+  // stock s'écrivent dans la même chaîne (rollback commun). Une précommande
+  // n'écrit RIEN ici : elle pèse en RÉSERVÉ (calcul dynamique côté Stocks)
+  // jusqu'à sa remise (orders/avancerFulfillment).
+  if (p.mode_vente === "instantane") {
+    const totaux = new Map<string, number>();
+    for (const l of lignes) {
+      const dep = deplierLigneEnGrammes(
+        { type: l.type, mode: l.mode, qte: l.qte, poids_g: l.poids_g, produit_id: l.produit_id, composants: l.composants },
+        ctx
+      );
+      for (const [cid, g] of dep) totaux.set(cid, (totaux.get(cid) ?? 0) + g);
+    }
+    if (totaux.size > 0) {
+      const { data: compStock, error: compStockError } = await supabase
+        .from("composant")
+        .select("id, unite, poids_piece_g")
+        .in("id", [...totaux.keys()]);
+      if (compStockError) {
+        await supabase.from("vente").delete().eq("id", vente.id);
+        return { error: compStockError.message };
+      }
+      const unites = new Map((compStock ?? []).map((x) => [x.id, x]));
+      const sorties = [];
+      for (const [cid, g] of totaux) {
+        const comp = unites.get(cid);
+        if (!comp) continue;
+        const q = grammesVersUnite(comp, g); // pièce sans poids → null, signalé sur Stocks
+        if (q == null) continue;
+        const arrondie = Math.round(q * 100) / 100;
+        if (arrondie <= 0) continue;
+        sorties.push({ composant_id: cid, type: "sortie", quantite: -arrondie, note: "Consommation vente", occurred_at: occurredAt });
+      }
+      if (sorties.length > 0) {
+        const { error: sortieError } = await supabase.from("mouvement_stock").insert(sorties);
+        if (sortieError) {
+          await supabase.from("vente").delete().eq("id", vente.id);
+          return { error: sortieError.message };
+        }
+      }
     }
   }
 

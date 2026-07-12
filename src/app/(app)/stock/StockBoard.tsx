@@ -14,7 +14,12 @@ import { ajusterStock, definirSeuil, enregistrerReception, retirerSeuil, upsertR
 
 export type StockComposant = {
   composant: Composant;
+  /** PHYSIQUE = Σ mouvements. */
   stock: number;
+  /** RÉSERVÉ par les commandes ouvertes — null : pièce sans poids, inconvertible. */
+  reserve: number | null;
+  /** DISPONIBLE = physique − réservé : porte le statut et la liste d'achat. */
+  disponible: number;
   seuil: number | null;
   lots: Lot[];
   reappro: ReapproLigne | null;
@@ -62,16 +67,16 @@ export function StockBoard({ lignes }: { lignes: StockComposant[] }) {
     () => new Map(lignes.map((l) => [l.composant.id, seuilEffectif(l.composant, l.seuil)])),
     [lignes]
   );
-  const sousSeuil = lignes.filter((l) => l.stock < (seuils.get(l.composant.id)?.valeur ?? 0));
+  const sousSeuil = lignes.filter((l) => l.disponible < (seuils.get(l.composant.id)?.valeur ?? 0));
 
-  // Liste d'achat : composants sous seuil effectif (rupture incluse).
+  // Liste d'achat : composants dont le DISPONIBLE passe sous le seuil effectif.
   const rachats: LigneRachat[] = useMemo(() => {
     return lignes
-      .filter((l) => l.stock < (seuils.get(l.composant.id)?.valeur ?? 0))
+      .filter((l) => l.disponible < (seuils.get(l.composant.id)?.valeur ?? 0))
       .map((l) => {
         const seuilEff = seuils.get(l.composant.id)!.valeur;
-        const manque = arrondi(Math.max(0, seuilEff - l.stock)); // CALCULÉ
-        const suggere = arrondi(Math.max(0, 2 * seuilEff - l.stock)); // ESTIMÉ (cible forfaitaire 2×seuil)
+        const manque = arrondi(Math.max(0, seuilEff - l.disponible)); // CALCULÉ
+        const suggere = arrondi(Math.max(0, 2 * seuilEff - l.disponible)); // ESTIMÉ (cible forfaitaire 2×seuil)
         const brouillon = qtes[l.composant.id];
         const persiste = l.reappro?.qte_retenue != null ? Number(l.reappro.qte_retenue) : null;
         const override = brouillon != null ? brouillon.trim() !== "" : persiste != null;
@@ -86,7 +91,7 @@ export function StockBoard({ lignes }: { lignes: StockComposant[] }) {
         return {
           ligne: l,
           seuilEff,
-          rupture: l.stock <= 0,
+          rupture: l.disponible <= 0,
           manque,
           suggere,
           qte,
@@ -195,41 +200,57 @@ export function StockBoard({ lignes }: { lignes: StockComposant[] }) {
           <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: 16, alignItems: "start" }} className="fz-users-grid">
             {/* Tableau composants */}
             <Card style={{ overflow: "hidden" }}>
-              <SectionHeader titre="Inventaire par composant" sous="Stock = Σ mouvements (réceptions, sorties, ajustements) en kg." />
+              <SectionHeader titre="Inventaire par composant" sous="Physique = Σ mouvements · Réservé = commandes ouvertes · Disponible = physique − réservé (porte le statut)." />
               <div>
                 <div
                   className="font-mono uppercase"
-                  style={{ display: "grid", gridTemplateColumns: "1.6fr .8fr .7fr .9fr", gap: 8, padding: "8px 16px", fontSize: 10, letterSpacing: ".08em", color: "#a79b84", borderBottom: "1px solid #efe7d6" }}
+                  style={{ display: "grid", gridTemplateColumns: "1.5fr .6fr .6fr .65fr .55fr .75fr", gap: 8, padding: "8px 16px", fontSize: 10, letterSpacing: ".08em", color: "#a79b84", borderBottom: "1px solid #efe7d6" }}
                 >
                   <span>Composant</span>
-                  <span style={{ textAlign: "right" }}>Stock</span>
+                  <span style={{ textAlign: "right" }}>Physique</span>
+                  <span style={{ textAlign: "right" }}>Réservé</span>
+                  <span style={{ textAlign: "right" }}>Disponible</span>
                   <span>Statut</span>
                   <span style={{ textAlign: "right" }}>Inventaire</span>
                 </div>
                 {lignes.map((l) => {
                   const deplie = ouvert === l.composant.id;
                   const se = seuils.get(l.composant.id)!;
+                  const pieceSansPoids = l.composant.unite === "piece" && l.composant.poids_piece_g == null;
                   const statut: { tone: "succes" | "alerte" | "critique"; label: string } =
-                    l.stock <= 0
+                    l.disponible <= 0
                       ? { tone: "critique", label: "Rupture" }
-                      : l.stock < se.valeur
+                      : l.disponible < se.valeur
                         ? { tone: "alerte", label: "Bas" }
                         : { tone: "succes", label: "OK" };
                   return (
                     <div key={l.composant.id} style={{ borderBottom: "1px solid #efe7d6" }}>
-                      <div style={{ display: "grid", gridTemplateColumns: "1.6fr .8fr .7fr .9fr", gap: 8, padding: "10px 16px", alignItems: "center" }}>
+                      <div style={{ display: "grid", gridTemplateColumns: "1.5fr .6fr .6fr .65fr .55fr .75fr", gap: 8, padding: "10px 16px", alignItems: "center" }}>
                         <button onClick={() => setOuvert(deplie ? null : l.composant.id)} className="flex items-center gap-2" style={{ textAlign: "left" }}>
                           {deplie ? <ChevronDown size={14} style={{ color: "#9a927f" }} /> : <ChevronRight size={14} style={{ color: "#9a927f" }} />}
                           <Dot color={CATEGORIE_COLOR[l.composant.categorie]} size={7} />
                           <span style={{ minWidth: 0 }}>
-                            <span style={{ display: "block", fontSize: 13.5, fontWeight: 600, color: "#0e3947" }}>{l.composant.nom}</span>
-                            <span className="font-mono" style={{ fontSize: 10, color: "#a79b84" }}>
+                            <span style={{ fontSize: 13.5, fontWeight: 600, color: "#0e3947" }}>
+                              {l.composant.nom}
+                              {pieceSansPoids && (
+                                <span className="font-mono" title="Sans poids par pièce, les sorties automatiques de ce composant ne peuvent pas être converties — renseignez-le via Seuil." style={{ marginLeft: 6, fontSize: 9, padding: "1px 6px", borderRadius: 100, background: "rgba(176,122,46,.14)", color: "#b07a2e", whiteSpace: "nowrap" }}>
+                                  poids/pièce à renseigner
+                                </span>
+                              )}
+                            </span>
+                            <span className="font-mono" style={{ display: "block", fontSize: 10, color: "#a79b84" }}>
                               {CATEGORIE_LABEL[l.composant.categorie]} · seuil {fmtKg(se.valeur)} {uniteAbr(l.composant.unite)}{se.source === "defaut" ? " (défaut)" : ""} · {l.lots.length} lot{l.lots.length > 1 ? "s" : ""}
                             </span>
                           </span>
                         </button>
-                        <span className="font-mono" style={{ fontSize: 13, fontWeight: 700, color: "#0e3947", textAlign: "right" }}>
+                        <span className="font-mono" style={{ fontSize: 12.5, color: "#6b7469", textAlign: "right" }}>
                           {fmtKg(l.stock)} {uniteAbr(l.composant.unite)}
+                        </span>
+                        <span className="font-mono" title="Engagé par les commandes ouvertes (précommandes non remises)" style={{ fontSize: 12.5, color: l.reserve == null ? "#b07a2e" : l.reserve > 0 ? "#8a7f6a" : "#c0b69e", textAlign: "right" }}>
+                          {l.reserve == null ? "?" : l.reserve > 0 ? `−${fmtKg(l.reserve)}` : "—"}
+                        </span>
+                        <span className="font-mono" style={{ fontSize: 13, fontWeight: 700, color: "#0e3947", textAlign: "right" }}>
+                          {fmtKg(l.disponible)} {uniteAbr(l.composant.unite)}
                         </span>
                         <span><Badge tone={statut.tone}>{statut.label}</Badge></span>
                         <span className="flex items-center justify-end gap-2">
@@ -335,7 +356,7 @@ export function StockBoard({ lignes }: { lignes: StockComposant[] }) {
             >
               <span style={{ flex: "0 0 22px" }} />
               <span style={{ flex: 1 }}>Composant</span>
-              <span style={{ flex: "0 0 110px" }}>Stock / seuil</span>
+              <span style={{ flex: "0 0 110px" }}>Dispo / seuil</span>
               <span style={{ flex: "0 0 84px", textAlign: "center" }}>Manque <TagCol>calculé</TagCol></span>
               <span style={{ flex: "0 0 96px", textAlign: "center" }}>Quantité <TagCol>estimé</TagCol></span>
               <span style={{ flex: "0 0 140px" }}>Fournisseur <span style={{ textTransform: "none", letterSpacing: 0, color: "#c0b69e" }}>· option.</span></span>
@@ -384,7 +405,7 @@ export function StockBoard({ lignes }: { lignes: StockComposant[] }) {
                     </span>
                     <span style={{ flex: "0 0 110px" }}>
                       <span className="font-mono" style={{ display: "block", fontSize: 12, color: "#0e3947" }}>
-                        {fmtKg(r.ligne.stock)} / {fmtKg(r.seuilEff)} {abr}
+                        {fmtKg(r.ligne.disponible)} / {fmtKg(r.seuilEff)} {abr}
                       </span>
                       <Badge tone={r.rupture ? "critique" : "alerte"}>{r.rupture ? "Rupture" : "Sous seuil"}</Badge>
                     </span>
@@ -526,6 +547,23 @@ export function StockBoard({ lignes }: { lignes: StockComposant[] }) {
                     style={champ}
                   />
                 </label>
+                {drawer.ligne.composant.unite === "piece" && (
+                  <label className="flex flex-col gap-1.5">
+                    <Libelle>Poids d&apos;une pièce (g) — pour convertir les sorties recettes</Libelle>
+                    <input
+                      name="poids_piece"
+                      defaultValue={drawer.ligne.composant.poids_piece_g != null ? String(drawer.ligne.composant.poids_piece_g).replace(".", ",") : ""}
+                      inputMode="decimal"
+                      placeholder="ex : 50 (un œuf)"
+                      className="outline-none"
+                      style={champ}
+                    />
+                    <p style={{ fontSize: 11.5, color: "#9a927f" }}>
+                      Sans ce poids, la déduction automatique du stock ne peut pas convertir les grammes
+                      des fiches en pièces — aucune sortie n&apos;est écrite pour ce composant.
+                    </p>
+                  </label>
+                )}
                 {drawer.ligne.seuil != null && (
                   <button
                     type="button"
