@@ -102,7 +102,7 @@ export const SCREEN_META: Record<string, { rubrique: string; titre: string; desc
   insight: { rubrique: "Pilotage", titre: "Insight stratégique", desc: "Constat · chiffre · action." },
   finance: { rubrique: "Pilotage", titre: "Finances", desc: "CA, marges et coûts." },
   sales: { rubrique: "Pilotage", titre: "Ventes & tendances", desc: "Courbes, top produits, saisonnalité." },
-  productivity: { rubrique: "Pilotage", titre: "Productivité", desc: "Cadence et rendement de production." },
+  productivity: { rubrique: "Pilotage", titre: "Productivité", desc: "Charge de production du vendu — rythme, coût matière consommé et temps de travail. L'écran s'adapte au canal : le comptoir n'a pas de cycle, le traiteur si." },
   clients: { rubrique: "Pilotage", titre: "Clients", desc: "Fiches et récurrence." },
   commu: { rubrique: "Marque & marketing", titre: "Réseaux sociaux", desc: "Publications et attribution." },
   users: { rubrique: "Réglages", titre: "Utilisateurs & rôles", desc: "L'équipe et ses accès." },

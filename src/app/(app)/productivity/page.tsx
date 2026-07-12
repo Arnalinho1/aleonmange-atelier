@@ -111,10 +111,18 @@ export default async function ProductivityPage() {
       const [v, l] = await Promise.all([
         // commande_le = borne de départ du cycle (0016) — occurred_at porte
         // désormais la REMISE : l'utiliser comme « saisie » donnerait un cycle nul.
-        enLots(venteIds, (lot) => supabase.from("vente").select("id, canal, commande_le").in("id", lot)),
+        enLots(venteIds, (lot) => supabase.from("vente").select("id, canal, commande_le, client_id").in("id", lot)),
         enLots(venteIds, (lot) => supabase.from("vente_ligne").select("vente_id, qte").in("vente_id", lot)),
       ]);
-      const ventes = new Map((v as Pick<Vente, "id" | "canal" | "commande_le">[]).map((x) => [x.id, x]));
+      const ventes = new Map(
+        (v as Pick<Vente, "id" | "canal" | "commande_le" | "client_id">[]).map((x) => [x.id, x])
+      );
+      // Nom de la commande dans la table des cycles (maquette V2).
+      const clientIds = [...new Set([...ventes.values()].map((x) => x.client_id).filter((x): x is string => x != null))];
+      const { data: clients } = clientIds.length
+        ? await supabase.from("client").select("id, nom").in("id", clientIds)
+        : { data: [] };
+      const nomClient = new Map((clients ?? []).map((x) => [x.id, x.nom]));
       const portions = new Map<string, number>();
       for (const li of l as Pick<VenteLigne, "vente_id" | "qte">[]) {
         portions.set(li.vente_id, (portions.get(li.vente_id) ?? 0) + (li.qte ?? 1));
@@ -129,6 +137,7 @@ export default async function ProductivityPage() {
           ({
             vente_id: x.vente_id,
             canal: vente.canal,
+            client_nom: vente.client_id ? nomClient.get(vente.client_id) ?? null : null,
             portions: portions.get(x.vente_id) ?? 1,
             saisie: vente.commande_le,
             en_prod: null,
