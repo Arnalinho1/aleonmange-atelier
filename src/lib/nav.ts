@@ -80,7 +80,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     titre: "Réglages",
     items: [
-      { id: "settings", href: "/settings", label: "Emplacements", icon: MapPin },
+      { id: "settings", href: "/settings", label: "Atelier", icon: MapPin },
       { id: "users", href: "/users", label: "Utilisateurs & rôles", icon: UserCog },
     ],
   },
@@ -106,7 +106,7 @@ export const SCREEN_META: Record<string, { rubrique: string; titre: string; desc
   clients: { rubrique: "Pilotage", titre: "Clients", desc: "Fiches et récurrence." },
   commu: { rubrique: "Marque & marketing", titre: "Réseaux sociaux", desc: "Publications et attribution." },
   users: { rubrique: "Réglages", titre: "Utilisateurs & rôles", desc: "L'équipe et ses accès." },
-  settings: { rubrique: "Réglages", titre: "Emplacements & réglages", desc: "Référentiels éditables." },
+  settings: { rubrique: "Réglages", titre: "Réglages de l'atelier", desc: "Emplacements du truck et paramètres de rentabilité — la configuration se fait ici, Finances consulte." },
   profile: { rubrique: "Réglages", titre: "Mon profil", desc: "Votre compte et vos réglages personnels — pour l'équipe et les accès, voir Utilisateurs & rôles." },
 };
 

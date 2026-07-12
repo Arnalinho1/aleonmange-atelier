@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Download } from "lucide-react";
 import { CANAL_COLOR, CANAL_LABEL, PAIEMENT_LABEL } from "@/lib/nav";
@@ -9,8 +9,8 @@ import { Card, SectionHeader } from "@/components/ui/Card";
 import { KpiCard } from "@/components/ui/KpiCard";
 import { fmtEuro } from "@/lib/calculs";
 import type { Canal, Paiement, ParametreRentabilite, SourceVente, StatutPaiement } from "@/lib/supabase/database.types";
+import Link from "next/link";
 import { enregistrerReglement } from "../orders/actions";
-import { saveParametres } from "./actions";
 
 /** Vente remise aplatie + lignes costées côté serveur (source unique calculs.ts). */
 export type VenteFinance = {
@@ -80,8 +80,6 @@ export function FinanceBoard({
   const [periode, setPeriode] = useState<(typeof PERIODES)[number]["id"]>("30j");
   const [canal, setCanal] = useState<Canal | "all">("all");
   const [error, setError] = useState<string | undefined>();
-  const [ok, setOk] = useState(false);
-  const [pending, startTransition] = useTransition();
   const [maintenant] = useState(() => Date.now());
 
   const filtrees = useMemo(() => {
@@ -149,19 +147,6 @@ export function FinanceBoard({
   }, [ventes, periode, maintenant]);
   const caTotal = Object.values(parCanal).reduce((a, x) => a + x.ca, 0);
 
-  function enregistrerParams(formData: FormData) {
-    setError(undefined);
-    setOk(false);
-    startTransition(async () => {
-      const res = await saveParametres(undefined, formData);
-      if (res?.error) setError(res.error);
-      else {
-        setOk(true);
-        router.refresh();
-      }
-    });
-  }
-
   /** Export compta : CSV réel des ventes remises filtrées. */
   function exporterCsv() {
     const lignesCsv = [
@@ -221,6 +206,10 @@ export function FinanceBoard({
           ventes remises uniquement — même source que l&apos;Historique
         </span>
       </div>
+
+      {error && (
+        <p style={{ fontSize: 12.5, color: "#c0442e", background: "rgba(192,68,46,.1)", borderRadius: 8, padding: "8px 10px", marginBottom: 12 }}>{error}</p>
+      )}
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 12, marginBottom: 16 }} className="fz-fin-kpi">
         <KpiCard
@@ -284,7 +273,7 @@ export function FinanceBoard({
                   <span className="font-mono" style={{ fontSize: 11.5, color: enRetard ? "#b00d1a" : "#6b7469", fontWeight: enRetard ? 700 : 400 }}>
                     {a.echeance_paiement != null
                       ? `échéance ${fmtDateCourt(a.echeance_paiement)}${enRetard ? " · EN RETARD" : ""}`
-                      : "échéance posée à la livraison"}
+                      : "échéance fixée à la livraison (J+30)"}
                   </span>
                   <span style={{ marginLeft: "auto" }}>
                     <ReglementRapide venteId={a.id} restant={a.restant} onDone={() => router.refresh()} onError={setError} />
@@ -339,55 +328,36 @@ export function FinanceBoard({
         </Card>
 
         <div className="flex flex-col gap-4">
-          {/* Paramètres de rentabilité */}
+          {/* Paramètres de rentabilité — LECTURE SEULE : la saisie vit dans Réglages */}
           <Card style={{ padding: 16 }}>
             <div className="flex items-center justify-between" style={{ marginBottom: 10 }}>
               <p className="font-display" style={{ fontSize: 15, fontWeight: 700, color: "#0e3947" }}>Paramètres de rentabilité</p>
               <Badge tone="calcule">Marge nette</Badge>
             </div>
-            <form action={enregistrerParams} className="flex flex-col gap-3">
-              <label className="flex items-center gap-2 justify-between">
-                <span style={{ fontSize: 12.5, color: "#6b7469" }}>Main-d&apos;œuvre / portion</span>
-                <span className="flex items-center gap-1">
-                  <input
-                    name="mo_par_portion"
-                    defaultValue={parametres?.mo_par_portion != null ? String(parametres.mo_par_portion).replace(".", ",") : ""}
-                    placeholder="0,00"
-                    inputMode="decimal"
-                    className="outline-none font-mono"
-                    style={{ width: 80, background: "#fff", border: "1px solid #dfd4bf", borderRadius: 8, padding: "6px 8px", fontSize: 12.5, textAlign: "right", color: "#0e3947" }}
-                  />
-                  <span className="font-mono" style={{ fontSize: 11, color: "#9a927f" }}>€</span>
+            <div className="flex flex-col gap-2">
+              <p className="flex items-center justify-between" style={{ fontSize: 12.5, color: "#6b7469" }}>
+                Main-d&apos;œuvre / portion
+                <span className="font-mono" style={{ fontWeight: 700, color: "#0e3947" }}>
+                  {parametres?.mo_par_portion != null ? `${fmtEuro(parametres.mo_par_portion)} €` : "—"}
                 </span>
-              </label>
-              <label className="flex items-center gap-2 justify-between">
-                <span style={{ fontSize: 12.5, color: "#6b7469" }}>Transport / portion</span>
-                <span className="flex items-center gap-1">
-                  <input
-                    name="transport_par_portion"
-                    defaultValue={parametres?.transport_par_portion != null ? String(parametres.transport_par_portion).replace(".", ",") : ""}
-                    placeholder="0,00"
-                    inputMode="decimal"
-                    className="outline-none font-mono"
-                    style={{ width: 80, background: "#fff", border: "1px solid #dfd4bf", borderRadius: 8, padding: "6px 8px", fontSize: 12.5, textAlign: "right", color: "#0e3947" }}
-                  />
-                  <span className="font-mono" style={{ fontSize: 11, color: "#9a927f" }}>€</span>
+              </p>
+              <p className="flex items-center justify-between" style={{ fontSize: 12.5, color: "#6b7469" }}>
+                Transport / portion
+                <span className="font-mono" style={{ fontWeight: 700, color: "#0e3947" }}>
+                  {parametres?.transport_par_portion != null ? `${fmtEuro(parametres.transport_par_portion)} €` : "—"}
                 </span>
-              </label>
-              {error && <p style={{ fontSize: 12, color: "#c0442e" }}>{error}</p>}
-              {ok && !error && <p style={{ fontSize: 12, color: "#1f7a50" }}>Paramètres enregistrés.</p>}
-              <button
-                type="submit"
-                disabled={pending}
-                style={{ alignSelf: "flex-end", padding: "8px 14px", borderRadius: 9, background: "#0e3947", color: "#f6f1e7", fontSize: 12.5, fontWeight: 600, opacity: pending ? 0.5 : 1 }}
-              >
-                {pending ? "…" : "Enregistrer"}
-              </button>
-            </form>
+              </p>
+            </div>
             <p style={{ fontSize: 11.5, color: "#9a927f", marginTop: 8 }}>
               Marge <strong>brute matière</strong> = prix − coût matière. Marge <strong>nette</strong> = après
               ces charges par portion. Deux calculs, deux libellés — jamais confondus.
             </p>
+            <Link
+              href="/settings"
+              style={{ display: "inline-block", marginTop: 8, fontSize: 12.5, fontWeight: 600, color: "#1493be" }}
+            >
+              Modifier dans Réglages de l&apos;atelier →
+            </Link>
           </Card>
 
           {/* CA par canal */}

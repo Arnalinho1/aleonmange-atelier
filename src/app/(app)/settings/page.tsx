@@ -3,30 +3,37 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { SCREEN_META } from "@/lib/nav";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-import type { Emplacement } from "@/lib/supabase/database.types";
+import type { Emplacement, ParametreRentabilite } from "@/lib/supabase/database.types";
 import { MapPin } from "lucide-react";
 import { EmplacementsManager } from "./EmplacementsManager";
+import { RentabiliteForm } from "./RentabiliteForm";
 
-export const metadata = { title: "Emplacements & réglages — Atelier ALM" };
+export const metadata = { title: "Réglages de l'atelier — Atelier ALM" };
 
 /**
- * Réglages — référentiel des emplacements truck (HANDOFF §01, point critique) :
- * table éditable (ajouter / renommer / désactiver), jamais un enum, jamais de
- * suppression. Les 3 marchés réels sont seedés ; la liste vit ensuite ici.
+ * Réglages de l'atelier — la configuration MÉTIER vit ici, les écrans de
+ * pilotage consultent : emplacements truck (HANDOFF §01 — table éditable,
+ * jamais un enum, jamais de suppression) et paramètres de rentabilité
+ * (MO/transport par portion, LUS par la marge nette de Finances).
  */
 export default async function SettingsPage() {
   const m = SCREEN_META.settings;
   let emplacements: Emplacement[] = [];
+  let parametres: ParametreRentabilite | null = null;
 
   if (isSupabaseConfigured()) {
     const supabase = await createClient();
-    const { data } = await supabase
-      .from("emplacement")
-      .select("*")
-      .order("actif", { ascending: false })
-      .order("jour_semaine", { ascending: true, nullsFirst: false })
-      .order("libelle");
+    const [{ data }, params] = await Promise.all([
+      supabase
+        .from("emplacement")
+        .select("*")
+        .order("actif", { ascending: false })
+        .order("jour_semaine", { ascending: true, nullsFirst: false })
+        .order("libelle"),
+      supabase.from("parametre_rentabilite").select("*").maybeSingle(),
+    ]);
     emplacements = data ?? [];
+    parametres = (params.data as ParametreRentabilite | null) ?? null;
   }
 
   return (
@@ -42,6 +49,11 @@ export default async function SettingsPage() {
       ) : (
         <EmplacementsManager emplacements={emplacements} />
       )}
+
+      {/* La saisie des paramètres vit ICI (Réglages configure, Finances consulte). */}
+      <div style={{ marginTop: 20 }}>
+        <RentabiliteForm parametres={parametres} />
+      </div>
     </>
   );
 }
