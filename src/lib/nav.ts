@@ -143,6 +143,12 @@ export const PAIEMENT_LABEL: Record<string, string> = {
   virement: "Virement",
 };
 
+export const ROLE_LABEL: Record<string, string> = {
+  owner: "Propriétaire",
+  chef: "Chef",
+  equipe: "Équipe",
+};
+
 /** Jour de semaine des emplacements truck (1=lundi … 7=dimanche, cf. 0002_referentiel). */
 export const JOUR_SEMAINE_LABEL: Record<number, string> = {
   1: "Lundi",

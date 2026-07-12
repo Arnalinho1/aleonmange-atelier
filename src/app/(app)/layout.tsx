@@ -2,6 +2,7 @@ import { Sidebar } from "@/components/shell/Sidebar";
 import { Topbar } from "@/components/shell/Topbar";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { ROLE_LABEL } from "@/lib/nav";
 
 /**
  * Shell commun à tous les écrans : sidebar persistante + topbar + zone contenu.
@@ -25,7 +26,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         .select("nom, role")
         .eq("id", user.id)
         .maybeSingle();
-      if (p) profil = { nom: p.nom, role: roleLabel(p.role) };
+      if (p) profil = { nom: p.nom, role: `${ROLE_LABEL[p.role] ?? ""} · A Léon Mange` };
 
       const [{ count: unread }, { count: openOrders }] = await Promise.all([
         supabase.from("notification").select("id", { count: "exact", head: true }).eq("lu", false),
@@ -50,9 +51,4 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </div>
     </div>
   );
-}
-
-function roleLabel(role: string): string {
-  const map: Record<string, string> = { owner: "Propriétaire · A Léon Mange", chef: "Chef · A Léon Mange", equipe: "Équipe · A Léon Mange" };
-  return map[role] ?? "A Léon Mange";
 }

@@ -119,3 +119,10 @@ body {
 .fz-scroll::-webkit-scrollbar-track {
   background: transparent;
 }
+
+/* Grilles 2 colonnes des écrans — passent en 1 colonne sous 1080px (MOCKUP §5) */
+@media (max-width: 1080px) {
+  .fz-users-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
