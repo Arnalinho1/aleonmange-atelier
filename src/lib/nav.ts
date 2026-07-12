@@ -17,6 +17,7 @@ import {
   Users,
   Megaphone,
   UserCog,
+  MapPin,
   type LucideIcon,
 } from "lucide-react";
 
@@ -78,7 +79,10 @@ export const NAV_GROUPS: NavGroup[] = [
   },
   {
     titre: "Réglages",
-    items: [{ id: "users", href: "/users", label: "Utilisateurs & rôles", icon: UserCog }],
+    items: [
+      { id: "settings", href: "/settings", label: "Emplacements", icon: MapPin },
+      { id: "users", href: "/users", label: "Utilisateurs & rôles", icon: UserCog },
+    ],
   },
 ];
 
@@ -137,4 +141,15 @@ export const PAIEMENT_LABEL: Record<string, string> = {
   cb: "CB",
   ticket: "Ticket resto",
   virement: "Virement",
+};
+
+/** Jour de semaine des emplacements truck (1=lundi … 7=dimanche, cf. 0002_referentiel). */
+export const JOUR_SEMAINE_LABEL: Record<number, string> = {
+  1: "Lundi",
+  2: "Mardi",
+  3: "Mercredi",
+  4: "Jeudi",
+  5: "Vendredi",
+  6: "Samedi",
+  7: "Dimanche",
 };
