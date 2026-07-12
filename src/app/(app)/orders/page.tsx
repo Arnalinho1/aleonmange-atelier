@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { enLots } from "@/lib/supabase/lots";
 import { fmtEuro } from "@/lib/calculs";
-import type { Vente, VenteLigne } from "@/lib/supabase/database.types";
+import type { Composant, Produit, Recette, RecetteComposant, Vente, VenteLigne } from "@/lib/supabase/database.types";
 import { ClipboardList } from "lucide-react";
 import Link from "next/link";
 import { OrdersQueue, type CommandeOuverte } from "./OrdersQueue";
@@ -22,24 +22,34 @@ export const metadata = { title: "Commandes du jour — Atelier ALM" };
 export default async function OrdersPage() {
   const m = SCREEN_META.orders;
   let commandes: CommandeOuverte[] = [];
+  let recettes: Recette[] = [];
+  let lignesRecettes: RecetteComposant[] = [];
+  let composants: Composant[] = [];
 
   if (isSupabaseConfigured()) {
     const supabase = await createClient();
-    const { data: ouvertes } = await supabase
-      .from("v_commande_ouverte")
-      .select("*")
-      .order("due_at", { ascending: true, nullsFirst: false });
+    const [{ data: ouvertes }, r, rc, c] = await Promise.all([
+      supabase.from("v_commande_ouverte").select("*").order("due_at", { ascending: true, nullsFirst: false }),
+      supabase.from("recette").select("*"),
+      supabase.from("recette_composant").select("*"),
+      supabase.from("composant").select("*"),
+    ]);
+    recettes = (r.data ?? []) as Recette[];
+    lignesRecettes = (rc.data ?? []) as RecetteComposant[];
+    composants = (c.data ?? []) as Composant[];
     const ventes = (ouvertes ?? []) as Vente[];
 
     if (ventes.length > 0) {
       const ids = ventes.map((v) => v.id);
       const clientIds = [...new Set(ventes.map((v) => v.client_id).filter(Boolean))] as string[];
-      const [lignesBrutes, cl] = await Promise.all([
+      const [lignesBrutes, cl, produitsBruts] = await Promise.all([
         enLots(ids, (lot) => supabase.from("vente_ligne").select("*").in("vente_id", lot)),
         enLots(clientIds, (lot) => supabase.from("client").select("id, nom").in("id", lot)),
+        supabase.from("produit").select("id, recette_id").then(({ data }) => data ?? []),
       ]);
       const lignes = lignesBrutes as VenteLigne[];
       const clientParId = new Map((cl as { id: string; nom: string }[]).map((x) => [x.id, x.nom]));
+      const recetteProduit = new Map((produitsBruts as Pick<Produit, "id" | "recette_id">[]).map((x) => [x.id, x.recette_id]));
 
       const ligneIds = lignes.map((x) => x.id);
       const vlc = await enLots(ligneIds, (lot) =>
@@ -74,6 +84,9 @@ export default async function OrdersPage() {
               qte: x.qte,
               poids_g: x.poids_g,
               composants: compsParLigne.get(x.id) ?? [],
+              // Pivot production (12/07/2026) : fiche du produit + drapeau libre
+              produit_recette_id: x.produit_id ? recetteProduit.get(x.produit_id) ?? null : null,
+              libre: x.type === "bowl" && x.recette_id == null,
             })),
         };
       });
@@ -114,7 +127,7 @@ export default async function OrdersPage() {
             />
             <KpiCard label="CA en attente" value={`${fmtEuro(caEnAttente)} €`} sub="compté à la remise, jamais avant" />
           </div>
-          <OrdersQueue commandes={commandes} />
+          <OrdersQueue commandes={commandes} recettes={recettes} lignesRecettes={lignesRecettes} composants={composants} />
         </>
       )}
     </>

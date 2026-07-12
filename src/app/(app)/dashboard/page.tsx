@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { Card, SectionHeader } from "@/components/ui/Card";
 import { Dot } from "@/components/ui/Badge";
-import { SCREEN_META, CANAL_COLOR, CANAL_LABEL, CATEGORIE_COLOR } from "@/lib/nav";
+import { SCREEN_META, CANAL_COLOR, CANAL_LABEL } from "@/lib/nav";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { enLots } from "@/lib/supabase/lots";
@@ -36,7 +36,8 @@ export default async function DashboardPage() {
   let caJMoins7 = 0;
   let topPlats: { libelle: string; qte: number; montant: number }[] = [];
   let ouvertes: Vente[] = [];
-  let chargeComposants: { nom: string; categorie: string; portions: number }[] = [];
+  let chargeProduits: { nom: string; portions: number }[] = [];
+  let portionsRestantes = 0;
   let insights: Insight[] = [];
   const alertes = { critique: 0, alerte: 0, info: 0 };
 
@@ -74,23 +75,33 @@ export default async function DashboardPage() {
     }
 
     ouvertes = (o.data ?? []) as Vente[];
-    // Charge par composant des commandes ouvertes
+    // CHARGE PAR PRODUIT FABRIQUÉ (correctif métier 12/07/2026) : revendus
+    // exclus, bowls libres comptés dans le total (composition variable).
     if (ouvertes.length > 0) {
-      const lignesOuvertes = await enLots(ouvertes.map((x) => x.id), (lot) =>
-        supabase.from("vente_ligne").select("id, qte, vente_id").in("vente_id", lot)
-      );
-      const qteParLigne = new Map(lignesOuvertes.map((l) => [l.id, l.qte ?? 1]));
-      const vlc = await enLots(lignesOuvertes.map((l) => l.id), (lot) =>
-        supabase.from("vente_ligne_composant").select("ligne_id, categorie, composant(nom)").in("ligne_id", lot)
-      );
-      const map = new Map<string, { nom: string; categorie: string; portions: number }>();
-      for (const row of vlc as unknown as { ligne_id: string; categorie: string; composant: { nom: string } | null }[]) {
-        const nom = row.composant?.nom ?? "Composant retiré";
-        const cur = map.get(nom) ?? { nom, categorie: row.categorie, portions: 0 };
-        cur.portions += qteParLigne.get(row.ligne_id) ?? 1;
-        map.set(nom, cur);
+      const [lignesOuvertes, produitsBruts] = await Promise.all([
+        enLots(ouvertes.map((x) => x.id), (lot) =>
+          supabase.from("vente_ligne").select("id, qte, vente_id, libelle, produit_id, type, recette_id").in("vente_id", lot)
+        ),
+        supabase.from("produit").select("id, recette_id").then(({ data }) => data ?? []),
+      ]);
+      const recetteProduit = new Map((produitsBruts as { id: string; recette_id: string | null }[]).map((x) => [x.id, x.recette_id]));
+      const map = new Map<string, { nom: string; portions: number }>();
+      let libres = 0;
+      for (const l of lignesOuvertes as { id: string; qte: number | null; libelle: string; produit_id: string | null; type: string; recette_id: string | null }[]) {
+        const ficheId = l.produit_id ? recetteProduit.get(l.produit_id) ?? null : null;
+        if (ficheId == null) continue; // revendu tel quel : pas de production
+        const portions = l.qte ?? 1;
+        portionsRestantes += portions;
+        if (l.type === "bowl" && l.recette_id == null) {
+          libres += portions; // composition libre : hors liste produits
+          continue;
+        }
+        const cur = map.get(l.libelle) ?? { nom: l.libelle, portions: 0 };
+        cur.portions += portions;
+        map.set(l.libelle, cur);
       }
-      chargeComposants = [...map.values()].sort((a, b) => b.portions - a.portions).slice(0, 5);
+      chargeProduits = [...map.values()].sort((a, b) => b.portions - a.portions).slice(0, 5);
+      if (libres > 0) chargeProduits.push({ nom: `+ ${libres} bowl${libres > 1 ? "s" : ""} libre${libres > 1 ? "s" : ""} (composition variable)`, portions: libres });
     }
 
     insights = trierInsights((ins.data ?? []) as Insight[]).slice(0, 3);
@@ -112,7 +123,6 @@ export default async function DashboardPage() {
   const traiteurProches = ouvertes.filter(
     (x) => x.canal === "traiteur" && x.due_at && [aujourdhui, jPlus1, jPlus2].includes(fmtJour.format(new Date(x.due_at)))
   );
-  const portionsRestantes = chargeComposants.reduce((acc, c) => acc + c.portions, 0);
 
   // ── Verdict tricolore — règle INDICATIVE, à valider (POINT OUVERT #2) :
   // rouge si commande en retard ou alerte critique · vert si CA ≥ J-7 (>0) ·
@@ -259,7 +269,7 @@ export default async function DashboardPage() {
       {/* Grille opérationnelle */}
       <div style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: 16, alignItems: "start" }} className="fz-users-grid">
         <Card style={{ overflow: "hidden" }}>
-          <SectionHeader titre="Charge à produire" action={<Link href="/orders" style={{ fontSize: 12, fontWeight: 600, color: "#1493be" }}>Plan complet →</Link>} />
+          <SectionHeader titre="Charge à produire" sous="Par produit fabriqué — revendus exclus." action={<Link href="/orders" style={{ fontSize: 12, fontWeight: 600, color: "#1493be" }}>Plan complet →</Link>} />
           <div style={{ padding: 16 }}>
             {ouvertes.length === 0 ? (
               <p style={{ fontSize: 13, color: "#6b7469" }}>Aucune commande à produire.</p>
@@ -267,7 +277,7 @@ export default async function DashboardPage() {
               <>
                 <div className="flex gap-6" style={{ marginBottom: 12 }}>
                   <div>
-                    <p className="font-display" style={{ fontSize: 26, fontWeight: 800, color: "#0e3947" }}>{portionsRestantes || ouvertes.length}</p>
+                    <p className="font-display" style={{ fontSize: 26, fontWeight: 800, color: "#0e3947" }}>{portionsRestantes}</p>
                     <p className="font-mono" style={{ fontSize: 9.5, color: "#a79b84" }}>portions restantes</p>
                   </div>
                   <div>
@@ -277,11 +287,11 @@ export default async function DashboardPage() {
                     <p className="font-mono" style={{ fontSize: 9.5, color: "#a79b84" }}>prochain créneau</p>
                   </div>
                 </div>
-                {chargeComposants.map((comp) => (
-                  <div key={comp.nom} className="flex items-center gap-2" style={{ padding: "4px 0" }}>
-                    <Dot color={CATEGORIE_COLOR[comp.categorie] ?? "#9a927f"} size={7} />
-                    <span style={{ flex: 1, fontSize: 12.5, fontWeight: 600, color: "#0e3947" }}>{comp.nom}</span>
-                    <span className="font-mono" style={{ fontSize: 11.5, color: "#6b7469" }}>{comp.portions} portion{comp.portions > 1 ? "s" : ""}</span>
+                {chargeProduits.map((p, i) => (
+                  <div key={p.nom} className="flex items-center gap-2" style={{ padding: "4px 0" }}>
+                    <span className="font-mono" style={{ fontSize: 10.5, color: "#a79b84", width: 18 }}>#{i + 1}</span>
+                    <span style={{ flex: 1, fontSize: 12.5, fontWeight: 600, color: "#0e3947" }}>{p.nom}</span>
+                    <span className="font-display" style={{ fontSize: 14, fontWeight: 800, color: "#1493be" }}>×{p.portions}</span>
                   </div>
                 ))}
               </>
