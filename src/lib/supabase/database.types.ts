@@ -148,6 +148,46 @@ export type ReleveHaccp = {
   created_at: string;
 };
 
+export type NotificationPreference = {
+  id: string;
+  profil_id: string;
+  categorie: string; // 'stock' | 'dlc' | 'seuil' | 'traiteur'
+  in_app: boolean;
+  email: boolean;
+};
+
+export type SocialPost = {
+  id: string;
+  reseau: string; // 'insta' | 'tiktok' | 'facebook'
+  emplacement_id: string | null;
+  contenu: string | null;
+  statut: string; // 'brouillon' | 'programme' | 'publie'
+  programme_le: string | null;
+  publie_le: string | null;
+  created_at: string;
+};
+
+export type ImportMapping = {
+  id: string;
+  nom: string;
+  separateur: string;
+  /** Mapping colonne CSV → champ modèle — entièrement paramétrable (jamais figé). */
+  colonnes: unknown;
+  actif: boolean;
+  created_at: string;
+};
+
+export type ImportBatch = {
+  id: string;
+  mapping_id: string | null;
+  fichier_nom: string | null;
+  lignes_total: number | null;
+  lignes_valides: number | null;
+  statut: string; // 'brouillon' | 'valide'
+  jour_exploitation: string | null;
+  created_at: string;
+};
+
 /** Singleton (id=true) — charges par portion pour la marge nette (Finances). */
 export type ParametreRentabilite = {
   id: boolean;
@@ -248,6 +288,10 @@ export type Database = {
       mouvement_stock: TableDef<MouvementStock, MakeInsert<MouvementStock, "composant_id" | "type" | "quantite">>;
       seuil_stock: TableDef<SeuilStock, MakeInsert<SeuilStock, "composant_id">>;
       releve_haccp: TableDef<ReleveHaccp, MakeInsert<ReleveHaccp, "type">>;
+      notification_preference: TableDef<NotificationPreference, MakeInsert<NotificationPreference, "profil_id" | "categorie">>;
+      social_post: TableDef<SocialPost, MakeInsert<SocialPost, "reseau">>;
+      import_mapping: TableDef<ImportMapping, MakeInsert<ImportMapping, "nom">>;
+      import_batch: TableDef<ImportBatch, MakeInsert<ImportBatch, never>>;
       insight: TableDef<Insight, MakeInsert<Insight, "urgence" | "constat">>;
       notification: TableDef<Notification, MakeInsert<Notification, "categorie" | "titre">>;
     };
