@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin-bottom:16px;padding:11px 14px;background:#F6F1E7;border:1px solid #E1D7C3;border-radius:14px">
+  <span style="font-family:'Spline Sans Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#B07A2E;margin-right:2px;flex:0 0 auto">Canal</span>
+  <sc-for list="{{ f.tabs }}" as="t" hint-placeholder-count="4"><button onClick="{{ t.pick }}" style="{{ t.style }}"><span style="{{ t.dotStyle }}"></span>{{ t.label }}</button></sc-for>
+  <sc-if value="{{ f.showPlace }}" hint-placeholder-val="{{ false }}">
+    <span style="width:1px;height:22px;background:#E1D7C3;margin:0 3px;flex:0 0 auto"></span>
+    <span style="font-family:'Spline Sans Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#B07A2E;margin-right:2px;flex:0 0 auto">Emplacement</span>
+    <sc-for list="{{ f.placeTabs }}" as="p" hint-placeholder-count="4"><button onClick="{{ p.pick }}" style="{{ p.style }}">{{ p.label }}</button></sc-for>
+  </sc-if>
+  <span style="margin-left:auto;font-family:'Spline Sans Mono',monospace;font-size:11.5px;color:#9A927F;flex:0 0 auto">{{ f.note }}</span>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;860px&quot;,&quot;height&quot;:&quot;64px&quot;},&quot;f&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{ tabs:any[]; showPlace:boolean; placeTabs:any[]; note:string }&quot;}}"></script>
+</body>
+</html>

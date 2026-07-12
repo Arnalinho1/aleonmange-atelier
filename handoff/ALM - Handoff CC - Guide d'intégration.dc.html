@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  doc-page:not(:defined){visibility:hidden}
+  body{margin:0;background:#6B6350}
+  a{color:#B00D1A;text-decoration:none}
+  a:hover{text-decoration:underline}
+  code.k{font-family:'Spline Sans Mono',monospace;font-size:10px;background:#F1EAD9;border:1px solid #E4DAC6;border-radius:5px;padding:1px 6px;color:#5C4A2A;white-space:nowrap}
+  .scr{break-inside:avoid;border:1px solid #E4DAC6;border-radius:13px;padding:15px 17px 16px;margin:0 0 12px;background:#FCFAF4}
+  .scr h3{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;color:#211E18;margin:0;display:flex;align-items:center;gap:9px}
+  .row{display:grid;grid-template-columns:82px 1fr;gap:10px;padding:7px 0;border-top:1px solid #EFE8D8}
+  .rl{font-family:'Spline Sans Mono',monospace;font-size:8.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:#9A8F78;padding-top:2px}
+  .rv{font-family:'Hanken Grotesk',sans-serif;font-size:11px;line-height:1.5;color:#2B271F}
+  .rv b{font-weight:600;color:#211E18}
+  h2.sec{break-after:avoid;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:21px;color:#211E18;margin:34px 0 5px;display:flex;align-items:baseline;gap:10px}
+  h2.sec .n{font-family:'Spline Sans Mono',monospace;font-size:13px;color:#B00D1A;font-weight:700}
+  .lede{font-family:'Hanken Grotesk',sans-serif;font-size:12px;line-height:1.55;color:#4A4437;margin:0 0 15px;max-width:66ch}
+  .grp{font-family:'Spline Sans Mono',monospace;font-size:9px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:#B00D1A;margin:20px 0 9px}
+</style>
+</helmet>
+
+<x-import component-from-global-scope="doc-page" from="./doc-page.js" size="letter" orientation="portrait" margin="0.62in" hint-size="820px,1060px">
+
+  <div slot="header" style="display:flex;align-items:center;justify-content:space-between;padding-bottom:9px;border-bottom:1px solid #E4DAC6;font-family:'Spline Sans Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#9A927F">
+    <span style="display:flex;align-items:center;gap:8px"><span style="width:16px;height:16px;border-radius:50%;background:#D81020;display:inline-flex;align-items:center;justify-content:center;color:#F6F1E7;font-weight:700;font-size:9px">A</span>A Léon Mange · Atelier</span>
+    <span>Handoff → CC · Guide d'intégration</span>
+  </div>
+  <div slot="footer" style="display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid #E4DAC6;font-family:'Spline Sans Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:#A79B84">
+    <span>Réimplémentation Next.js + Supabase</span>
+    <span>Confidentiel · usage interne</span>
+  </div>
+
+  <!-- COVER -->
+  <div style="margin:30px 0 4px">
+    <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#B00D1A;font-weight:600;margin-bottom:10px">Dossier de passation · destiné à Claude Code</div>
+    <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:33px;line-height:1.05;letter-spacing:-.01em;color:#211E18;margin:0 0 12px">Guide d'intégration&nbsp;: du design au produit</h1>
+    <p style="font-family:'Hanken Grotesk',sans-serif;font-size:13px;line-height:1.55;color:#4A4437;margin:0;max-width:64ch">Tu vas <b>réimplémenter</b> l'Atelier ALM en Next.js + Supabase. La maquette HTML est ta référence de <b>forme</b> et de <b>comportement</b> — pas une base à «&nbsp;brancher&nbsp;». Ce guide décrit chaque écran, ses sources réelles, l'état attendu de ses actions, et surtout comment traiter les données de la maquette (spoiler&nbsp;: presque aucune ne part en base).</p>
+  </div>
+
+  <!-- ENCART CRITIQUE -->
+  <div style="break-inside:avoid;margin:20px 0 8px;border:1.5px solid #B00D1A;border-radius:14px;background:#FBF0EC;padding:16px 18px">
+    <div style="font-family:'Spline Sans Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#B00D1A;margin-bottom:8px">⚠ À lire avant tout · nature de la maquette</div>
+    <p style="font-family:'Hanken Grotesk',sans-serif;font-size:12px;line-height:1.55;color:#3A241F;margin:0 0 8px">La maquette et <b>toutes ses données</b> sont un <b>artefact de démonstration</b>. Elle illustre l'expérience et valide la forme des écrans avec l'équipe. <b>Aucune</b> donnée n'est destinée à la production — ni les ventes, ni les stocks, <b>ni le catalogue</b>.</p>
+    <p style="font-family:'Hanken Grotesk',sans-serif;font-size:12px;line-height:1.55;color:#3A241F;margin:0">Les <b>58 produits</b> du catalogue sont des exemples plausibles <b>inventés</b>, pas les vrais plats d'ALM. En base, tout le contenu sera <b>refait proprement</b> avec des données validées par les chefs (catalogue, recettes, coûts) et l'équipe marketing (social). <b>CC ne porte pas le contenu de la maquette en base.</b> Tu portes le <b>modèle</b>, pas les exemples.</p>
+  </div>
+
+  <!-- 00 LES 3 FICHIERS -->
+  <h2 class="sec"><span class="n">00</span>Les trois pièces de la passation</h2>
+  <p class="lede">Le dossier tient en trois fichiers. Deux te sont déjà remis&nbsp;; le troisième est ce document.</p>
+  <div style="display:flex;flex-direction:column;gap:9px;margin-bottom:6px">
+    <div style="break-inside:avoid;display:grid;grid-template-columns:26px 1fr;gap:12px;background:#F6F1E7;border:1px solid #E4DAC6;border-radius:11px;padding:12px 15px">
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:15px;font-weight:700;color:#B00D1A">1</div>
+      <div style="font-family:'Hanken Grotesk',sans-serif;font-size:11.5px;line-height:1.5;color:#2B271F"><b>ALM – Atelier.dc.html</b> — la maquette complète (17 écrans). Référence <b>visuelle et comportementale</b> de forme, <b>pas de contenu</b>. Ouvre-la, clique tout&nbsp;: c'est le geste attendu à reproduire.</div>
+    </div>
+    <div style="break-inside:avoid;display:grid;grid-template-columns:26px 1fr;gap:12px;background:#F6F1E7;border:1px solid #E4DAC6;border-radius:11px;padding:12px 15px">
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:15px;font-weight:700;color:#B00D1A">2</div>
+      <div style="font-family:'Hanken Grotesk',sans-serif;font-size:11.5px;line-height:1.5;color:#2B271F"><b>Contrat de données — la Vente</b> — référence <b>structurelle</b> (schéma, enums, nullabilité, consommateurs). Marqué <b>v1 — révisable sur deux fronts&nbsp;: l'export caisse réel ET les corrections de conformité actées</b> (emplacement = référentiel éditable à FK, modèle à 2 modes).</div>
+    </div>
+    <div style="break-inside:avoid;display:grid;grid-template-columns:26px 1fr;gap:12px;background:#F6F1E7;border:1px solid #E4DAC6;border-radius:11px;padding:12px 15px">
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:15px;font-weight:700;color:#B00D1A">3</div>
+      <div style="font-family:'Hanken Grotesk',sans-serif;font-size:11.5px;line-height:1.5;color:#2B271F"><b>Ce guide d'intégration</b> — écran par écran, les 3 natures de données, la cohérence des sources uniques, les états vides et les points ouverts.</div>
+    </div>
+  </div>
+
+  <!-- 01 TROIS NATURES -->
+  <h2 class="sec"><span class="n">01</span>Trois natures de données, trois traitements</h2>
+  <p class="lede">La distinction structurante du projet. Range chaque donnée dans l'une des trois — elle décide de ce qui entre en base et de ce qui reste dans la maquette.</p>
+
+  <div style="break-inside:avoid;border:1px solid #E4DAC6;border-radius:13px;padding:15px 17px;margin-bottom:11px;background:#F3F7F3">
+    <div style="display:flex;align-items:center;gap:9px;margin-bottom:7px"><span style="font-family:'Spline Sans Mono',monospace;font-size:10px;font-weight:700;color:#1F8A5B;letter-spacing:.06em">A · STRUCTURE du référentiel</span><span style="font-family:'Spline Sans Mono',monospace;font-size:9px;font-weight:600;background:#DDEEE1;color:#1F6B47;padding:2px 9px;border-radius:100px">À CONSERVER — c'est le modèle</span></div>
+    <p style="font-family:'Hanken Grotesk',sans-serif;font-size:11px;line-height:1.5;color:#2B271F;margin:0 0 6px">Le <b>contenant</b>. Il définit la forme, pas les exemples. À porter tel quel&nbsp;:</p>
+    <ul style="font-family:'Hanken Grotesk',sans-serif;font-size:11px;line-height:1.6;color:#2B271F;margin:0;padding-left:18px">
+      <li>Le schéma <b>produit</b>&nbsp;: <code class="k">canal</code>, <code class="k">mode</code>, prix, composants (recette).</li>
+      <li>Les <b>enums</b>&nbsp;: canal (<code class="k">truck·boutique·traiteur</code>), mode (<code class="k">unite·poids</code> — 2 modes), paiement (<code class="k">especes·cb·virement·ticket</code>), origine, fulfillment (<code class="k">a_produire·en_prod·pret·remis</code>).</li>
+      <li>Les <b>emplacements truck</b> — <b>réels et à seeder</b>&nbsp;: <code class="k">oingt</code> (Mar · Marché du Bois d'Oingt), <code class="k">tassin</code> (Mer · Tassin-la-Demi-Lune), <code class="k">salvagny</code> (Jeu · La Tour-de-Salvagny). <b>Attention&nbsp;: PAS un enum figé</b> — c'est une <b>table de référentiel éditable</b> (voir §01 bis).</li>
+    </ul>
+  </div>
+
+  <div style="break-inside:avoid;border:1px solid #E4DAC6;border-radius:13px;padding:15px 17px;margin-bottom:11px;background:#FBF4EC">
+    <div style="display:flex;align-items:center;gap:9px;margin-bottom:7px"><span style="font-family:'Spline Sans Mono',monospace;font-size:10px;font-weight:700;color:#B5731A;letter-spacing:.06em">B · CONTENU du référentiel</span><span style="font-family:'Spline Sans Mono',monospace;font-size:9px;font-weight:600;background:#F3E4CE;color:#9A6516;padding:2px 9px;border-radius:100px">À REFAIRE — ne pas porter</span></div>
+    <p style="font-family:'Hanken Grotesk',sans-serif;font-size:11px;line-height:1.5;color:#2B271F;margin:0 0 6px">Le catalogue des <b>58 produits</b>, leurs prix, recettes et coûts&nbsp;: <b>démo inventée</b>. En base&nbsp;:</p>
+    <ul style="font-family:'Hanken Grotesk',sans-serif;font-size:11px;line-height:1.6;color:#2B271F;margin:0;padding-left:18px">
+      <li><b>Catalogue vide au départ.</b> Rempli ensuite à la main avec les vraies données validées chefs + marketing.</li>
+      <li>Donc les <b>écrans/formulaires de saisie du référentiel</b> (créer un produit, une recette, un composant) sont des <b>fonctionnalités réelles</b>, pas des maquettes&nbsp;: c'est par là qu'entre le vrai contenu. À implémenter en priorité.</li>
+    </ul>
+  </div>
+
+  <div style="break-inside:avoid;border:1px solid #E4DAC6;border-radius:13px;padding:15px 17px;margin-bottom:6px;background:#F0F4F8">
+    <div style="display:flex;align-items:center;gap:9px;margin-bottom:7px"><span style="font-family:'Spline Sans Mono',monospace;font-size:10px;font-weight:700;color:#2A6FA8;letter-spacing:.06em">C · TRANSACTIONNEL</span><span style="font-family:'Spline Sans Mono',monospace;font-size:9px;font-weight:600;background:#DCE9F3;color:#215E8E;padding:2px 9px;border-radius:100px">NAÎT VIDE — se remplit par l'usage</span></div>
+    <p style="font-family:'Hanken Grotesk',sans-serif;font-size:11px;line-height:1.5;color:#2B271F;margin:0">Ventes, commandes, mouvements de stock, insights, historique, agrégats. <b>Aucun seed de démo.</b> Ces tables partent vides et se remplissent par l'exploitation réelle.</p>
+  </div>
+
+  <!-- 01 bis EMPLACEMENTS -->
+  <h2 class="sec"><span class="n">01<span style="font-size:11px">bis</span></span>Emplacements truck — référentiel éditable, pas un enum</h2>
+  <p class="lede">Point d'architecture critique. Les emplacements ne sont <b>pas</b> un enum en dur&nbsp;: ils changent presque tous les ans (un marché s'arrête, un nouveau s'ouvre). Un enum imposerait un redéploiement à chaque changement.</p>
+  <div style="break-inside:avoid;border:1.5px solid #B00D1A;border-radius:13px;background:#FBF0EC;padding:15px 17px">
+    <ul style="font-family:'Hanken Grotesk',sans-serif;font-size:11.5px;line-height:1.65;color:#3A241F;margin:0;padding-left:18px">
+      <li><b>Table de référentiel éditable</b>, gérée par l'équipe depuis <b>Réglages</b> (ajouter / renommer / désactiver un emplacement), exactement comme le catalogue produits.</li>
+      <li><b>On ne SUPPRIME jamais un emplacement — on le DÉSACTIVE</b> (<code class="k">actif=false</code>)&nbsp;: il disparaît des choix de saisie mais reste en base. <b>Raison critique&nbsp;:</b> les ventes passées doivent garder leur emplacement d'origine même s'il ferme, sinon la saisonnalité historique est corrompue (les ventes de Tassin 2026 restent « Tassin » même si le truck quitte Tassin en 2027).</li>
+      <li>La vente stocke une <b>référence (FK)</b> vers l'emplacement, jamais une chaîne libre — intégrité garantie, liste éditable.</li>
+      <li>À seeder au départ avec les 3 emplacements réels&nbsp;: <code class="k">oingt</code>, <code class="k">tassin</code>, <code class="k">salvagny</code> (voir §01-A et le Contrat de données).</li>
+    </ul>
+  </div>
+
+  <!-- 02 ECRAN PAR ECRAN -->
+  <h2 class="sec"><span class="n">02</span>Écran par écran</h2>
+  <p class="lede">Pour chaque écran&nbsp;: ce qu'il affiche, ses sources, ses CTA et leur <b>état réel attendu</b> (fonctionnels — pas des toasts de démo), et son <b>état vide</b> au lancement (catalogue vide ET transactionnel vide). Aucun écran ne doit casser, afficher <code class="k">NaN</code> ou un graphe vide non géré.</p>
+
+  <div class="grp">Accueil</div>
+
+  <div class="scr">
+    <h3><code class="k">dashboard</code> Tableau de bord</h3>
+    <div class="row"><div class="rl">Affiche</div><div class="rv">Verdict d'état tricolore (constats, sans verbe) · <b>3 key insights</b> (teaser) · bandeau «&nbsp;X/7 blocs en réel&nbsp;» · 7 blocs&nbsp;: CA/canal vs J-7, objectif du jour, ventes + panier moyen, top plat, charge à produire + prochain créneau, commandes traiteur J/J+1/J+2, alertes vitales.</div></div>
+    <div class="row"><div class="rl">Sources</div><div class="rv">Agrège les autres écrans. Key insights = <b>même source que Insight stratégique</b> (ne pas recalculer). CA = ventes <code class="k">fulfillment=remis</code> du jour.</div></div>
+    <div class="row"><div class="rl">CTA réels</div><div class="rv">Clic key insight → ouvre Insight. Clic bloc → écran source (charge→Production, alertes→Stocks, traiteur→Commandes). Boutons de navigation, pas d'action mutante.</div></div>
+    <div class="row"><div class="rl">État vide</div><div class="rv">Verdict «&nbsp;<b>Journée pas encore démarrée</b>&nbsp;»&nbsp;; 0 vente → panier moyen masqué (pas <code class="k">0/0</code>)&nbsp;; blocs affichent «&nbsp;aucune donnée aujourd'hui&nbsp;»&nbsp;; bandeau «&nbsp;0/7&nbsp;».</div></div>
+  </div>
+
+  <div class="scr">
+    <h3><code class="k">notifs</code> Notifications</h3>
+    <div class="row"><div class="rl">Affiche</div><div class="rv">Fil d'alertes (rupture stock, DLC, seuil, commande traiteur à confirmer) + préférences par canal (in-app / e-mail).</div></div>
+    <div class="row"><div class="rl">Sources</div><div class="rv">Générées par des <b>règles</b> sur le transactionnel + référentiel (seuils stock, DLC lots). Préférences = table de config utilisateur.</div></div>
+    <div class="row"><div class="rl">CTA réels</div><div class="rv">Marquer lu / tout lire (persisté) · toggle préférence (persisté) · clic notif → écran concerné.</div></div>
+    <div class="row"><div class="rl">État vide</div><div class="rv">«&nbsp;<b>Aucune notification</b>&nbsp;» — rien à traiter. Le badge de nav disparaît (pas <code class="k">0</code>).</div></div>
+  </div>
+
+  <div class="grp">Activité</div>
+
+  <div class="scr">
+    <h3><code class="k">sale</code> Saisie de vente</h3>
+    <div class="row"><div class="rl">Affiche</div><div class="rv">Sélecteur canal (+ emplacement si truck) · panier par mode&nbsp;: <b>unité</b> (bowls truck en format unique, plats préparés, produits à la pièce), <b>poids</b> (prix/kg × grammes, pas 50 g) · mode de paiement · mode de vente (instantané / précommande) · total live.</div></div>
+    <div class="row"><div class="rl">Sources</div><div class="rv">Lit le <b>catalogue</b> (référentiel) filtré par canal. <b>Écrit</b> une <code class="k">vente</code> + lignes — c'est LA source de vérité transactionnelle.</div></div>
+    <div class="row"><div class="rl">CTA réels</div><div class="rv">«&nbsp;Encaisser&nbsp;» → écrit la vente (<code class="k">occurred_at</code> = maintenant, Europe/Paris), fixe <code class="k">fulfillment</code> (<code class="k">remis</code> si comptoir instantané, sinon <code class="k">a_produire</code>). Pas de toast&nbsp;: vraie écriture.</div></div>
+    <div class="row"><div class="rl">État vide</div><div class="rv"><b>Catalogue vide → «&nbsp;Aucun produit sur ce canal — ajoutez-en au Catalogue&nbsp;»</b> avec lien. Panier vide → «&nbsp;Encaisser&nbsp;» désactivé. Jamais de total <code class="k">NaN</code>.</div></div>
+  </div>
+
+  <div class="scr">
+    <h3><code class="k">orders</code> Commandes du jour</h3>
+    <div class="row"><div class="rl">Affiche</div><div class="rv">File de production des <b>précommandes</b> par jour → créneau → commande dépliable, + charge par composant. C&C boutique et traiteur. (Le comptoir instantané n'apparaît pas ici — il est déjà <code class="k">remis</code>.)</div></div>
+    <div class="row"><div class="rl">Sources</div><div class="rv">Ventes avec <code class="k">mode_vente=precommande</code> et <code class="k">fulfillment ≠ remis</code>, groupées par <code class="k">due</code> (jour/créneau).</div></div>
+    <div class="row"><div class="rl">CTA réels</div><div class="rv">Faire avancer le <code class="k">fulfillment</code> (a_produire → en_prod → pret → remis) — <b>vraie mutation d'état</b>, se répercute partout (dashboard, historique quand remis).</div></div>
+    <div class="row"><div class="rl">État vide</div><div class="rv">«&nbsp;<b>Aucune commande à produire</b>&nbsp;» par jour&nbsp;; charge composant masquée si 0.</div></div>
+  </div>
+
+  <div class="scr">
+    <h3><code class="k">history</code> Historique des ventes</h3>
+    <div class="row"><div class="rl">Affiche</div><div class="rv">Ventes remises par jour, KPI (CA, nb ventes, panier), filtre canal + emplacement (ChanFilter partagé). Marque <b>Import</b> les ventes issues de l'import caisse.</div></div>
+    <div class="row"><div class="rl">Sources</div><div class="rv">Ventes <code class="k">fulfillment=remis</code>. <b>Même source que Finances</b> — dérivations, pas de calcul parallèle.</div></div>
+    <div class="row"><div class="rl">CTA réels</div><div class="rv">Filtrer (recalcul live des KPI) · ouvrir le détail d'une vente. Lecture seule sur le passé.</div></div>
+    <div class="row"><div class="rl">État vide</div><div class="rv">«&nbsp;<b>Aucune vente enregistrée</b>&nbsp;»&nbsp;; KPI à <code class="k">0 €</code> proprement, panier moyen masqué si 0 vente.</div></div>
+  </div>
+
+  <div class="scr">
+    <h3><code class="k">import</code> Import caisse</h3>
+    <div class="row"><div class="rl">Affiche</div><div class="rv">Dépôt CSV → mapping colonnes → prévisualisation (lignes valides / à mapper) → validation batch. Déduit le <code class="k">mode</code> quand absent (marqué «&nbsp;mode déduit · à confirmer&nbsp;»).</div></div>
+    <div class="row"><div class="rl">Sources</div><div class="rv">Fichier caisse boutique en fin de journée. <b>Écrit</b> des ventes dans l'historique (source transactionnelle).</div></div>
+    <div class="row"><div class="rl">CTA réels</div><div class="rv">Valider → injecte les ventes valides (comme Saisie). Lignes à désignation inconnue → bloquées jusqu'à mapping produit.</div></div>
+    <div class="row"><div class="rl">État vide</div><div class="rv">Avant fichier&nbsp;: zone de dépôt seule. <b>Mapping PROVISOIRE</b> — voir §05, à caler sur un vrai export.</div></div>
+  </div>
+
+  <div class="grp">Cuisine</div>
+
+  <div class="scr">
+    <h3><code class="k">catalog</code> Catalogue</h3>
+    <div class="row"><div class="rl">Affiche</div><div class="rv">Les produits par canal, avec mode/prix/format. Un même composant peut apparaître sur plusieurs canaux (recouvrement intentionnel) — <b>un seul objet</b>, compté une fois.</div></div>
+    <div class="row"><div class="rl">Sources</div><div class="rv">Le <b>référentiel produit</b> (STRUCTURE à conserver, CONTENU à refaire).</div></div>
+    <div class="row"><div class="rl">CTA réels</div><div class="rv"><b>«&nbsp;Nouveau produit&nbsp;» → formulaire de création réel</b> (canal, mode, prix, composants). Éditer / retirer d'un canal. C'est l'entrée du vrai contenu.</div></div>
+    <div class="row"><div class="rl">État vide</div><div class="rv"><b>Catalogue vide au lancement</b> → «&nbsp;<b>Aucun produit — créez le premier</b>&nbsp;» avec CTA proéminent. Tous les écrans en aval en dépendent&nbsp;: soigner cet état.</div></div>
+  </div>
+
+  <div class="scr">
+    <h3><code class="k">recipes</code> Fiches techniques de production</h3>
+    <div class="row"><div class="rl">Affiche</div><div class="rv">La <b>fiche technique</b> de chaque plat&nbsp;: composants, quantités, étapes, rendement. Rôle production (pas commercial — plus de mini-cartes prix/marge, doublon supprimé).</div></div>
+    <div class="row"><div class="rl">Sources</div><div class="rv">La recette du référentiel produit (STRUCTURE conservée, CONTENU refait avec les chefs).</div></div>
+    <div class="row"><div class="rl">CTA réels</div><div class="rv">Créer / éditer une fiche (composants + étapes) — formulaire de saisie réel du référentiel.</div></div>
+    <div class="row"><div class="rl">État vide</div><div class="rv">«&nbsp;<b>Aucune fiche technique — créez-en une</b>&nbsp;»&nbsp;; suit le catalogue vide.</div></div>
+  </div>
+
+  <div class="scr">
+    <h3><code class="k">prod</code> Production</h3>
+    <div class="row"><div class="rl">Affiche</div><div class="rv">Prévision de demande + plan de production, avec le ChanFilter comme «&nbsp;prisme&nbsp;» (part de canal × emplacement met la prévision à l'échelle).</div></div>
+    <div class="row"><div class="rl">Sources</div><div class="rv">Historique des ventes (tendance) + commandes fermes du jour. Transactionnel.</div></div>
+    <div class="row"><div class="rl">CTA réels</div><div class="rv">Ajuster le plan · filtrer par canal (recalcul). Lecture + planification.</div></div>
+    <div class="row"><div class="rl">État vide</div><div class="rv">Sans historique&nbsp;: «&nbsp;<b>Pas encore d'historique pour prévoir</b>&nbsp;» — proposer une saisie manuelle du plan plutôt qu'un graphe vide.</div></div>
+  </div>
+
+  <div class="scr">
+    <h3><code class="k">haccp</code> HACCP</h3>
+    <div class="row"><div class="rl">Affiche</div><div class="rv">Relevés de traçabilité (températures, DLC lots, contrôles). Registre réglementaire.</div></div>
+    <div class="row"><div class="rl">Sources</div><div class="rv">Saisies opérateur (transactionnel) + lots stock.</div></div>
+    <div class="row"><div class="rl">CTA réels</div><div class="rv">Enregistrer un relevé (horodaté) — vraie écriture, traçabilité.</div></div>
+    <div class="row"><div class="rl">État vide</div><div class="rv">«&nbsp;<b>Aucun relevé aujourd'hui</b>&nbsp;» + rappel des contrôles dus.</div></div>
+  </div>
+
+  <div class="scr">
+    <h3><code class="k">stock</code> Stocks</h3>
+    <div class="row"><div class="rl">Affiche</div><div class="rv">Inventaire par composant/ingrédient, seuils, lots + DLC, alertes rupture.</div></div>
+    <div class="row"><div class="rl">Sources</div><div class="rv">Mouvements de stock (transactionnel) déduits des ventes/production + réceptions. Seuils = config référentiel.</div></div>
+    <div class="row"><div class="rl">CTA réels</div><div class="rv">Saisir une réception / un ajustement · définir un seuil — vraies mutations.</div></div>
+    <div class="row"><div class="rl">État vide</div><div class="rv">«&nbsp;<b>Aucun article en stock</b>&nbsp;»&nbsp;; pas d'alerte fantôme sans référentiel.</div></div>
+  </div>
+
+  <div class="grp">Pilotage</div>
+
+  <div class="scr">
+    <h3><code class="k">insight</code> Insight stratégique</h3>
+    <div class="row"><div class="rl">Affiche</div><div class="rv">Synthèse décisionnelle&nbsp;: cartes <b>CONSTAT + CHIFFRE + ACTION</b>, triées urgence (aujourd'hui / semaine / structurel) → impact. Tags Calculé / Démo.</div></div>
+    <div class="row"><div class="rl">Sources</div><div class="rv"><b>Source unique des insights</b> (règles sur le transactionnel). Le dashboard lit ce même jeu — ne pas dupliquer la logique.</div></div>
+    <div class="row"><div class="rl">CTA réels</div><div class="rv">Chaque «&nbsp;action&nbsp;» → écran d'exécution concerné. Marquer traité / reporter.</div></div>
+    <div class="row"><div class="rl">État vide</div><div class="rv">«&nbsp;<b>Rien à arbitrer — pas assez de données</b>&nbsp;». Les insights naissent avec l'activité.</div></div>
+  </div>
+
+  <div class="scr">
+    <h3><code class="k">finance</code> Finances</h3>
+    <div class="row"><div class="rl">Affiche</div><div class="rv">CA, marges, coûts, ventilation canal (ChanFilter). Distingue explicitement <b>marge brute matière</b> et <b>marge nette</b> — noms distincts, jamais confondus.</div></div>
+    <div class="row"><div class="rl">Sources</div><div class="rv">Ventes <code class="k">fulfillment=remis</code> — <b>même source que Historique</b>. Coûts = référentiel (coût matière composant).</div></div>
+    <div class="row"><div class="rl">CTA réels</div><div class="rv">Filtrer période + canal (recalcul). Export. Lecture analytique.</div></div>
+    <div class="row"><div class="rl">État vide</div><div class="rv">Tous les montants à <code class="k">0 €</code> proprement&nbsp;; ratios/marges masqués si dénominateur 0 (jamais <code class="k">NaN%</code>)&nbsp;; graphes «&nbsp;pas de données sur la période&nbsp;».</div></div>
+  </div>
+
+  <div class="scr">
+    <h3><code class="k">sales</code> Ventes &amp; tendances</h3>
+    <div class="row"><div class="rl">Affiche</div><div class="rv">Courbes de ventes, top produits, saisonnalité, comparaisons période/période/canal.</div></div>
+    <div class="row"><div class="rl">Sources</div><div class="rv">Historique des ventes agrégé. Dérivation, pas source parallèle.</div></div>
+    <div class="row"><div class="rl">CTA réels</div><div class="rv">Changer période / granularité / canal (recalcul).</div></div>
+    <div class="row"><div class="rl">État vide</div><div class="rv">«&nbsp;<b>Pas encore de tendance — revenez après quelques ventes</b>&nbsp;»&nbsp;; axes vides gérés, pas de graphe cassé.</div></div>
+  </div>
+
+  <div class="scr">
+    <h3><code class="k">productivity</code> Productivité</h3>
+    <div class="row"><div class="rl">Affiche</div><div class="rv">Cadence de production, temps par plat, débit par créneau/emplacement.</div></div>
+    <div class="row"><div class="rl">Sources</div><div class="rv">Transitions de <code class="k">fulfillment</code> horodatées + fiches techniques (temps théoriques).</div></div>
+    <div class="row"><div class="rl">CTA réels</div><div class="rv">Filtrer période / poste. Lecture.</div></div>
+    <div class="row"><div class="rl">État vide</div><div class="rv">«&nbsp;<b>Aucune production mesurée</b>&nbsp;»&nbsp;; pas de moyenne sur 0.</div></div>
+  </div>
+
+  <div class="scr">
+    <h3><code class="k">clients</code> Clients</h3>
+    <div class="row"><div class="rl">Affiche</div><div class="rv">Fiches clients (surtout traiteur / C&C), historique de commandes, récurrence.</div></div>
+    <div class="row"><div class="rl">Sources</div><div class="rv">Clients rattachés aux ventes/commandes (transactionnel). Le comptoir anonyme n'en crée pas.</div></div>
+    <div class="row"><div class="rl">CTA réels</div><div class="rv">Créer / éditer une fiche client · ouvrir son historique.</div></div>
+    <div class="row"><div class="rl">État vide</div><div class="rv">«&nbsp;<b>Aucun client enregistré</b>&nbsp;» + CTA de création.</div></div>
+  </div>
+
+  <div class="grp">Marketing</div>
+
+  <div class="scr">
+    <h3><code class="k">commu</code> Réseaux sociaux</h3>
+    <div class="row"><div class="rl">Affiche</div><div class="rv">Planning/feed de publications par réseau, calées sur les vrais emplacements truck.</div></div>
+    <div class="row"><div class="rl">Sources</div><div class="rv">Contenu marketing (référentiel social) — <b>à refaire</b> avec l'équipe marketing, la démo est inventée.</div></div>
+    <div class="row"><div class="rl">CTA réels</div><div class="rv">Créer / programmer / éditer un post — saisie réelle du contenu social.</div></div>
+    <div class="row"><div class="rl">État vide</div><div class="rv">«&nbsp;<b>Aucune publication programmée</b>&nbsp;» + CTA de création.</div></div>
+  </div>
+
+  <div class="grp">Réglages</div>
+
+  <div class="scr">
+    <h3><code class="k">users</code> Utilisateurs &amp; rôles</h3>
+    <div class="row"><div class="rl">Affiche</div><div class="rv">Comptes de l'équipe, rôles/permissions par écran.</div></div>
+    <div class="row"><div class="rl">Sources</div><div class="rv">Auth Supabase + table rôles. Non-démo dès le départ (au moins Arnaud + chefs).</div></div>
+    <div class="row"><div class="rl">CTA réels</div><div class="rv">Inviter / éditer un rôle / désactiver — vraies mutations sécurisées.</div></div>
+    <div class="row"><div class="rl">État vide</div><div class="rv">Au minimum le compte propriétaire&nbsp;; jamais 0 utilisateur.</div></div>
+  </div>
+
+  <!-- 03 SOURCES UNIQUES -->
+  <h2 class="sec"><span class="n">03</span>Cohérence des sources uniques</h2>
+  <p class="lede">À préserver en base. Ces règles évitent les chiffres divergents entre écrans. Un calcul, plusieurs vues — jamais l'inverse.</p>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <div style="break-inside:avoid;background:#F6F1E7;border:1px solid #E4DAC6;border-radius:10px;padding:11px 14px;font-family:'Hanken Grotesk',sans-serif;font-size:11px;line-height:1.5;color:#2B271F"><b>CA compté une seule fois</b> sur <code class="k">fulfillment=remis</code>. Une commande précommandée non remise n'est pas du CA.</div>
+    <div style="break-inside:avoid;background:#F6F1E7;border:1px solid #E4DAC6;border-radius:10px;padding:11px 14px;font-family:'Hanken Grotesk',sans-serif;font-size:11px;line-height:1.5;color:#2B271F"><b>Finances et Historique</b> dérivent de la <b>même source</b> de ventes remises. Pas de recompte indépendant.</div>
+    <div style="break-inside:avoid;background:#F6F1E7;border:1px solid #E4DAC6;border-radius:10px;padding:11px 14px;font-family:'Hanken Grotesk',sans-serif;font-size:11px;line-height:1.5;color:#2B271F"><b>Key insights du dashboard = même source</b> que Insight stratégique (même tri urgence→impact, <code class="k">.slice(0,3)</code>). Zéro logique parallèle.</div>
+    <div style="break-inside:avoid;background:#F6F1E7;border:1px solid #E4DAC6;border-radius:10px;padding:11px 14px;font-family:'Hanken Grotesk',sans-serif;font-size:11px;line-height:1.5;color:#2B271F"><b>Marges nommées distinctement</b>&nbsp;: <b>brute matière</b> (prix − coût matière) vs <b>nette</b> (après charges). Jamais le même libellé pour deux calculs.</div>
+    <div style="break-inside:avoid;background:#F6F1E7;border:1px solid #E4DAC6;border-radius:10px;padding:11px 14px;font-family:'Hanken Grotesk',sans-serif;font-size:11px;line-height:1.5;color:#2B271F"><b>Composant compté une fois</b> même s'il apparaît sur plusieurs canaux (recouvrement catalogue intentionnel). Coût matière / gaspi lit le composant par son <code class="k">id</code>, jamais par canal.</div>
+  </div>
+
+  <!-- 04 OCCURRED_AT -->
+  <h2 class="sec"><span class="n">04</span><code class="k" style="font-size:15px">occurred_at</code></h2>
+  <div style="break-inside:avoid;border-left:3px solid #B00D1A;background:#FBF4EC;border-radius:0 11px 11px 0;padding:13px 16px">
+    <p style="font-family:'Hanken Grotesk',sans-serif;font-size:12px;line-height:1.55;color:#2B271F;margin:0"><code class="k">occurred_at</code> est capturé <b>à l'encaissement</b>, fuseau <b>Europe/Paris</b>, et <b>jamais dérivé de <code class="k">created_at</code></b>. Un import de fin de journée peut être créé à 21 h pour des ventes survenues à midi&nbsp;: <code class="k">occurred_at</code> porte l'heure réelle de la vente, <code class="k">created_at</code> l'heure d'insertion. Toute l'analytique temporelle (jour, créneau, tendance) lit <code class="k">occurred_at</code>.</p>
+  </div>
+
+  <!-- 05 IMPORT CAISSE -->
+  <h2 class="sec"><span class="n">05</span>Import caisse — point ouvert</h2>
+  <div style="break-inside:avoid;border:1.5px dashed #C99A4E;background:#FBF7EE;border-radius:12px;padding:14px 16px">
+    <div style="font-family:'Spline Sans Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#9A6516;margin-bottom:7px">⚑ Non figé — à caler avec CC + Arnaud</div>
+    <p style="font-family:'Hanken Grotesk',sans-serif;font-size:11.5px;line-height:1.55;color:#2B271F;margin:0 0 7px">Le <b>mapping CSV est provisoire</b> et la <b>déduction de mode</b> (quand la colonne manque) est une hypothèse. Ils doivent être calés sur un <b>vrai export de la caisse boutique</b>, non disponible à ce stade.</p>
+    <p style="font-family:'Hanken Grotesk',sans-serif;font-size:11.5px;line-height:1.55;color:#2B271F;margin:0">N'implémente pas le parseur comme spec finale&nbsp;: garde le mapping <b>configurable</b> (l'écran le prévoit déjà) et signale toute ligne au mode déduit comme «&nbsp;à confirmer&nbsp;». La spec définitive suit la réception d'un export réel — ce qui déclenchera aussi la révision du contrat de données v1.</p>
+  </div>
+
+  <!-- 06 POINTS OUVERTS -->
+  <h2 class="sec"><span class="n">06</span>Points ouverts — à trancher par CC / Arnaud</h2>
+  <p class="lede">Je les signale plutôt que de trancher à ta place.</p>
+  <ol style="font-family:'Hanken Grotesk',sans-serif;font-size:11.5px;line-height:1.65;color:#2B271F;margin:0;padding-left:20px">
+    <li><b>Format d'export caisse boutique</b> → fige mapping d'import + déduction de mode + révision du contrat v1.</li>
+    <li><b>Structure des tables Supabase</b> (normalisation vente/lignes, stock, insights) — laissée à ton appréciation&nbsp;; le contrat fige les champs, pas le schéma physique.</li>
+    <li><b>Règles exactes des insights et seuils d'alerte</b> (stock, DLC) — à valider avec Arnaud avant de figer.</li>
+    <li><b>Périmètre du référentiel social</b> et outillage de programmation — cadrage marketing.</li>
+    <li><b>Modèle de rôles/permissions</b> par écran — à préciser (qui saisit, qui pilote, qui encaisse).</li>
+  </ol>
+
+  <div style="margin:26px 0 10px;padding-top:14px;border-top:1px solid #E4DAC6;font-family:'Hanken Grotesk',sans-serif;font-size:11px;line-height:1.55;color:#6B6250"><b style="color:#211E18">En résumé&nbsp;:</b> porte la <b>structure</b> et le <b>comportement</b>, pas le <b>contenu</b>. Catalogue et transactionnel partent <b>vides</b>. Chaque écran gère son <b>état vide</b>. Les <b>sources uniques</b> ne se dupliquent pas. Et quand un doute subsiste — <b>signale-le</b> au lieu de deviner.</div>
+
+</x-import>
+
+</x-dc>
+</body>
+</html>

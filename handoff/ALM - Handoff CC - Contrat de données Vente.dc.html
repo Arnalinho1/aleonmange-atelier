@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  doc-page:not(:defined){visibility:hidden}
+  body{margin:0;background:#6B6350}
+  a{color:#B00D1A;text-decoration:none}
+  a:hover{text-decoration:underline}
+  .spec-tbl{width:100%;border-collapse:collapse;margin:0}
+  .spec-tbl thead th{font-family:'Spline Sans Mono',monospace;font-size:9px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:#8A7F6A;text-align:left;padding:0 10px 7px;border-bottom:1.5px solid #211E18;vertical-align:bottom}
+  .spec-tbl tbody td{font-family:'Hanken Grotesk',sans-serif;font-size:11.5px;line-height:1.42;color:#2B271F;padding:9px 10px;border-bottom:1px solid #EAE4D6;vertical-align:top}
+  .spec-tbl tbody tr{break-inside:avoid}
+  .mono{font-family:'Spline Sans Mono',monospace;font-size:10.5px;letter-spacing:.01em}
+  code.k{font-family:'Spline Sans Mono',monospace;font-size:10.5px;background:#F1EAD9;border:1px solid #E4DAC6;border-radius:5px;padding:1px 6px;color:#5C4A2A;white-space:nowrap}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-family:'Spline Sans Mono',monospace;font-size:10px;font-weight:600;padding:2px 9px;border-radius:100px;white-space:nowrap}
+  pre.ddl{font-family:'Spline Sans Mono',monospace;font-size:10.5px;line-height:1.62;background:#20242A;color:#DCE3E8;border-radius:12px;padding:16px 18px;overflow:visible;white-space:pre-wrap;break-inside:avoid;margin:0}
+  pre.ddl .cm{color:#7C8B96}
+  pre.ddl .kw{color:#E9A23B}
+  pre.ddl .ty{color:#8FCFE2}
+  pre.ddl .st{color:#9BD59B}
+  h2.sec{break-after:avoid}
+</style>
+</helmet>
+
+<x-import component-from-global-scope="doc-page" from="./doc-page.js" size="letter" orientation="portrait" margin="0.62in" hint-size="820px,1060px">
+
+  <div slot="header" style="display:flex;align-items:center;justify-content:space-between;padding-bottom:9px;border-bottom:1px solid #E4DAC6;font-family:'Spline Sans Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#9A927F">
+    <span style="display:flex;align-items:center;gap:8px"><span style="width:16px;height:16px;border-radius:50%;background:#D81020;display:inline-flex;align-items:center;justify-content:center;color:#F6F1E7;font-weight:700;font-size:9px">A</span>A Léon Mange · Atelier</span>
+    <span>Handoff → CC · Spec v1</span>
+  </div>
+
+  <div slot="footer" style="display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid #E4DAC6;font-family:'Spline Sans Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:#A79B84">
+    <span>Contrat de données — Vente</span>
+    <span>Confidentiel · usage interne</span>
+  </div>
+
+  <!-- ===== COVER BLOCK ===== -->
+  <div style="margin:30px 0 4px">
+    <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#B00D1A;font-weight:600;margin-bottom:10px">Spécification technique · destinée à Claude Code</div>
+    <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:34px;line-height:1.05;letter-spacing:-.01em;color:#211E18;margin:0 0 12px">Contrat de données&nbsp;: la Vente</h1>
+    <p style="font-family:'Hanken Grotesk',sans-serif;font-size:13px;line-height:1.55;color:#4A4437;margin:0;max-width:60ch">Modèle canonique d'une vente de l'Atelier ALM, prêt à mapper sur des tables Supabase. Chaque champ, son type, son enum, sa nullabilité et l'écran analytique qui le consomme. Ce document fige le contrat&nbsp;; la structure des tables reste à l'appréciation de CC. <strong style="color:#B00D1A">v1 — révisable sur deux fronts&nbsp;:</strong> (1) après réception d'un export caisse boutique réel (mapping d'import et déduction de mode provisoires), et (2) les corrections de conformité actées avec l'équipe — emplacement = référentiel éditable à FK (plus un enum), et modèle à 2 modes <code class="k">unite·poids</code> (mode <s>portion</s> et taille <s>S/M/L</s> retirés).</p>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0 26px">
+    <div style="background:#F6F1E7;border:1px solid #E4DAC6;border-radius:12px;padding:12px 14px">
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:#8A7F6A;margin-bottom:5px">Objet</div>
+      <div style="font-family:'Hanken Grotesk',sans-serif;font-size:12px;font-weight:600;color:#211E18;line-height:1.35">Entité <code class="k">vente</code> + lignes</div>
+    </div>
+    <div style="background:#F6F1E7;border:1px solid #E4DAC6;border-radius:12px;padding:12px 14px">
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:#8A7F6A;margin-bottom:5px">Source de vérité</div>
+      <div style="font-family:'Hanken Grotesk',sans-serif;font-size:12px;font-weight:600;color:#211E18;line-height:1.35">Écran Saisie de vente</div>
+    </div>
+    <div style="background:#F6F1E7;border:1px solid #E4DAC6;border-radius:12px;padding:12px 14px">
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:#8A7F6A;margin-bottom:5px">Consommateurs</div>
+      <div style="font-family:'Hanken Grotesk',sans-serif;font-size:12px;font-weight:600;color:#211E18;line-height:1.35">Commandes du jour · Finances · Ventes &amp; tendances · Productivité · Attribution</div>
+    </div>
+  </div>
+
+  <!-- ===== 1. MODELE VENTE ===== -->
+  <h2 class="sec" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#211E18;margin:0 0 3px;display:flex;align-items:baseline;gap:9px"><span style="font-family:'Spline Sans Mono',monospace;font-size:13px;color:#B00D1A;font-weight:700">01</span>Le modèle <code class="k">vente</code></h2>
+  <p style="font-family:'Hanken Grotesk',sans-serif;font-size:11.5px;line-height:1.5;color:#6B6350;margin:0 0 14px">Un enregistrement par transaction encaissée (ou devis, pour le traiteur). Les lignes de panier vivent dans une table enfant <code class="k">vente_ligne</code> (§02). Le champ <code class="k">fulfillment</code> pilote la répartition entre file de production et historique.</p>
+
+  <table class="spec-tbl">
+    <thead><tr><th style="width:20%">Champ</th><th style="width:17%">Type</th><th style="width:9%">Null</th><th style="width:30%">Rôle / enum</th><th style="width:24%">Consommé par</th></tr></thead>
+    <tbody>
+      <tr><td><code class="k">id</code></td><td class="mono" style="color:#6B6350">uuid</td><td class="mono">non</td><td>Clé technique (PK).</td><td style="color:#8A7F6A">— (base)</td></tr>
+      <tr><td><code class="k">occurred_at</code></td><td class="mono" style="color:#6B6350">timestamptz</td><td class="mono">non</td><td><strong style="color:#B00D1A">Champ critique</strong> — porte le jour-de-semaine (voir §03).</td><td>Ventes &amp; tendances, Historique, Finances</td></tr>
+      <tr><td><code class="k">canal</code></td><td class="mono" style="color:#6B6350">enum canal</td><td class="mono">non</td><td>Axe transversal. <code class="k">truck·boutique·traiteur</code></td><td>Tous les écrans analytiques</td></tr>
+      <tr><td><code class="k">emplacement_id</code></td><td class="mono" style="color:#6B6350">uuid fk</td><td class="mono" style="color:#B00D1A">oui*</td><td><strong style="color:#B00D1A">FK → table <code class="k">emplacement</code></strong> (référentiel éditable, PAS un enum). Session truck. *NOT NULL si <code class="k">canal='truck'</code>, sinon NULL. Fige la référence, jamais une chaîne libre.</td><td>Ventes &amp; tendances (saisonnalité), Attribution, Production</td></tr>
+      <tr><td><code class="k">montant_total</code></td><td class="mono" style="color:#6B6350">numeric(8,2)</td><td class="mono">non</td><td>En €. Somme des lignes (dérivable, mais figé à l'encaissement).</td><td>Finances, KPI, Ventes &amp; tendances</td></tr>
+      <tr><td><code class="k">couverts</code></td><td class="mono" style="color:#6B6350">int</td><td class="mono">oui</td><td>Traiteur uniquement — base du €/personne.</td><td>Devis traiteur, marge/pers.</td></tr>
+      <tr><td><code class="k">client_id</code></td><td class="mono" style="color:#6B6350">uuid fk</td><td class="mono">oui</td><td>Optionnel (vente au comptoir = anonyme).</td><td>Clients (CRM léger)</td></tr>
+      <tr><td><code class="k">moyen_paiement</code></td><td class="mono" style="color:#6B6350">enum paiement</td><td class="mono">non</td><td>Stat d'encaissement. Défaut par canal (§04).</td><td>Finances (ventilation encaissement)</td></tr>
+      <tr><td><code class="k">origine</code></td><td class="mono" style="color:#6B6350">enum origine</td><td class="mono">non</td><td>Proxy déclaratif (pas d'attribution dure). Défaut <code class="k">spontane</code>.</td><td>Attribution B2 (social → ventes)</td></tr>
+      <tr><td><code class="k">mode_vente</code></td><td class="mono" style="color:#6B6350">enum mode_vente</td><td class="mono">non</td><td><strong style="color:#0E6E8F">Marqueur saisi à la vente.</strong> <code class="k">instantane·precommande</code>. C'est LUI (pas le canal) qui dérive <code class="k">fulfillment</code> → encadré ci-dessous.</td><td>Commandes du jour, fulfillment</td></tr>
+      <tr><td><code class="k">fulfillment</code></td><td class="mono" style="color:#6B6350">enum fulfillment</td><td class="mono">non</td><td><strong style="color:#0E6E8F">Cycle de production.</strong> <code class="k">a_produire·en_prod·pret·remis</code>. Dérivé du <code class="k">mode_vente</code> + règle CA → encadré ci-dessous.</td><td>Commandes du jour, Finances (CA), Historique</td></tr>
+    </tbody>
+  </table>
+
+  <div style="margin-top:14px;background:#EAF2F6;border:1px solid #C4DEEA;border-left:3px solid #1493BE;border-radius:12px;padding:14px 16px;break-inside:avoid">
+    <div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#0E6E8F;font-weight:600;margin-bottom:9px">Cycle de vie — <code class="k" style="background:#fff;border-color:#C4DEEA">fulfillment</code> dérive du <code class="k" style="background:#fff;border-color:#C4DEEA">mode_vente</code></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:13px">
+      <div>
+        <div style="font-family:'Hanken Grotesk',sans-serif;font-size:11px;font-weight:700;color:#211E18;margin-bottom:5px">Dérivation par le MODE (jamais le canal)</div>
+        <ul style="margin:0;padding-left:15px;font-family:'Hanken Grotesk',sans-serif;font-size:11px;line-height:1.55;color:#2B3B42">
+          <li><code class="k" style="background:#fff;border-color:#C4DEEA">instantane</code> (truck comptoir, boutique à l'unité) → naît <code class="k" style="background:#fff;border-color:#C4DEEA">remis</code>.</li>
+          <li><code class="k" style="background:#fff;border-color:#C4DEEA">precommande</code> (traiteur, C&amp;C boutique) → naît <code class="k" style="background:#fff;border-color:#C4DEEA">a_produire</code> → <code class="k" style="background:#fff;border-color:#C4DEEA">en_prod → pret → remis</code>.</li>
+          <li><strong style="color:#B00D1A">⚠ La boutique fait les deux.</strong> Dériver de <code class="k" style="background:#fff;border-color:#C4DEEA">canal</code> ferait disparaître les C&amp;C boutique de la file — d'où le marqueur <code class="k" style="background:#fff;border-color:#C4DEEA">mode_vente</code> saisi à l'écran Saisie.</li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-family:'Hanken Grotesk',sans-serif;font-size:11px;font-weight:700;color:#211E18;margin-bottom:5px">Règle CA — critique</div>
+        <p style="margin:0;font-family:'Hanken Grotesk',sans-serif;font-size:11px;line-height:1.55;color:#2B3B42">Le CA (et les KPI Finances / Historique) ne se comptent <strong>que sur <code class="k" style="background:#fff;border-color:#C4DEEA">fulfillment='remis'</code></strong>. Une commande traiteur pour vendredi saisie aujourd'hui n'entre pas dans le CA du jour de saisie — elle y bascule à la remise. La page <strong>Commandes du jour</strong> n'affiche que le non-remis.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 2. DECISION BOWL ===== -->
+  <h2 class="sec" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#211E18;margin:30px 0 3px;display:flex;align-items:baseline;gap:9px"><span style="font-family:'Spline Sans Mono',monospace;font-size:13px;color:#B00D1A;font-weight:700">02</span>Décision&nbsp;: le bowl composé — «&nbsp;les deux en couches&nbsp;»</h2>
+  <p style="font-family:'Hanken Grotesk',sans-serif;font-size:11.5px;line-height:1.55;color:#4A4437;margin:0 0 14px">Un bowl truck s'enregistre comme <strong>une ligne recette virtuelle</strong> (<code class="k">type='bowl'</code>) qui <strong>référence ses composants</strong>. Le modèle porte les deux niveaux simultanément&nbsp;:</p>
+
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin:0 0 16px">
+    <div style="flex:1 1 240px;background:#FBF8F1;border:1px solid #E4DAC6;border-left:3px solid #D81020;border-radius:12px;padding:13px 15px;break-inside:avoid">
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#B00D1A;font-weight:600;margin-bottom:6px">Niveau produit → C1</div>
+      <div style="font-family:'Hanken Grotesk',sans-serif;font-size:11.5px;line-height:1.5;color:#2B271F">L'analytique <strong>commerciale</strong> lit le bowl comme un produit unique — «&nbsp;le coco-curry cartonne le mercredi&nbsp;». Le <code class="k">recette_id</code> virtuel porte le nom du bowl.</div>
+    </div>
+    <div style="flex:1 1 240px;background:#FBF8F1;border:1px solid #E4DAC6;border-left:3px solid #E9A23B;border-radius:12px;padding:13px 15px;break-inside:avoid">
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#B07A2E;font-weight:600;margin-bottom:6px">Niveau composant → C2</div>
+      <div style="font-family:'Hanken Grotesk',sans-serif;font-size:11.5px;line-height:1.5;color:#2B271F">L'analytique <strong>cuisine</strong> déplie vers les 4 composants (protéine·féculent·légume·sauce) pour le gaspi et le coût matière. Chaque composant = une sous-ligne.</div>
+    </div>
+  </div>
+
+  <pre class="ddl"><span class="cm">-- Une ligne de vente = un bowl (recette virtuelle, se déplie),</span>
+<span class="cm">-- un produit fini, ou une formule traiteur. Tarification : 2 modes.</span>
+<span class="kw">create table</span> vente_ligne (
+  id            <span class="ty">uuid</span> <span class="kw">primary key</span>,
+  vente_id      <span class="ty">uuid</span> <span class="kw">references</span> vente(id),
+  type          <span class="ty">ligne_type</span>,        <span class="cm">-- bowl | produit | formule</span>
+  mode          <span class="ty">ligne_mode</span>,        <span class="cm">-- unite | poids  (2 modes)</span>
+  recette_id    <span class="ty">uuid</span> <span class="kw">references</span> recette(id), <span class="cm">-- bowl = recette VIRTUELLE (se déplie)</span>
+  poids_g       <span class="ty">int</span>,               <span class="cm">-- mode=poids UNIQ. — pesée réelle (continu), sinon NULL</span>
+  prix_kg       <span class="ty">numeric(6,2)</span>,      <span class="cm">-- mode=poids UNIQ. — prix au kilo, sinon NULL</span>
+  qte           <span class="ty">int</span>,               <span class="cm">-- mode=unite — pièces ; NULL en poids</span>
+  prix_unitaire <span class="ty">numeric(6,2)</span>,      <span class="cm">-- mode=unite ; NULL en poids</span>
+  montant       <span class="ty">numeric(8,2)</span>       <span class="cm">-- unite: PU×qte · poids: prix_kg×poids_g/1000</span>
+);
+
+<span class="cm">-- Dépliage du bowl → 4 composants (coût matière + gaspi C2).</span>
+<span class="cm">-- Le bowl se VEND à l'unité mais reste COMPOSÉ. Vide pour un produit fini.</span>
+<span class="kw">create table</span> vente_ligne_composant (
+  ligne_id      <span class="ty">uuid</span> <span class="kw">references</span> vente_ligne(id),
+  composant_id  <span class="ty">uuid</span> <span class="kw">references</span> composant(id),
+  categorie     <span class="ty">categorie</span>        <span class="cm">-- proteine|feculent|legume|sauce</span>
+);</pre>
+
+  <div style="margin-top:13px;background:#EAF2F6;border:1px solid #C4DEEA;border-left:3px solid #1493BE;border-radius:11px;padding:12px 15px;break-inside:avoid">
+    <div style="font-family:'Hanken Grotesk',sans-serif;font-size:11px;line-height:1.55;color:#1B3B47"><strong>Champ <code class="k" style="background:#fff;border-color:#C4DEEA">mode</code> — 2 tarifications.</strong> <code class="k" style="background:#fff;border-color:#C4DEEA">unite</code> (prix_unitaire × qté) : bowls truck en <strong>format unique</strong>, plats préparés, plats/plateaux traiteur, produits boutique à la pièce. <code class="k" style="background:#fff;border-color:#C4DEEA">poids</code> (poids_g × prix_kg) : produits boutique à la pesée. <strong>Plus de mode <s>portion</s> ni de champ <s>taille</s> S/M/L</strong> — supprimés du modèle. Le bowl reste <strong>composé</strong> : vendu à l'unité, il se déplie en 4 composants via <code class="k" style="background:#fff;border-color:#C4DEEA">vente_ligne_composant</code> (couche cuisine = coût matière + gaspi C2). « Les deux en couches » : couche produit = unite, couche cuisine = composants.</div>
+  </div>
+
+  <div style="margin-top:13px;background:#F1EEF6;border:1px solid #D6CBE6;border-left:3px solid #7A5EA8;border-radius:11px;padding:12px 15px;break-inside:avoid">
+    <div style="font-family:'Hanken Grotesk',sans-serif;font-size:11px;line-height:1.55;color:#2E2540"><strong>Catalogue — 3 catalogues de vente distincts + 1 couche composants commune.</strong> Schéma produit : <code class="k" style="background:#fff;border-color:#D6CBE6">nom</code>, <code class="k" style="background:#fff;border-color:#D6CBE6">categorie</code>, <code class="k" style="background:#fff;border-color:#D6CBE6">canal</code> (truck|boutique|traiteur), <code class="k" style="background:#fff;border-color:#D6CBE6">mode</code> (unite|poids), <code class="k" style="background:#fff;border-color:#D6CBE6">prix</code> selon mode (prix_unitaire ou prix_kg), <code class="k" style="background:#fff;border-color:#D6CBE6">dispo</code>. Les catalogues de vente sont <strong>propres à chaque canal</strong>, peu de recouvrement (bowls & plats truck ; plats du jour au poids + parts/pains à l'unité en boutique ; plats & plateaux traiteur). <strong>Exception :</strong> la couche <code class="k" style="background:#fff;border-color:#D6CBE6">composant</code> (poulet, brocoli, riz…) est <strong>COMMUNE</strong> sous les catalogues — un composant est une brique de bowl truck ET peut être un produit au poids en boutique. Catalogues de vente distincts, couche composants partagée (coût matière + gaspi). Pas de silos étanches.</div>
+  </div>
+
+  <div style="margin-top:13px;background:#FCEEEF;border:1px solid #F0C9CC;border-radius:11px;padding:12px 15px;break-inside:avoid">
+    <div style="font-family:'Hanken Grotesk',sans-serif;font-size:11px;line-height:1.5;color:#7A1219"><strong>À trancher côté base :</strong> la <em>recette virtuelle</em> d'un bowl est-elle matérialisée en ligne dans <code class="k" style="background:#fff;border-color:#F0C9CC">recette</code> (une par combinaison signature vendue), ou générée à la volée depuis les 4 composants&nbsp;? Recommandation&nbsp;: une recette virtuelle par <strong>bowl signature au menu</strong> (le coco-curry existe comme produit), les compositions libres restant dépliées sans recette parente.</div>
+  </div>
+
+  <!-- ===== 3. TIMESTAMP ===== -->
+  <h2 class="sec" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#211E18;margin:30px 0 3px;display:flex;align-items:baseline;gap:9px"><span style="font-family:'Spline Sans Mono',monospace;font-size:13px;color:#B00D1A;font-weight:700">03</span>Le timestamp n'est pas un détail</h2>
+  <div style="background:#20242A;border-radius:14px;padding:17px 20px;break-inside:avoid">
+    <div style="display:flex;align-items:center;gap:9px;margin-bottom:9px">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E9A23B" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+      <span style="font-family:'Spline Sans Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#E9A23B;font-weight:600">occurred_at — timestamptz — NOT NULL</span>
+    </div>
+    <p style="font-family:'Hanken Grotesk',sans-serif;font-size:11.5px;line-height:1.55;color:#DCE3E8;margin:0">Dans la maquette, «&nbsp;aujourd'hui&nbsp;» est codé en dur. En base, <strong style="color:#fff">c'est ce champ qui porte le jour-de-semaine</strong>, et donc TOUTE la saisonnalité&nbsp;: le pic du mercredi (Ventes &amp; tendances), le prisme de demande de la Production, la courbe CA par jour. Il doit être capturé à l'encaissement, en fuseau <code style="font-family:'Spline Sans Mono',monospace;color:#8FCFE2">Europe/Paris</code>, et ne jamais être dérivé de <code style="font-family:'Spline Sans Mono',monospace;color:#8FCFE2">created_at</code> technique (une vente saisie en différé garde sa date réelle).</p>
+  </div>
+
+  <!-- ===== 4. ENUMS ===== -->
+  <h2 class="sec" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#211E18;margin:30px 0 3px;display:flex;align-items:baseline;gap:9px"><span style="font-family:'Spline Sans Mono',monospace;font-size:13px;color:#B00D1A;font-weight:700">04</span>Les enums exacts, prêts à mapper</h2>
+  <p style="font-family:'Hanken Grotesk',sans-serif;font-size:11.5px;line-height:1.5;color:#6B6350;margin:0 0 14px">Clés = valeurs stockées (stables, jamais traduites). Libellés = affichage FR uniquement.</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:13px">
+
+    <div style="background:#FBF8F1;border:1px solid #E4DAC6;border-radius:12px;padding:13px 15px;break-inside:avoid">
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#8A7F6A;margin-bottom:9px">enum <span style="color:#B00D1A">canal</span></div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div style="display:flex;align-items:center;justify-content:space-between"><span class="pill" style="background:rgba(216,16,32,.12);color:#B00D1A"><span style="width:7px;height:7px;border-radius:50%;background:#D81020"></span>truck</span><span style="font-family:'Hanken Grotesk';font-size:11px;color:#4A4437">Food truck</span></div>
+        <div style="display:flex;align-items:center;justify-content:space-between"><span class="pill" style="background:rgba(20,147,190,.13);color:#0E6E8F"><span style="width:7px;height:7px;border-radius:50%;background:#1493BE"></span>boutique</span><span style="font-family:'Hanken Grotesk';font-size:11px;color:#4A4437">Boutique</span></div>
+        <div style="display:flex;align-items:center;justify-content:space-between"><span class="pill" style="background:rgba(233,162,59,.16);color:#A9741F"><span style="width:7px;height:7px;border-radius:50%;background:#E9A23B"></span>traiteur</span><span style="font-family:'Hanken Grotesk';font-size:11px;color:#4A4437">Traiteur</span></div>
+      </div>
+    </div>
+
+    <div style="background:#FBF8F1;border:1px solid #E4DAC6;border-radius:12px;padding:13px 15px;break-inside:avoid">
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#8A7F6A;margin-bottom:9px"><span style="color:#B00D1A">TABLE emplacement</span> <span style="text-transform:none;letter-spacing:0;color:#A79B84">· référentiel éditable — PAS un enum</span></div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div style="display:flex;align-items:center;justify-content:space-between"><code class="k">oingt</code><span style="font-family:'Hanken Grotesk';font-size:11px;color:#4A4437">Mar · Marché du Bois d'Oingt</span></div>
+        <div style="display:flex;align-items:center;justify-content:space-between"><code class="k">tassin</code><span style="font-family:'Hanken Grotesk';font-size:11px;color:#4A4437">Mer · Tassin-la-Demi-Lune</span></div>
+        <div style="display:flex;align-items:center;justify-content:space-between"><code class="k">salvagny</code><span style="font-family:'Hanken Grotesk';font-size:11px;color:#4A4437">Jeu · La Tour-de-Salvagny</span></div>
+      </div>
+      <div style="font-family:'Hanken Grotesk';font-size:10px;color:#7A1219;margin-top:9px;line-height:1.45"><strong>Table de référentiel, gérée depuis Réglages</strong> (ajouter / renommer / <strong>désactiver</strong>), comme le catalogue. Les emplacements changent presque chaque année. On ne SUPPRIME jamais : on <strong>désactive</strong> (<code class="k" style="font-size:9px">actif=false</code>) — l'emplacement quitte les choix de saisie mais reste en base, sinon la saisonnalité historique est corrompue (les ventes de Tassin 2026 doivent rester « Tassin » même si le truck part en 2027). La vente porte une <strong>FK</strong>, pas de chaîne libre.</div>
+    </div>
+
+    <div style="background:#FBF8F1;border:1px solid #E4DAC6;border-radius:12px;padding:13px 15px;break-inside:avoid">
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#8A7F6A;margin-bottom:9px">enum <span style="color:#B00D1A">paiement</span></div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div style="display:flex;align-items:center;justify-content:space-between"><code class="k">especes</code><span style="font-family:'Hanken Grotesk';font-size:11px;color:#4A4437">Espèces <span style="color:#A79B84">· défaut truck</span></span></div>
+        <div style="display:flex;align-items:center;justify-content:space-between"><code class="k">cb</code><span style="font-family:'Hanken Grotesk';font-size:11px;color:#4A4437">CB <span style="color:#A79B84">· défaut boutique</span></span></div>
+        <div style="display:flex;align-items:center;justify-content:space-between"><code class="k">ticket</code><span style="font-family:'Hanken Grotesk';font-size:11px;color:#4A4437">Ticket resto</span></div>
+        <div style="display:flex;align-items:center;justify-content:space-between"><code class="k">virement</code><span style="font-family:'Hanken Grotesk';font-size:11px;color:#4A4437">Virement <span style="color:#A79B84">· défaut traiteur</span></span></div>
+      </div>
+    </div>
+
+    <div style="background:#FBF8F1;border:1px solid #E4DAC6;border-radius:12px;padding:13px 15px;break-inside:avoid">
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#8A7F6A;margin-bottom:9px">enum <span style="color:#B00D1A">origine</span> <span style="text-transform:none;letter-spacing:0;color:#A79B84">· proxy B2</span></div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div style="display:flex;align-items:center;justify-content:space-between"><code class="k">spontane</code><span style="font-family:'Hanken Grotesk';font-size:11px;color:#4A4437">Spontané <span style="color:#A79B84">· défaut</span></span></div>
+        <div style="display:flex;align-items:center;justify-content:space-between"><code class="k">insta</code><span style="font-family:'Hanken Grotesk';font-size:11px;color:#4A4437">Vu sur Insta</span></div>
+        <div style="display:flex;align-items:center;justify-content:space-between"><code class="k">tiktok</code><span style="font-family:'Hanken Grotesk';font-size:11px;color:#4A4437">Vu sur TikTok</span></div>
+        <div style="display:flex;align-items:center;justify-content:space-between"><code class="k">facebook</code><span style="font-family:'Hanken Grotesk';font-size:11px;color:#4A4437">Vu sur Facebook</span></div>
+        <div style="display:flex;align-items:center;justify-content:space-between"><code class="k">code</code><span style="font-family:'Hanken Grotesk';font-size:11px;color:#4A4437">Code promo</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="margin-top:13px;background:#FBF8F1;border:1px solid #E4DAC6;border-radius:12px;padding:13px 15px;break-inside:avoid">
+    <div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#8A7F6A;margin-bottom:9px">enum <span style="color:#B00D1A">mode_vente</span> <span style="text-transform:none;letter-spacing:0;color:#A79B84">· marqueur de saisie</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px 24px">
+      <div style="display:flex;align-items:center;justify-content:space-between"><span class="pill" style="background:rgba(20,147,190,.14);color:#0E6E8F">instantane</span><span style="font-family:'Hanken Grotesk';font-size:11px;color:#4A4437">Truck comptoir, boutique à l'unité <span style="color:#A79B84">→ remis</span></span></div>
+      <div style="display:flex;align-items:center;justify-content:space-between"><span class="pill" style="background:rgba(233,162,59,.18);color:#A9741F">precommande</span><span style="font-family:'Hanken Grotesk';font-size:11px;color:#4A4437">Traiteur, C&amp;C boutique <span style="color:#A79B84">→ a_produire</span></span></div>
+    </div>
+  </div>
+
+  <div style="margin-top:13px;background:#FBF8F1;border:1px solid #E4DAC6;border-radius:12px;padding:13px 15px;break-inside:avoid">
+    <div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#8A7F6A;margin-bottom:9px">enum <span style="color:#B00D1A">fulfillment</span> <span style="text-transform:none;letter-spacing:0;color:#A79B84">· cycle de production</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px 24px">
+      <div style="display:flex;align-items:center;justify-content:space-between"><span class="pill" style="background:rgba(233,162,59,.18);color:#A9741F">a_produire</span><span style="font-family:'Hanken Grotesk';font-size:11px;color:#4A4437">À produire <span style="color:#A79B84">· défaut précommande</span></span></div>
+      <div style="display:flex;align-items:center;justify-content:space-between"><span class="pill" style="background:rgba(20,147,190,.14);color:#0E6E8F">en_prod</span><span style="font-family:'Hanken Grotesk';font-size:11px;color:#4A4437">En production</span></div>
+      <div style="display:flex;align-items:center;justify-content:space-between"><span class="pill" style="background:rgba(45,107,74,.16);color:#2D6B4A">pret</span><span style="font-family:'Hanken Grotesk';font-size:11px;color:#4A4437">Prêt · retrait/livraison</span></div>
+      <div style="display:flex;align-items:center;justify-content:space-between"><span class="pill" style="background:#EDE7DA;color:#6B6350">remis</span><span style="font-family:'Hanken Grotesk';font-size:11px;color:#4A4437">Remis <span style="color:#B00D1A">· CA compté ici</span></span></div>
+    </div>
+  </div>
+
+  <!-- ===== 5. IMPORT CAISSE ===== -->
+  <h2 class="sec" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#211E18;margin:30px 0 3px;display:flex;align-items:baseline;gap:9px"><span style="font-family:'Spline Sans Mono',monospace;font-size:13px;color:#B00D1A;font-weight:700">05</span>Import de caisse — fin de journée (boutique)</h2>
+  <p style="font-family:'Hanken Grotesk',sans-serif;font-size:11.5px;line-height:1.5;color:#6B6350;margin:0 0 14px">La boutique dispose d'une caisse/balance qui exporte un fichier en fin de journée. L'écran <strong>Import caisse</strong> reconstitue les ventes du jour par lot au lieu de les ressaisir. Flux&nbsp;: <strong>dépôt du fichier → mapping des colonnes → prévisualisation → validation en batch</strong>. Chaque ligne devient une <code class="k">vente</code> boutique (<code class="k">mode_vente='instantane'</code> → <code class="k">fulfillment='remis'</code>), avec ses <code class="k">vente_ligne</code> en mode <code class="k">poids</code> ou <code class="k">unite</code> (§02).</p>
+
+  <div style="display:flex;gap:13px;flex-wrap:wrap;margin-bottom:13px">
+    <div style="flex:1 1 250px;background:#EAF2F6;border:1px solid #C4DEEA;border-left:3px solid #1493BE;border-radius:12px;padding:14px 16px;break-inside:avoid">
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#0E6E8F;font-weight:600;margin-bottom:9px">Mapping configurable — à caler</div>
+      <div style="font-family:'Hanken Grotesk',sans-serif;font-size:11px;line-height:1.55;color:#1B3B47;margin-bottom:8px">Le parseur n'est <strong>PAS figé</strong> sur un format supposé. Le mapping colonne CSV → champ modèle est paramétrable (détection du séparateur <code class="k" style="background:#fff;border-color:#C4DEEA">; , tab</code>). Format réel de la caisse ALM <strong>pas encore fourni</strong> — à caler sur un vrai export avant prod. <strong>Déduction du mode provisoire</strong>&nbsp;: faute de colonne « mode » dans le fichier, le mode (poids/unité) est <em>deviné</em> (kg→poids, qté→unité) et chaque ligne est signalée <strong>« à confirmer »</strong> dans la prévisualisation — à remplacer par un mapping de mode explicite. Lignes non rapprochées exclues du batch ; les ventes créées sont marquées <code class="k" style="background:#fff;border-color:#C4DEEA">source='import'</code> (distinctes d'une saisie manuelle).</div>
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:10px;line-height:1.7;color:#2B3B42">Désignation → <code class="k" style="background:#fff;border-color:#C4DEEA">recette_id / composant</code><br>Poids (kg) → <code class="k" style="background:#fff;border-color:#C4DEEA">poids_g</code> (×1000)<br>Quantité → <code class="k" style="background:#fff;border-color:#C4DEEA">qte</code><br>Montant → <code class="k" style="background:#fff;border-color:#C4DEEA">montant</code><br>Règlement → <code class="k" style="background:#fff;border-color:#C4DEEA">moyen_paiement</code></div>
+    </div>
+    <div style="flex:1 1 250px;background:#20242A;border-radius:12px;padding:14px 16px;break-inside:avoid">
+      <div style="display:flex;align-items:center;gap:9px;margin-bottom:9px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E9A23B" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+        <span style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#E9A23B;font-weight:600">Horodatage — critique</span>
+      </div>
+      <div style="font-family:'Hanken Grotesk',sans-serif;font-size:11px;line-height:1.6;color:#DCE3E8"><code class="k" style="background:#2B3138;border-color:#3A424B;color:#E9A23B">occurred_at</code> = <strong>jour de l'import</strong> (date réelle), sans heure précise — acceptable pour la boutique. Ne <strong>jamais</strong> dériver <code class="k" style="background:#2B3138;border-color:#3A424B;color:#E9A23B">occurred_at</code> d'un <code class="k" style="background:#2B3138;border-color:#3A424B;color:#E9A23B">created_at</code> technique&nbsp;: la date d'insertion en base ≠ la date de vente réelle. Reporter la date métier du fichier / du jour d'exploitation.</div>
+    </div>
+  </div>
+  <div style="margin-bottom:2px;padding:12px 15px;background:#FBF8F1;border:1px solid #E4DAC6;border-radius:11px;font-family:'Hanken Grotesk',sans-serif;font-size:11px;line-height:1.55;color:#5C4A2A;break-inside:avoid">Lignes non rapprochées (désignation inconnue, montant manquant) <strong>signalées et exclues du batch</strong> jusqu'à correction du mapping — jamais créées à l'aveugle. Validation = création groupée des seules lignes valides. <span style="font-family:'Spline Sans Mono',monospace;font-size:10px;color:#9A7A3A">Démo — parseur sur CSV d'exemple.</span></div>
+
+  <!-- ===== 6. FIGE VS A DECIDER ===== -->
+  <h2 class="sec" style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:20px;color:#211E18;margin:30px 0 12px;display:flex;align-items:baseline;gap:9px"><span style="font-family:'Spline Sans Mono',monospace;font-size:13px;color:#B00D1A;font-weight:700">06</span>Figé vs. à décider côté base</h2>
+
+  <div style="display:flex;gap:13px;flex-wrap:wrap">
+    <div style="flex:1 1 250px;background:#EEF6EF;border:1px solid #CDE6D1;border-radius:12px;padding:14px 16px;break-inside:avoid">
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#2E7D46;font-weight:600;margin-bottom:9px">✓ Figé — ne pas rediscuter</div>
+      <ul style="margin:0;padding-left:16px;font-family:'Hanken Grotesk',sans-serif;font-size:11px;line-height:1.6;color:#2B4030">
+        <li>Le jeu de champs de <code class="k" style="background:#fff;border-color:#CDE6D1">vente</code> et leur nullabilité (§01).</li>
+        <li>Les enums et leurs clés exactes (§04) — dont <code class="k" style="background:#fff;border-color:#CDE6D1">mode_vente</code>, marqueur qui dérive <code class="k" style="background:#fff;border-color:#CDE6D1">fulfillment</code>.</li>
+        <li>Le bowl = recette virtuelle + référence composants, deux niveaux (§02).</li>
+        <li><code class="k" style="background:#fff;border-color:#CDE6D1">emplacement</code> obligatoire pour le truck, NULL ailleurs.</li>
+        <li>Le paiement remplace le statut d'encaissement (l'Atelier est un cahier de vente, pas une caisse).</li>
+        <li><code class="k" style="background:#fff;border-color:#CDE6D1">occurred_at</code> = jour de vente réel&nbsp;; à l'import caisse = jour d'import, jamais un <code class="k" style="background:#fff;border-color:#CDE6D1">created_at</code> technique (§05).</li>
+      </ul>
+    </div>
+    <div style="flex:1 1 250px;background:#FBF3E6;border:1px solid #EBD8B4;border-radius:12px;padding:14px 16px;break-inside:avoid">
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#A9741F;font-weight:600;margin-bottom:9px">? À décider — appel base (CC)</div>
+      <ul style="margin:0;padding-left:16px;font-family:'Hanken Grotesk',sans-serif;font-size:11px;line-height:1.6;color:#5C4A2A">
+        <li>Matérialisation de la recette virtuelle bowl (§02) — reco donnée, à valider.</li>
+        <li>Normalisation des enums&nbsp;: types Postgres <code class="k" style="background:#fff;border-color:#EBD8B4">create type</code> vs. tables de référence + FK.</li>
+        <li>Dérivation de <code class="k" style="background:#fff;border-color:#EBD8B4">montant_total</code> (stocké vs. calculé à la lecture).</li>
+        <li>Rattachement multi-emplacements futur (marchés supplémentaires) — la liste PLACES est déjà paramétrable.</li>
+        <li>Format réel du CSV caisse (§05)&nbsp;: mapping à caler sur un vrai export avant prod.</li>
+        <li>Indexation pour la saisonnalité (index sur <code class="k" style="background:#fff;border-color:#EBD8B4">occurred_at</code>, <code class="k" style="background:#fff;border-color:#EBD8B4">canal</code>).</li>
+      </ul>
+    </div>
+  </div>
+
+  <div style="margin-top:22px;padding-top:12px;border-top:1px solid #E4DAC6;font-family:'Hanken Grotesk',sans-serif;font-size:10.5px;color:#9A927F;line-height:1.5">Référence maquette&nbsp;: écran <strong style="color:#6B6350">Saisie de vente</strong> (source de vérité du contrat). Les écrans consommateurs listés en §01 lisent ces champs tels quels — aucune transformation cachée côté front.</div>
+
+</x-import>
+</x-dc>
+</body>
+</html>
