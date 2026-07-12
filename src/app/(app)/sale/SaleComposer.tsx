@@ -37,6 +37,7 @@ type BowlEnCours = Record<CategorieComposant, string | "">;
 type BowlPanier = { key: number; produit_id: string; composants: BowlEnCours; libre: boolean };
 
 export function SaleComposer({
+  canalInitial,
   produits,
   composants,
   emplacements,
@@ -44,6 +45,8 @@ export function SaleComposer({
   compositionParProduit,
   jourSemaineAuj,
 }: {
+  /** Préférence perso « canal par défaut » (null = ask, comportement standard). */
+  canalInitial: Canal | null;
   produits: Produit[];
   composants: Composant[];
   emplacements: Emplacement[];
@@ -53,8 +56,10 @@ export function SaleComposer({
   /** 1=lundi … 7=dimanche, calculé serveur en Europe/Paris (badge « AUJ. »). */
   jourSemaineAuj: number;
 }) {
-  const [canal, setCanal] = useState<Canal>("truck");
-  const [modeVente, setModeVente] = useState<ModeVente>("instantane");
+  const [canal, setCanal] = useState<Canal>(canalInitial ?? "truck");
+  const [modeVente, setModeVente] = useState<ModeVente>(
+    (canalInitial ?? "truck") === "traiteur" ? "precommande" : "instantane"
+  );
   const [emplacementId, setEmplacementId] = useState<string>("");
   const [qtyParProduit, setQtyParProduit] = useState<Record<string, number>>({});
   const [poidsParProduit, setPoidsParProduit] = useState<Record<string, string>>({});
@@ -64,7 +69,7 @@ export function SaleComposer({
   const [couverts, setCouverts] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [dueHeure, setDueHeure] = useState("");
-  const [paiement, setPaiement] = useState<Paiement>(PAIEMENT_DEFAUT.truck);
+  const [paiement, setPaiement] = useState<Paiement>(PAIEMENT_DEFAUT[canalInitial ?? "truck"]);
   const [origine, setOrigine] = useState<Origine>("spontane");
   const [error, setError] = useState<string | undefined>();
   const [confirmation, setConfirmation] = useState<string | undefined>();

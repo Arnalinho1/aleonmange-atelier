@@ -85,20 +85,27 @@ export function Sidebar({
         ))}
       </nav>
 
-      {/* Pied avatar */}
+      {/* Pied avatar — cliquable → Mon profil (handoff Profil & Stock §01) */}
       <div className="flex items-center gap-[10px]" style={{ padding: 14, borderTop: "1px solid rgba(255,255,255,.08)" }}>
-        <span
-          className="shrink-0 grid place-items-center rounded-full font-display"
-          style={{ width: 34, height: 34, background: "#3fa8ce", color: "#0e3947", fontWeight: 800, fontSize: 15 }}
+        <Link
+          href="/profil"
+          title="Mon profil"
+          className="flex items-center gap-[10px] rounded-lg transition-colors hover:bg-white/10"
+          style={{ minWidth: 0, flex: 1, padding: "3px 4px", margin: "-3px -4px" }}
         >
-          {(profil?.nom ?? "A").charAt(0).toUpperCase()}
-        </span>
-        <div style={{ minWidth: 0, flex: 1 }}>
-          <p style={{ fontSize: 13.5, fontWeight: 600, color: "#f6f1e7", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-            {profil?.nom ?? "Compte propriétaire"}
-          </p>
-          <p style={{ fontSize: 11, color: "#8fcfe2" }}>{profil?.role ?? "A Léon Mange"}</p>
-        </div>
+          <span
+            className="shrink-0 grid place-items-center rounded-full font-display"
+            style={{ width: 34, height: 34, background: "#3fa8ce", color: "#0e3947", fontWeight: 800, fontSize: 15 }}
+          >
+            {(profil?.nom ?? "A").charAt(0).toUpperCase()}
+          </span>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <p style={{ fontSize: 13.5, fontWeight: 600, color: "#f6f1e7", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {profil?.nom ?? "Compte propriétaire"}
+            </p>
+            <p style={{ fontSize: 11, color: "#8fcfe2" }}>{profil?.role ?? "A Léon Mange"}</p>
+          </div>
+        </Link>
         <form action={signOut}>
           <button
             type="submit"

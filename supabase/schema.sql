@@ -1,4 +1,4 @@
--- Atelier ALM — schéma complet (concaténation des migrations 0001→0009).
+-- Atelier ALM — schéma complet (concaténation des migrations 0001→0012).
 -- À exécuter dans le SQL Editor Supabase du projet DÉDIÉ ALM (base vide).
 -- Généré à partir de supabase/migrations/*.sql
 
@@ -603,3 +603,97 @@ alter table notification
 
 comment on column notification.created_at is
   'Heure d''insertion technique (≠ occurred_at métier) — borne des purges temporelles.';
+
+-- ═══════════════════════════════════════════════════════════════════
+-- 0010_user_preference.sql
+-- ═══════════════════════════════════════════════════════════════════
+-- Atelier ALM — Migration 0010 : préférences PERSONNELLES de travail.
+--
+-- Principe du handoff « Profil & Stock » §00 : une PRÉFÉRENCE PERSO vit dans
+-- une table rattachée à l'utilisateur, RLS owner-only (le canal par défaut
+-- d'Audrey ne change jamais l'écran de Victorien) — par opposition à la
+-- config métier PARTAGÉE (seuil_stock, emplacements…) en lecture équipe.
+-- Même famille que notification_preference.
+
+create table user_preference (
+  profil_id     uuid primary key references profil (id) on delete cascade,
+  canal_defaut  text not null default 'ask'
+                check (canal_defaut in ('ask', 'truck', 'boutique', 'traiteur')),
+  ecran_accueil text not null default 'dashboard'
+                check (ecran_accueil in ('dashboard', 'sale', 'orders')),
+  updated_at    timestamptz not null default now()
+);
+
+comment on table user_preference is
+  'Préférences PERSONNELLES (RLS owner-only) : canal présélectionné à la Saisie, écran ouvert à la connexion. Une source, plusieurs lecteurs (sale, routeur post-login).';
+
+-- RLS OWNER-ONLY : chacun ne lit/écrit QUE les siennes.
+alter table user_preference enable row level security;
+create policy "preference perso lecture" on user_preference
+  for select to authenticated using (auth.uid() = profil_id);
+create policy "preference perso ecriture" on user_preference
+  for all to authenticated using (auth.uid() = profil_id) with check (auth.uid() = profil_id);
+
+grant all on user_preference to authenticated, service_role;
+
+
+-- ═══════════════════════════════════════════════════════════════════
+-- 0011_reappro_ligne.sql
+-- ═══════════════════════════════════════════════════════════════════
+
+-- Atelier ALM — Migration 0011 : liste de réapprovisionnement PERSISTÉE.
+--
+-- Arbitrage navette CC (prime sur le handoff « Profil & Stock » §2.4 qui
+-- recommandait l'éphémère) : la liste d'achat survit d'un jour à l'autre.
+-- UNE ligne vivante par composant (unique), upsertée : on retrouve la
+-- quantité retenue, le fournisseur (texte libre — PAS de référentiel
+-- fournisseurs, §2.3) et l'état « commandé ». La feature S'ARRÊTE au flag
+-- commandé : l'entrée en stock reste l'action Ajuster de l'onglet Niveaux.
+-- Config PARTAGÉE d'établissement (§00) → RLS équipe, pas owner-only.
+
+create table reappro_ligne (
+  id            uuid primary key default gen_random_uuid(),
+  composant_id  uuid not null unique references composant (id) on delete cascade,
+  qte_retenue   numeric(10, 2),               -- override manuel (?? quantité suggérée)
+  fournisseur   text,                         -- texte libre, optionnel
+  commande      boolean not null default false,
+  date_liste    date not null default ((now() at time zone 'Europe/Paris'))::date,
+  created_at    timestamptz not null default now()
+);
+
+comment on table reappro_ligne is
+  'Liste de courses persistée (une ligne vivante par composant) : qté retenue, fournisseur libre, flag commandé. S''arrête au flag — la réception réelle passe par l''ajustement d''inventaire.';
+
+alter table reappro_ligne enable row level security;
+create policy "equipe lit reappro_ligne" on reappro_ligne
+  for select to authenticated using (true);
+create policy "equipe ecrit reappro_ligne" on reappro_ligne
+  for all to authenticated using (true) with check (true);
+
+grant all on reappro_ligne to authenticated, service_role;
+
+
+-- ═══════════════════════════════════════════════════════════════════
+-- 0012_deduction_stock.sql
+-- ═══════════════════════════════════════════════════════════════════
+
+-- Atelier ALM — Migration 0012 : déduction de stock à la vente (B8).
+--
+-- CONSOMMÉ = mouvements réels « sortie » écrits à la REMISE (vente instantanée
+-- ou passage à remis). RÉSERVÉ = calcul dynamique sur les commandes ouvertes
+-- (aucun mouvement — toujours juste sans mécanique de dé-réservation).
+--
+-- 1) Le dépliage d'un bowl porte ses grammes FIGÉS à l'encaissement :
+--    la fiche peut changer ensuite, l'historique reste vrai.
+alter table vente_ligne_composant
+  add column quantite_g numeric(10, 2);
+comment on column vente_ligne_composant.quantite_g is
+  'Grammes TOTAUX de la ligne pour ce composant (qte × grammes fiche), figés à l''encaissement. NULL sur l''historique antérieur à B8 (fallback fiche).';
+
+-- 2) Conversion grammes → pièces pour les composants suivis à la pièce
+--    (œuf ≈ 50 g…). Sans poids renseigné : pas de sortie automatique,
+--    badge « poids à renseigner » sur l'écran Stocks.
+alter table composant
+  add column poids_piece_g numeric(10, 2);
+comment on column composant.poids_piece_g is
+  'Poids d''UNE pièce en grammes (composants unite=piece) — requis pour convertir les sorties recettes (g) en pièces.';

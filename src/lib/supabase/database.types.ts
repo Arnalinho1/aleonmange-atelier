@@ -36,6 +36,8 @@ export type Composant = {
   cout_matiere_kg: number | null;
   /** Unité de STOCK (kg | piece | l) — les coûts restent en €/kg (recettes en g). */
   unite: string;
+  /** Poids d'UNE pièce en g (unite=piece) — conversion des sorties recettes ; NULL = non convertible (0012). */
+  poids_piece_g: number | null;
   actif: boolean;
   created_at: string;
 };
@@ -150,6 +152,25 @@ export type ReleveHaccp = {
   created_at: string;
 };
 
+/** Préférences PERSONNELLES (RLS owner-only) — une source, plusieurs lecteurs. */
+export type UserPreference = {
+  profil_id: string;
+  canal_defaut: "ask" | Canal;
+  ecran_accueil: "dashboard" | "sale" | "orders";
+  updated_at: string;
+};
+
+/** Liste de courses persistée — une ligne vivante par composant (0011). */
+export type ReapproLigne = {
+  id: string;
+  composant_id: string;
+  qte_retenue: number | null;
+  fournisseur: string | null;
+  commande: boolean;
+  date_liste: string;
+  created_at: string;
+};
+
 export type NotificationPreference = {
   id: string;
   profil_id: string;
@@ -229,6 +250,8 @@ export type VenteLigneComposant = {
   ligne_id: string;
   composant_id: string;
   categorie: CategorieComposant;
+  /** Grammes TOTAUX de la ligne pour ce composant, figés à l'encaissement (0012). NULL avant B8. */
+  quantite_g: number | null;
 };
 
 export type Insight = {
@@ -290,8 +313,10 @@ export type Database = {
       lot: TableDef<Lot, MakeInsert<Lot, "composant_id">>;
       mouvement_stock: TableDef<MouvementStock, MakeInsert<MouvementStock, "composant_id" | "type" | "quantite">>;
       seuil_stock: TableDef<SeuilStock, MakeInsert<SeuilStock, "composant_id">>;
+      reappro_ligne: TableDef<ReapproLigne, MakeInsert<ReapproLigne, "composant_id">>;
       releve_haccp: TableDef<ReleveHaccp, MakeInsert<ReleveHaccp, "type">>;
       notification_preference: TableDef<NotificationPreference, MakeInsert<NotificationPreference, "profil_id" | "categorie">>;
+      user_preference: TableDef<UserPreference, MakeInsert<UserPreference, "profil_id">>;
       social_post: TableDef<SocialPost, MakeInsert<SocialPost, "reseau">>;
       import_mapping: TableDef<ImportMapping, MakeInsert<ImportMapping, "nom">>;
       import_batch: TableDef<ImportBatch, MakeInsert<ImportBatch, never>>;

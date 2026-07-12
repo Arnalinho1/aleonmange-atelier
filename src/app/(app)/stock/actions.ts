@@ -90,7 +90,12 @@ export async function ajusterStock(
   return { ok: true };
 }
 
-/** Définit / met à jour le seuil bas d'un composant (config référentiel). */
+/**
+ * Définit / met à jour le seuil bas d'un composant (config PARTAGÉE).
+ * Vide = suppression de l'override → retour au défaut par catégorie
+ * (seuil effectif, src/lib/stock.ts). Pour un composant à la pièce, le même
+ * formulaire porte le poids d'une pièce (conversion des sorties — B8).
+ */
 export async function definirSeuil(
   _prev: StockFormState,
   formData: FormData
@@ -98,11 +103,59 @@ export async function definirSeuil(
   const composantId = String(formData.get("composant_id") ?? "");
   const raw = String(formData.get("seuil") ?? "").replace(",", ".").trim();
   if (!composantId) return { error: "Composant introuvable." };
-  const seuil = raw ? Number(raw) : null;
-  if (seuil !== null && (!Number.isFinite(seuil) || seuil < 0)) return { error: "Seuil invalide." };
 
   const supabase = await createClient();
-  const { error } = await supabase.from("seuil_stock").upsert({ composant_id: composantId, seuil_bas: seuil });
+  if (!raw) {
+    const { error } = await supabase.from("seuil_stock").delete().eq("composant_id", composantId);
+    if (error) return { error: error.message };
+  } else {
+    const seuil = Number(raw);
+    if (!Number.isFinite(seuil) || seuil < 0) return { error: "Seuil invalide." };
+    const { error } = await supabase.from("seuil_stock").upsert({ composant_id: composantId, seuil_bas: seuil });
+    if (error) return { error: error.message };
+  }
+
+  // Poids d'une pièce (présent uniquement pour les composants unite=piece).
+  if (formData.has("poids_piece")) {
+    const rawPoids = String(formData.get("poids_piece") ?? "").replace(",", ".").trim();
+    const poids = rawPoids ? Number(rawPoids) : null;
+    if (poids !== null && (!Number.isFinite(poids) || poids <= 0)) return { error: "Poids par pièce invalide." };
+    const { error } = await supabase.from("composant").update({ poids_piece_g: poids }).eq("id", composantId);
+    if (error) return { error: error.message };
+  }
+
+  revalidatePath("/stock");
+  return { ok: true };
+}
+
+/** « ↺ défaut » : efface l'override — le seuil redevient le défaut hérité. */
+export async function retirerSeuil(composantId: string): Promise<StockFormState> {
+  if (!composantId) return { error: "Composant introuvable." };
+  const supabase = await createClient();
+  const { error } = await supabase.from("seuil_stock").delete().eq("composant_id", composantId);
+  if (error) return { error: error.message };
+
+  revalidatePath("/stock");
+  return { ok: true };
+}
+
+/**
+ * Liste d'achat : upsert de LA ligne vivante du composant (unique) —
+ * qté retenue (override manuel), fournisseur libre, flag commandé.
+ * La feature s'arrête là : l'entrée en stock reste l'Ajuster de Niveaux.
+ */
+export async function upsertReappro(
+  composantId: string,
+  patch: { qte_retenue?: number | null; fournisseur?: string | null; commande?: boolean }
+): Promise<StockFormState> {
+  if (!composantId) return { error: "Composant introuvable." };
+  if (patch.qte_retenue != null && (!Number.isFinite(patch.qte_retenue) || patch.qte_retenue < 0))
+    return { error: "Quantité invalide." };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("reappro_ligne")
+    .upsert({ composant_id: composantId, ...patch }, { onConflict: "composant_id" });
   if (error) return { error: error.message };
 
   revalidatePath("/stock");
