@@ -108,6 +108,14 @@ export type Vente = {
   created_at: string;
 };
 
+/** Singleton (id=true) — charges par portion pour la marge nette (Finances). */
+export type ParametreRentabilite = {
+  id: boolean;
+  mo_par_portion: number | null;
+  transport_par_portion: number | null;
+  updated_at: string;
+};
+
 /** Transition horodatée du cycle de production — source des cadences (Productivité). */
 export type FulfillmentEvent = {
   id: string;
@@ -195,6 +203,7 @@ export type Database = {
       vente_ligne: TableDef<VenteLigne, MakeInsert<VenteLigne, "vente_id" | "type" | "mode" | "libelle" | "montant">>;
       vente_ligne_composant: TableDef<VenteLigneComposant, MakeInsert<VenteLigneComposant, "ligne_id" | "composant_id" | "categorie">>;
       fulfillment_event: TableDef<FulfillmentEvent, MakeInsert<FulfillmentEvent, "vente_id" | "de" | "vers">>;
+      parametre_rentabilite: TableDef<ParametreRentabilite, MakeInsert<ParametreRentabilite, never>>;
       insight: TableDef<Insight, MakeInsert<Insight, "urgence" | "constat">>;
       notification: TableDef<Notification, MakeInsert<Notification, "categorie" | "titre">>;
     };

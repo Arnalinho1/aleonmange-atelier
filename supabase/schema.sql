@@ -1,4 +1,4 @@
--- Atelier ALM — schéma complet (concaténation des migrations 0001→0007).
+-- Atelier ALM — schéma complet (concaténation des migrations 0001→0008).
 -- À exécuter dans le SQL Editor Supabase du projet DÉDIÉ ALM (base vide).
 -- Généré à partir de supabase/migrations/*.sql
 
@@ -551,3 +551,28 @@ create policy "equipe ecrit fulfillment_event" on fulfillment_event for all to a
 
 -- Les default privileges de 0006 couvrent la nouvelle table ; explicite par sûreté.
 grant all on fulfillment_event to authenticated, service_role;
+
+-- ═══════════════════════════════════════════════════════════════════
+-- 0008_parametre_rentabilite.sql
+-- ═══════════════════════════════════════════════════════════════════
+-- Atelier ALM — Paramètres de rentabilité (Finances, MOCKUP §3.11).
+-- La marge NETTE = marge brute matière − charges par portion (main-d'œuvre,
+-- transport). Table singleton (une seule ligne, id booléen contraint) :
+-- la structure des tables est à l'appréciation de CC (Contrat §06).
+
+create table parametre_rentabilite (
+  id                    boolean primary key default true check (id),
+  mo_par_portion        numeric(6, 2),
+  transport_par_portion numeric(6, 2),
+  updated_at            timestamptz not null default now()
+);
+
+comment on table parametre_rentabilite is
+  'Singleton — charges par portion pour la marge nette (Finances). Libellés distincts : brute matière ≠ nette.';
+
+-- RLS dès la création (règle non négociable).
+alter table parametre_rentabilite enable row level security;
+create policy "equipe lit parametre_rentabilite" on parametre_rentabilite for select to authenticated using (true);
+create policy "equipe ecrit parametre_rentabilite" on parametre_rentabilite for all to authenticated using (true) with check (true);
+
+grant all on parametre_rentabilite to authenticated, service_role;
