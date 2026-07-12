@@ -7,31 +7,50 @@ import { CATEGORIE_COLOR, CATEGORIE_LABEL } from "@/lib/nav";
 import { Badge, Dot } from "@/components/ui/Badge";
 import { Card, SectionHeader } from "@/components/ui/Card";
 import { ChanFilter, type ChanFilterValue } from "@/components/ui/ChanFilter";
-import type { Canal, Composant, Emplacement, Lot } from "@/lib/supabase/database.types";
+import {
+  agregerPlanProduits,
+  besoinsMatieres,
+  fmtGrammes,
+  fmtPortions,
+  portionGParRecette,
+} from "@/lib/plan";
+import type { Canal, Composant, Emplacement, Lot, Produit, Recette, RecetteComposant } from "@/lib/supabase/database.types";
 import { enregistrerReception } from "../stock/actions";
 
-/** Portion vendue dépliée par composant (7 derniers jours, côté serveur). */
-export type PortionComposant = {
-  composant_id: string;
+/** Ligne vendue (7 j, remises) enrichie du canal/emplacement pour le prisme. */
+export type LigneVendue = {
+  ligne_id: string;
+  produit_id: string | null;
+  type: string;
+  recette_id: string | null;
+  qte: number | null;
+  poids_g: number | null;
   canal: Canal;
   emplacement_id: string | null;
-  portions: number;
 };
 
 /**
- * Production — prévision INDICATIVE (moyenne 7 j × buffer +10 %, badge
- * « aide à la décision ») mise à l'échelle par le ChanFilter-prisme, plan du
- * jour (lots enregistrés vs suggéré) et enregistrement de lots réel
- * (lot + mouvement d'entrée en stock).
+ * Production — le plan est PAR PRODUIT FABRIQUÉ (correctif métier 12/07/2026,
+ * source unique lib/plan.ts). Les besoins matières premières sont DÉRIVÉS du
+ * plan (plan × fiches) — jamais « à produire ». L'enregistrement de lot reste
+ * au niveau matière (modèle lots/produits finis : arbitrage en attente).
  */
 export function ProdBoard({
   composants,
-  portions,
+  produits,
+  recettes,
+  lignesRecettes,
+  lignesVendues,
+  composantsLibres,
   lotsDuJour,
   emplacements,
 }: {
   composants: Composant[];
-  portions: PortionComposant[];
+  produits: Produit[];
+  recettes: Recette[];
+  lignesRecettes: RecetteComposant[];
+  lignesVendues: LigneVendue[];
+  composantsLibres: { ligne_id: string; composant_id: string }[];
   lotsDuJour: Lot[];
   emplacements: Emplacement[];
 }) {
@@ -41,30 +60,77 @@ export function ProdBoard({
   const [error, setError] = useState<string | undefined>();
   const [pending, startTransition] = useTransition();
 
+  const prodParId = useMemo(() => new Map(produits.map((p) => [p.id, p])), [produits]);
   const compParId = useMemo(() => new Map(composants.map((c) => [c.id, c])), [composants]);
-
-  // Prévision : portions vendues (7 j, prisme canal/emplacement) → moyenne/j → +10 %.
-  const prevision = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const p of portions) {
-      if (filtre.canal !== "all" && p.canal !== filtre.canal) continue;
-      if (filtre.canal === "truck" && filtre.emplacementId !== "all" && p.emplacement_id !== filtre.emplacementId) continue;
-      map.set(p.composant_id, (map.get(p.composant_id) ?? 0) + p.portions);
+  const recetteParId = useMemo(() => new Map(recettes.map((r) => [r.id, r])), [recettes]);
+  const lignesParRecette = useMemo(() => {
+    const map = new Map<string, RecetteComposant[]>();
+    for (const l of lignesRecettes) {
+      const arr = map.get(l.recette_id) ?? [];
+      arr.push(l);
+      map.set(l.recette_id, arr);
     }
-    return [...map.entries()]
-      .map(([id, total]) => {
-        const moyenne = total / 7;
-        return { composant: compParId.get(id), total, moyenne, suggere: Math.ceil((moyenne * 1.1) * 10) / 10 };
-      })
-      .filter((x) => x.composant)
-      .sort((a, b) => b.total - a.total);
-  }, [portions, filtre, compParId]);
-
-  const lotsParComposant = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const lot of lotsDuJour) map.set(lot.composant_id, (map.get(lot.composant_id) ?? 0) + Number(lot.quantite ?? 0));
     return map;
-  }, [lotsDuJour]);
+  }, [lignesRecettes]);
+  const portionG = useMemo(() => portionGParRecette(recettes, lignesRecettes), [recettes, lignesRecettes]);
+
+  // ── Prisme : le ChanFilter recadre les lignes sources, puis UN SEUL calcul.
+  const lignesFiltrees = useMemo(
+    () =>
+      lignesVendues.filter(
+        (l) =>
+          (filtre.canal === "all" || l.canal === filtre.canal) &&
+          (filtre.canal !== "truck" || filtre.emplacementId === "all" || l.emplacement_id === filtre.emplacementId)
+      ),
+    [lignesVendues, filtre]
+  );
+  const plan = useMemo(
+    () => agregerPlanProduits(lignesFiltrees, prodParId, portionG),
+    [lignesFiltrees, prodParId, portionG]
+  );
+
+  // Prévision demain : moyenne 7 j × buffer +10 % (règle INDICATIVE inchangée).
+  // Arrondi du suggéré : ENTIER SUPÉRIEUR (décision du 12/07/2026 — politique
+  // d'affichage rattachée au point ouvert #2, révisable avec les chefs).
+  const prevision = useMemo(
+    () =>
+      plan.produits.map((p) => ({
+        ...p,
+        moyenne: p.portions / 7,
+        suggere: Math.ceil((p.portions / 7) * 1.1),
+      })),
+    [plan.produits]
+  );
+
+  // Besoins matières = plan (suggéré) × fiches — dérivation, pas de production.
+  const besoins = useMemo(
+    () =>
+      besoinsMatieres(
+        prevision.map((p) => ({ recette_id: p.recette_id, portions: p.suggere })),
+        recetteParId,
+        lignesParRecette,
+        compParId
+      ),
+    [prevision, recetteParId, lignesParRecette, compParId]
+  );
+
+  // Composants réels des bowls LIBRES (portions, sans grammages — dépliage réel).
+  const libresDetail = useMemo(() => {
+    const lignesLibres = new Map(
+      lignesFiltrees.filter((l) => l.type === "bowl" && l.recette_id == null).map((l) => [l.ligne_id, l.qte ?? 1])
+    );
+    const map = new Map<string, { composant: Composant; portions: number }>();
+    for (const row of composantsLibres) {
+      const portions = lignesLibres.get(row.ligne_id);
+      if (!portions) continue;
+      const composant = compParId.get(row.composant_id);
+      if (!composant) continue;
+      const cur = map.get(composant.id) ?? { composant, portions: 0 };
+      cur.portions += portions;
+      map.set(composant.id, cur);
+    }
+    return [...map.values()].sort((a, b) => b.portions - a.portions);
+  }, [lignesFiltrees, composantsLibres, compParId]);
 
   function onSubmit(formData: FormData) {
     setError(undefined);
@@ -77,6 +143,8 @@ export function ProdBoard({
       }
     });
   }
+
+  const maxBesoin = Math.max(1, ...besoins.map((b) => b.grammes));
 
   return (
     <>
@@ -93,86 +161,151 @@ export function ProdBoard({
 
       <ChanFilter emplacements={emplacements} value={filtre} onChange={setFiltre} note="Prisme : recadre la prévision sur le canal/emplacement." />
 
-      {/* Prévision — demain (carte foncée) */}
+      {/* Prévision — demain : PAR PRODUIT FABRIQUÉ */}
       <div style={{ background: "#0e3947", borderRadius: 16, padding: 18, marginBottom: 16 }}>
         <div className="flex items-center gap-2 flex-wrap" style={{ marginBottom: 4 }}>
           <p className="font-display" style={{ fontSize: 16, fontWeight: 700, color: "#f6f1e7" }}>Prévision — demain</p>
           <Badge tone="demo">Aide à la décision</Badge>
         </div>
         <p className="font-mono" style={{ fontSize: 10.5, color: "#8fcfe2", marginBottom: 14 }}>
-          moyenne des 7 derniers jours (ventes remises dépliées par composant) + buffer 10 % — règle INDICATIVE, à valider
+          par PRODUIT FABRIQUÉ · moyenne 7 j des ventes remises + buffer 10 % — règle INDICATIVE, à valider · les revendus tels quels n&apos;apparaissent jamais
         </p>
-        {prevision.length === 0 ? (
+        {prevision.length === 0 && plan.libresPortions === 0 ? (
           <p style={{ fontSize: 13, color: "#bfdce7" }}>
-            Pas encore d&apos;historique pour prévoir — saisissez le plan à la main via « Enregistrer un lot ».
+            Pas encore d&apos;historique pour prévoir sur ce filtre — saisissez vos préparations via « Enregistrer un lot ».
           </p>
         ) : (
           <>
             <div
               className="font-mono uppercase"
-              style={{ display: "grid", gridTemplateColumns: "1.5fr .8fr .8fr .7fr", gap: 8, fontSize: 9.5, letterSpacing: ".08em", color: "#5c8593", paddingBottom: 7, borderBottom: "1px solid rgba(255,255,255,.1)" }}
+              style={{ display: "grid", gridTemplateColumns: "1.6fr .8fr .7fr .7fr", gap: 8, fontSize: 9.5, letterSpacing: ".08em", color: "#5c8593", paddingBottom: 7, borderBottom: "1px solid rgba(255,255,255,.1)" }}
             >
-              <span>Composant</span>
+              <span>Produit fabriqué</span>
               <span style={{ textAlign: "right" }}>Vendu (7 j)</span>
               <span style={{ textAlign: "right" }}>Moyenne / j</span>
               <span style={{ textAlign: "right" }}>Suggéré</span>
             </div>
             {prevision.map((p) => (
               <div
-                key={p.composant!.id}
-                style={{ display: "grid", gridTemplateColumns: "1.5fr .8fr .8fr .7fr", gap: 8, padding: "8px 0", alignItems: "center", borderBottom: "1px solid rgba(255,255,255,.08)" }}
+                key={p.produit_id}
+                style={{ display: "grid", gridTemplateColumns: "1.6fr .8fr .7fr .7fr", gap: 8, padding: "8px 0", alignItems: "center", borderBottom: "1px solid rgba(255,255,255,.08)" }}
               >
-                <span className="flex items-center gap-2" style={{ fontSize: 13, fontWeight: 600, color: "#f6f1e7" }}>
-                  <Dot color={CATEGORIE_COLOR[p.composant!.categorie]} size={7} />
-                  {p.composant!.nom}
-                  <span className="font-mono" style={{ fontSize: 9.5, color: "#5c8593" }}>{CATEGORIE_LABEL[p.composant!.categorie]}</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: "#f6f1e7" }}>
+                  {p.nom}
+                  {p.kg != null && (
+                    <span className="font-mono" style={{ marginLeft: 8, fontSize: 9.5, color: "#5c8593" }}>
+                      ≈ {p.kg.toFixed(1).replace(".", ",")} kg vendus
+                    </span>
+                  )}
                 </span>
-                <span className="font-mono" style={{ fontSize: 12, color: "#bfdce7", textAlign: "right" }}>{p.total} portion{p.total > 1 ? "s" : ""}</span>
+                <span className="font-mono" style={{ fontSize: 12, color: "#bfdce7", textAlign: "right" }}>
+                  {fmtPortions(p.portions)} portion{p.portions > 1 ? "s" : ""}
+                </span>
                 <span className="font-mono" style={{ fontSize: 12, color: "#bfdce7", textAlign: "right" }}>{p.moyenne.toFixed(1).replace(".", ",")}</span>
-                <span className="font-display" style={{ fontSize: 19, fontWeight: 800, color: "#8fcfe2", textAlign: "right" }}>{String(p.suggere).replace(".", ",")}</span>
+                <span style={{ textAlign: "right" }}>
+                  <span className="font-display" style={{ fontSize: 19, fontWeight: 800, color: "#8fcfe2" }}>×{fmtPortions(p.suggere)}</span>
+                  {p.kg != null && portionG.get(p.recette_id) != null && (
+                    <span className="font-mono" style={{ display: "block", fontSize: 9.5, color: "#5c8593" }}>
+                      ≈ {((p.suggere * (portionG.get(p.recette_id) ?? 0)) / 1000).toFixed(1).replace(".", ",")} kg à peser
+                    </span>
+                  )}
+                </span>
               </div>
             ))}
+            {plan.libresPortions > 0 && (
+              <p className="font-mono" style={{ fontSize: 10.5, color: "#8fcfe2", marginTop: 10 }}>
+                + {plan.libresPortions} bowl{plan.libresPortions > 1 ? "s" : ""} libre{plan.libresPortions > 1 ? "s" : ""} (7 j) — composition variable, voir besoins matières.
+              </p>
+            )}
+            {plan.kgNonConvertis.length > 0 && (
+              <p className="font-mono" style={{ fontSize: 10, color: "#5c8593", marginTop: 4 }}>
+                Non convertis en portions (fiche sans grammages) : {plan.kgNonConvertis.map((k) => `${k.nom} ${k.kg.toFixed(1).replace(".", ",")} kg`).join(" · ")}
+              </p>
+            )}
           </>
         )}
       </div>
 
-      {/* Plan du jour + lots */}
+      {/* Plan du jour + besoins dérivés + lots */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(320px,1fr))", gap: 16, alignItems: "start" }}>
         <Card style={{ overflow: "hidden" }}>
-          <SectionHeader titre="Plan de production du jour" sous="Lots enregistrés vs prévision suggérée." />
+          <SectionHeader
+            titre="Plan de production du jour"
+            sous="Photo du suggéré par produit. Le suivi « fait / à faire » reviendra avec l'arbitrage lots ↔ produits finis."
+          />
           <div style={{ padding: 16 }}>
-            {prevision.length === 0 && lotsDuJour.length === 0 ? (
-              <p style={{ fontSize: 12.5, color: "#6b7469" }}>Rien à suivre aujourd&apos;hui.</p>
+            {prevision.length === 0 ? (
+              <p style={{ fontSize: 12.5, color: "#6b7469" }}>Rien à planifier sur ce filtre.</p>
             ) : (
-              (prevision.length > 0 ? prevision : [...lotsParComposant.keys()].map((id) => ({ composant: compParId.get(id), suggere: 0, total: 0, moyenne: 0 })))
-                .filter((p) => p.composant)
-                .map((p) => {
-                  const fait = lotsParComposant.get(p.composant!.id) ?? 0;
-                  const cible = Math.max(p.suggere, fait);
-                  return (
-                    <div key={p.composant!.id} style={{ padding: "6px 0" }}>
-                      <div className="flex items-center gap-2" style={{ marginBottom: 3 }}>
-                        <Dot color={CATEGORIE_COLOR[p.composant!.categorie]} size={7} />
-                        <span style={{ flex: 1, fontSize: 12.5, fontWeight: 600, color: "#0e3947" }}>{p.composant!.nom}</span>
-                        <span className="font-mono" style={{ fontSize: 11.5, color: "#6b7469" }}>
-                          {String(fait).replace(".", ",")} / {p.suggere > 0 ? String(p.suggere).replace(".", ",") : "—"}
-                        </span>
-                      </div>
-                      <div style={{ height: 7, borderRadius: 100, background: "#e4dac6" }}>
-                        <div style={{ width: `${cible > 0 ? Math.min(100, (fait / cible) * 100) : 0}%`, height: "100%", borderRadius: 100, background: CATEGORIE_COLOR[p.composant!.categorie] }} />
-                      </div>
-                    </div>
-                  );
-                })
+              prevision.map((p) => (
+                <div key={p.produit_id} className="flex items-center gap-2" style={{ padding: "6px 0", borderBottom: "1px solid #efe7d6" }}>
+                  <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: "#0e3947" }}>{p.nom}</span>
+                  {p.kg != null && portionG.get(p.recette_id) != null && (
+                    <span className="font-mono" style={{ fontSize: 10, color: "#a79b84" }}>
+                      ≈ {((p.suggere * (portionG.get(p.recette_id) ?? 0)) / 1000).toFixed(1).replace(".", ",")} kg
+                    </span>
+                  )}
+                  <span className="font-display" style={{ fontSize: 16, fontWeight: 800, color: "#1493be" }}>×{fmtPortions(p.suggere)}</span>
+                </div>
+              ))
             )}
           </div>
         </Card>
 
         <Card style={{ overflow: "hidden" }}>
-          <SectionHeader titre="Lots enregistrés aujourd'hui" compteur={`${lotsDuJour.length} lot${lotsDuJour.length > 1 ? "s" : ""}`} />
+          <SectionHeader
+            titre="Besoins matières premières"
+            sous="Dérivés du plan (plan × fiches techniques) — ce n'est pas la production."
+            action={<Badge tone="calcule">Dérivé</Badge>}
+          />
+          <div style={{ padding: 16 }}>
+            {besoins.length === 0 && libresDetail.length === 0 ? (
+              <p style={{ fontSize: 12.5, color: "#6b7469" }}>Aucun besoin dérivable sur ce filtre.</p>
+            ) : (
+              <>
+                {besoins.map((b) => (
+                  <div key={b.composant.id} style={{ padding: "5px 0" }}>
+                    <div className="flex items-center gap-2" style={{ marginBottom: 3 }}>
+                      <Dot color={CATEGORIE_COLOR[b.composant.categorie]} size={7} />
+                      <span style={{ flex: 1, fontSize: 12.5, fontWeight: 600, color: "#0e3947" }}>{b.composant.nom}</span>
+                      <span className="font-mono" style={{ fontSize: 10, color: "#a79b84" }}>{CATEGORIE_LABEL[b.composant.categorie]}</span>
+                      <span className="font-mono" style={{ fontSize: 12, fontWeight: 600, color: "#0e3947" }}>{fmtGrammes(b.grammes)}</span>
+                    </div>
+                    <div style={{ height: 6, borderRadius: 100, background: "#e4dac6" }}>
+                      <div style={{ width: `${(b.grammes / maxBesoin) * 100}%`, height: "100%", borderRadius: 100, background: CATEGORIE_COLOR[b.composant.categorie] }} />
+                    </div>
+                  </div>
+                ))}
+                {plan.libresPortions > 0 && (
+                  <div style={{ marginTop: 12, background: "#f1ead9", borderRadius: 10, padding: "9px 12px" }}>
+                    <p className="font-mono uppercase" style={{ fontSize: 9, letterSpacing: ".08em", color: "#8a7f6a", marginBottom: 5 }}>
+                      + {plan.libresPortions} bowl{plan.libresPortions > 1 ? "s" : ""} libre{plan.libresPortions > 1 ? "s" : ""} — composition variable
+                    </p>
+                    <div className="flex gap-2 flex-wrap">
+                      {libresDetail.map((x) => (
+                        <span key={x.composant.id} className="flex items-center gap-1 font-mono" style={{ fontSize: 10.5, color: "#6b7469", background: "#fbf8f1", border: "1px solid #e4dac6", borderRadius: 100, padding: "2px 8px" }}>
+                          <Dot color={CATEGORIE_COLOR[x.composant.categorie]} size={6} />
+                          {x.composant.nom} · {x.portions} portion{x.portions > 1 ? "s" : ""}
+                        </span>
+                      ))}
+                    </div>
+                    <p className="font-mono" style={{ fontSize: 9, color: "#a79b84", marginTop: 5 }}>
+                      comptés en portions — le dépliage réel ne porte pas de grammages
+                    </p>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </Card>
+
+        <Card style={{ overflow: "hidden" }}>
+          <SectionHeader titre="Préparations de matières (lots du jour)" compteur={`${lotsDuJour.length} lot${lotsDuJour.length > 1 ? "s" : ""}`} />
           <div style={{ padding: 16 }}>
             {lotsDuJour.length === 0 ? (
-              <p style={{ fontSize: 12.5, color: "#6b7469" }}>Aucun lot aujourd&apos;hui — « Enregistrer un lot » crée le lot et son entrée en stock.</p>
+              <p style={{ fontSize: 12.5, color: "#6b7469" }}>
+                Aucun lot aujourd&apos;hui — « Enregistrer un lot » crée le lot et son entrée en stock (niveau matière ; le rattachement aux produits finis est en attente d&apos;arbitrage).
+              </p>
             ) : (
               lotsDuJour.map((lot) => {
                 const comp = compParId.get(lot.composant_id);
@@ -184,7 +317,7 @@ export function ProdBoard({
                       <span className="font-mono" style={{ fontSize: 11, color: "#1493be", fontWeight: 600 }}>{lot.numero ?? "sans n°"}</span>
                     </div>
                     <p className="font-mono" style={{ fontSize: 10.5, color: "#8a7f6a", marginTop: 3 }}>
-                      Qté {lot.quantite != null ? `${String(lot.quantite).replace(".", ",")} kg` : "—"}
+                      Qté {lot.quantite != null ? `${String(lot.quantite).replace(".", ",")}` : "—"}
                       {lot.dlc ? ` · DLC ${fmtDate(lot.dlc)}` : ""}
                     </p>
                   </div>
@@ -207,7 +340,7 @@ export function ProdBoard({
             </div>
             <form action={onSubmit} className="flex flex-col gap-4" style={{ padding: 20 }}>
               <label className="flex flex-col gap-1.5">
-                <Libelle>Composant produit</Libelle>
+                <Libelle>Composant préparé</Libelle>
                 <select name="composant_id" required className="outline-none" style={champ}>
                   <option value="">— choisir —</option>
                   {composants.map((c) => (
@@ -216,7 +349,7 @@ export function ProdBoard({
                 </select>
               </label>
               <label className="flex flex-col gap-1.5">
-                <Libelle>Quantité produite (kg)</Libelle>
+                <Libelle>Quantité produite (kg / pièces / L selon le composant)</Libelle>
                 <input name="quantite" required inputMode="decimal" placeholder="ex : 4,5" className="outline-none font-display" style={{ ...champ, fontSize: 22, fontWeight: 700 }} />
               </label>
               <label className="flex flex-col gap-1.5">
@@ -228,7 +361,7 @@ export function ProdBoard({
                 <input name="dlc" type="date" className="outline-none" style={champ} />
               </label>
               <p style={{ fontSize: 12, color: "#9a927f", background: "#f1ead9", borderRadius: 8, padding: "8px 10px" }}>
-                Crée le lot ET son entrée en stock (mouvement « réception » de production).
+                Crée le lot ET son entrée en stock, au niveau MATIÈRE. Les lots de produits finis attendent l&apos;arbitrage du modèle de stock.
               </p>
               {error && (
                 <p style={{ fontSize: 12.5, color: "#c0442e", background: "rgba(192,68,46,.1)", borderRadius: 8, padding: "8px 10px" }}>{error}</p>
