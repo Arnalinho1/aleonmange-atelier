@@ -3,6 +3,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { SCREEN_META } from "@/lib/nav";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { enLots } from "@/lib/supabase/lots";
 import type { Composant, Emplacement, Lot, Vente } from "@/lib/supabase/database.types";
 import { Factory } from "lucide-react";
 import { ProdBoard, type PortionComposant } from "./ProdBoard";
@@ -39,19 +40,15 @@ export default async function ProdPage() {
     const remises = (v.data ?? []) as Omit<Vente, "fulfillment" | "created_at">[];
     if (remises.length > 0) {
       const venteParId = new Map(remises.map((x) => [x.id, x]));
-      const { data: l } = await supabase
-        .from("vente_ligne")
-        .select("id, vente_id, qte")
-        .in("vente_id", remises.map((x) => x.id));
-      const ligneParId = new Map((l ?? []).map((x) => [x.id, x]));
-      const { data: vlc } = (l ?? []).length
-        ? await supabase
-            .from("vente_ligne_composant")
-            .select("ligne_id, composant_id")
-            .in("ligne_id", (l ?? []).map((x) => x.id))
-        : { data: [] };
+      const l = await enLots(remises.map((x) => x.id), (lot) =>
+        supabase.from("vente_ligne").select("id, vente_id, qte").in("vente_id", lot)
+      );
+      const ligneParId = new Map(l.map((x) => [x.id, x]));
+      const vlc = await enLots(l.map((x) => x.id), (lot) =>
+        supabase.from("vente_ligne_composant").select("ligne_id, composant_id").in("ligne_id", lot)
+      );
 
-      for (const row of (vlc ?? []) as { ligne_id: string; composant_id: string }[]) {
+      for (const row of vlc as { ligne_id: string; composant_id: string }[]) {
         const ligne = ligneParId.get(row.ligne_id);
         const vente = ligne ? venteParId.get(ligne.vente_id) : undefined;
         if (!ligne || !vente) continue;

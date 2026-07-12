@@ -3,6 +3,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { SCREEN_META } from "@/lib/nav";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { enLots } from "@/lib/supabase/lots";
 import type { FulfillmentEvent, Vente, VenteLigne } from "@/lib/supabase/database.types";
 import { Gauge } from "lucide-react";
 import { ProductivityBoard, type CycleCommande } from "./ProductivityBoard";
@@ -32,12 +33,12 @@ export default async function ProductivityPage() {
     if (events.length > 0) {
       const venteIds = [...new Set(events.map((e) => e.vente_id))];
       const [v, l] = await Promise.all([
-        supabase.from("vente").select("id, canal, occurred_at").in("id", venteIds),
-        supabase.from("vente_ligne").select("vente_id, qte").in("vente_id", venteIds),
+        enLots(venteIds, (lot) => supabase.from("vente").select("id, canal, occurred_at").in("id", lot)),
+        enLots(venteIds, (lot) => supabase.from("vente_ligne").select("vente_id, qte").in("vente_id", lot)),
       ]);
-      const ventes = new Map(((v.data ?? []) as Pick<Vente, "id" | "canal" | "occurred_at">[]).map((x) => [x.id, x]));
+      const ventes = new Map((v as Pick<Vente, "id" | "canal" | "occurred_at">[]).map((x) => [x.id, x]));
       const portions = new Map<string, number>();
-      for (const li of (l.data ?? []) as Pick<VenteLigne, "vente_id" | "qte">[]) {
+      for (const li of l as Pick<VenteLigne, "vente_id" | "qte">[]) {
         portions.set(li.vente_id, (portions.get(li.vente_id) ?? 0) + (li.qte ?? 1));
       }
 

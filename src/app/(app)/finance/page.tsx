@@ -3,6 +3,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { SCREEN_META } from "@/lib/nav";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { enLots } from "@/lib/supabase/lots";
 import { coutPortionProduit } from "@/lib/calculs";
 import type {
   Composant,
@@ -57,11 +58,9 @@ export default async function FinancePage() {
     }));
 
     if (remises.length > 0) {
-      const { data: l } = await supabase
-        .from("vente_ligne")
-        .select("*")
-        .in("vente_id", remises.map((x) => x.id));
-      const lignes = (l ?? []) as VenteLigne[];
+      const lignes = (await enLots(remises.map((x) => x.id), (lot) =>
+        supabase.from("vente_ligne").select("*").in("vente_id", lot)
+      )) as VenteLigne[];
 
       const recetteParId = new Map(((r.data ?? []) as Recette[]).map((x) => [x.id, x]));
       const compParId = new Map(((c.data ?? []) as Composant[]).map((x) => [x.id, x]));

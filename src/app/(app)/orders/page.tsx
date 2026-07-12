@@ -4,6 +4,7 @@ import { KpiCard } from "@/components/ui/KpiCard";
 import { SCREEN_META } from "@/lib/nav";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { enLots } from "@/lib/supabase/lots";
 import { fmtEuro } from "@/lib/calculs";
 import type { Vente, VenteLigne } from "@/lib/supabase/database.types";
 import { ClipboardList } from "lucide-react";
@@ -33,24 +34,19 @@ export default async function OrdersPage() {
     if (ventes.length > 0) {
       const ids = ventes.map((v) => v.id);
       const clientIds = [...new Set(ventes.map((v) => v.client_id).filter(Boolean))] as string[];
-      const [l, cl] = await Promise.all([
-        supabase.from("vente_ligne").select("*").in("vente_id", ids),
-        clientIds.length
-          ? supabase.from("client").select("id, nom").in("id", clientIds)
-          : Promise.resolve({ data: [] }),
+      const [lignesBrutes, cl] = await Promise.all([
+        enLots(ids, (lot) => supabase.from("vente_ligne").select("*").in("vente_id", lot)),
+        enLots(clientIds, (lot) => supabase.from("client").select("id, nom").in("id", lot)),
       ]);
-      const lignes = (l.data ?? []) as VenteLigne[];
-      const clientParId = new Map((cl.data ?? []).map((x) => [x.id, x.nom]));
+      const lignes = lignesBrutes as VenteLigne[];
+      const clientParId = new Map((cl as { id: string; nom: string }[]).map((x) => [x.id, x.nom]));
 
       const ligneIds = lignes.map((x) => x.id);
-      const { data: vlc } = ligneIds.length
-        ? await supabase
-            .from("vente_ligne_composant")
-            .select("ligne_id, categorie, composant(nom)")
-            .in("ligne_id", ligneIds)
-        : { data: [] };
+      const vlc = await enLots(ligneIds, (lot) =>
+        supabase.from("vente_ligne_composant").select("ligne_id, categorie, composant(nom)").in("ligne_id", lot)
+      );
       const compsParLigne = new Map<string, { nom: string; categorie: string }[]>();
-      for (const row of (vlc ?? []) as { ligne_id: string; categorie: string; composant: { nom: string } | null }[]) {
+      for (const row of vlc as unknown as { ligne_id: string; categorie: string; composant: { nom: string } | null }[]) {
         const arr = compsParLigne.get(row.ligne_id) ?? [];
         arr.push({ nom: row.composant?.nom ?? "Composant retiré", categorie: row.categorie });
         compsParLigne.set(row.ligne_id, arr);
