@@ -1,26 +1,121 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+  Atelier ALM — design tokens (source: handoff README + MOCKUP_DIGEST).
+  Ce sont les valeurs finales (fidélité hi-fi). Ne pas inventer d'autres teintes.
+*/
+@theme {
+  /* Fonds */
+  --color-sable: #ede7da; /* fond app */
+  --color-creme: #f6f1e7; /* cartes */
+  --color-creme-2: #f1ead9; /* en-têtes de section, chips inactives */
+  --color-creme-3: #fbf8f1; /* inputs, mini-cartes */
+  --color-creme-4: #efe9dc;
+  --color-canard: #0e3947; /* sidebar / blocs sombres */
+
+  /* Bordures & séparateurs */
+  --color-bord: #dfd4bf;
+  --color-bord-2: #e1d7c3;
+  --color-bord-3: #e4dac6;
+  --color-piste: #e4dac6; /* track des barres */
+  --color-piste-2: #e7decb;
+
+  /* Texte */
+  --color-encre: #0e3947; /* texte principal */
+  --color-encre-2: #6b7469; /* secondaire */
+  --color-muted: #9a927f; /* labels / placeholder */
+  --color-muted-2: #8a7f6a;
+  --color-mono-label: #a79b84;
+
+  /* Sidebar */
+  --color-side-text: #bfdce7;
+  --color-side-accent: #8fcfe2;
+  --color-side-group: #5c8593;
+
+  /* Rouge signature */
+  --color-rouge: #d81020;
+  --color-rouge-fonce: #b00d1a;
+
+  /* Teal / bleu */
+  --color-teal: #1493be; /* action primaire / info / Calculé */
+  --color-teal-fonce: #0e6e8f;
+  --color-cyan: #3fa8ce;
+
+  /* Ambre / or (Démo, traiteur, alertes douces, emplacements) */
+  --color-ambre: #e9a23b;
+  --color-ambre-fonce: #b07a2e;
+  --color-ambre-clair: #f0c173;
+
+  /* Vert positif / succès */
+  --color-vert: #1f8a5b;
+  --color-vert-2: #2e7d46;
+  --color-vert-fonce: #245539;
+
+  /* Sévérité */
+  --color-critique: #c0442e;
+  --color-alerte: #a9761e;
+
+  /* Verdict tricolore (dashboard) */
+  --color-verdict-vert: #1f8a5b;
+  --color-verdict-vert-bg: #e9f3ec;
+  --color-verdict-ambre: #b07a2e;
+  --color-verdict-ambre-bg: #f6eedd;
+  --color-verdict-rouge: #b00d1a;
+  --color-verdict-rouge-bg: #f7e7e4;
+
+  /* Couleurs canaux */
+  --color-canal-truck: #d81020;
+  --color-canal-boutique: #1493be;
+  --color-canal-traiteur: #e9a23b;
+
+  /* Couleurs catégories composants */
+  --color-cat-proteine: #d81020;
+  --color-cat-feculent: #e9a23b;
+  --color-cat-legume: #3fa8ce;
+  --color-cat-sauce: #1493be;
+
+  /* Polices (variables injectées par next/font) */
+  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-spline-mono), ui-monospace, monospace;
+
+  /* Rayons */
+  --radius-pill: 100px;
+  --radius-input: 11px;
+  --radius-carte: 16px;
+  --radius-kpi: 14px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  height: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-sable);
+  color: var(--color-encre);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-rouge);
+  color: var(--color-creme);
+}
+
+/* Scrollbar custom (.fz-scroll) */
+.fz-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #d8cdb6 transparent;
+}
+.fz-scroll::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.fz-scroll::-webkit-scrollbar-thumb {
+  background: #d8cdb6;
+  border-radius: 100px;
+}
+.fz-scroll::-webkit-scrollbar-track {
+  background: transparent;
 }
