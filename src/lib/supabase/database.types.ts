@@ -158,6 +158,17 @@ export type UserPreference = {
   updated_at: string;
 };
 
+/** Liste de courses persistée — une ligne vivante par composant (0011). */
+export type ReapproLigne = {
+  id: string;
+  composant_id: string;
+  qte_retenue: number | null;
+  fournisseur: string | null;
+  commande: boolean;
+  date_liste: string;
+  created_at: string;
+};
+
 export type NotificationPreference = {
   id: string;
   profil_id: string;
@@ -298,6 +309,7 @@ export type Database = {
       lot: TableDef<Lot, MakeInsert<Lot, "composant_id">>;
       mouvement_stock: TableDef<MouvementStock, MakeInsert<MouvementStock, "composant_id" | "type" | "quantite">>;
       seuil_stock: TableDef<SeuilStock, MakeInsert<SeuilStock, "composant_id">>;
+      reappro_ligne: TableDef<ReapproLigne, MakeInsert<ReapproLigne, "composant_id">>;
       releve_haccp: TableDef<ReleveHaccp, MakeInsert<ReleveHaccp, "type">>;
       notification_preference: TableDef<NotificationPreference, MakeInsert<NotificationPreference, "profil_id" | "categorie">>;
       user_preference: TableDef<UserPreference, MakeInsert<UserPreference, "profil_id">>;

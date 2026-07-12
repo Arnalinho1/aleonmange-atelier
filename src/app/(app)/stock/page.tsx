@@ -3,7 +3,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { SCREEN_META } from "@/lib/nav";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-import type { Composant, Lot, MouvementStock, SeuilStock } from "@/lib/supabase/database.types";
+import type { Composant, Lot, MouvementStock, ReapproLigne, SeuilStock } from "@/lib/supabase/database.types";
 import { Boxes } from "lucide-react";
 import { StockBoard, type StockComposant } from "./StockBoard";
 
@@ -21,16 +21,18 @@ export default async function StockPage() {
 
   if (isSupabaseConfigured()) {
     const supabase = await createClient();
-    const [c, mv, lo, se] = await Promise.all([
+    const [c, mv, lo, se, re] = await Promise.all([
       supabase.from("composant").select("*").eq("actif", true).order("nom"),
       supabase.from("mouvement_stock").select("*"),
       supabase.from("lot").select("*"),
       supabase.from("seuil_stock").select("*"),
+      supabase.from("reappro_ligne").select("*"),
     ]);
     const composants = (c.data ?? []) as Composant[];
     const mouvements = (mv.data ?? []) as MouvementStock[];
     const lots = (lo.data ?? []) as Lot[];
     const seuils = new Map(((se.data ?? []) as SeuilStock[]).map((x) => [x.composant_id, x.seuil_bas]));
+    const reappros = new Map(((re.data ?? []) as ReapproLigne[]).map((x) => [x.composant_id, x]));
 
     const stockParComposant = new Map<string, number>();
     for (const mvt of mouvements) {
@@ -48,6 +50,7 @@ export default async function StockPage() {
       stock: Math.round((stockParComposant.get(composant.id) ?? 0) * 1000) / 1000,
       seuil: seuils.get(composant.id) != null ? Number(seuils.get(composant.id)) : null,
       lots: lotsParComposant.get(composant.id) ?? [],
+      reappro: reappros.get(composant.id) ?? null,
     }));
   }
 
