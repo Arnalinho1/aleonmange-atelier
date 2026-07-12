@@ -5,6 +5,7 @@ import { Badge, Dot } from "@/components/ui/Badge";
 import { SCREEN_META, CATEGORIE_COLOR, CATEGORIE_LABEL } from "@/lib/nav";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { coutMatiereFiche, coutParPortion, margeBruteMatiere, fmtEuro } from "@/lib/calculs";
 import type { Recette, RecetteComposant, Composant, Produit } from "@/lib/supabase/database.types";
 import { ChefHat } from "lucide-react";
 import { NewRecipeDrawer } from "./NewRecipeDrawer";
@@ -68,7 +69,7 @@ export default async function RecipesPage() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(330px,1fr))", gap: 16 }}>
             {recettes.map((r) => {
               const comps = lignesParRecette.get(r.id) ?? [];
-              const cout = coutMatiere(comps, compParId);
+              const cout = coutMatiereFiche(comps, compParId);
               const produit = produitParRecette.get(r.id);
               const etapes = Array.isArray(r.etapes) ? (r.etapes as string[]) : [];
               return (
@@ -115,7 +116,7 @@ export default async function RecipesPage() {
                             {l.quantite != null ? `${fmtQte(l.quantite)} g` : "—"}
                           </span>
                           <span className="font-mono" style={{ fontSize: 12, fontWeight: 600, color: "#0e3947", width: 56, textAlign: "right" }}>
-                            {coutLigne != null ? `${fmt(coutLigne)} €` : "—"}
+                            {coutLigne != null ? `${fmtEuro(coutLigne)} €` : "—"}
                           </span>
                         </div>
                       );
@@ -129,18 +130,18 @@ export default async function RecipesPage() {
                       </span>
                       <Badge tone="calcule">Calculé</Badge>
                     </div>
-                    <LigneCalc label="Coût matière (fiche)" value={cout != null ? `${fmt(cout)} €` : "—"} />
+                    <LigneCalc label="Coût matière (fiche)" value={cout != null ? `${fmtEuro(cout)} €` : "—"} />
                     <LigneCalc
                       label="Coût / portion"
-                      value={cout != null && r.rendement ? `${fmt(cout / r.rendement)} €` : "—"}
+                      value={cout != null && r.rendement ? `${fmtEuro(cout / r.rendement)} €` : "—"}
                     />
                     <LigneCalc
                       label="Prix de vente"
-                      value={produit?.prix_unitaire != null ? `${fmt(produit.prix_unitaire)} €` : "—"}
+                      value={produit?.prix_unitaire != null ? `${fmtEuro(produit.prix_unitaire)} €` : "—"}
                     />
                     <LigneCalc
                       label="Marge brute matière"
-                      value={margeBrute(cout, r.rendement, produit)}
+                      value={afficherMarge(cout, r.rendement, produit)}
                       strong
                     />
                   </div>
@@ -171,28 +172,10 @@ function LigneCalc({ label, value, strong }: { label: string; value: string; str
   );
 }
 
-/** Coût matière de la fiche : Σ quantite_g/1000 × coût €/kg. Null si rien n'est calculable. */
-function coutMatiere(comps: RecetteComposant[], compParId: Map<string, Composant>): number | null {
-  let total = 0;
-  let calculable = false;
-  for (const l of comps) {
-    const c = compParId.get(l.composant_id);
-    if (l.quantite != null && c?.cout_matiere_kg != null) {
-      total += (l.quantite / 1000) * c.cout_matiere_kg;
-      calculable = true;
-    }
-  }
-  return calculable ? total : null;
-}
-
-/** Marge brute matière = prix de vente − coût matière/portion. « — » dès qu'un terme manque. */
-function margeBrute(cout: number | null, rendement: number | null, produit: Produit | undefined): string {
-  if (cout == null || !rendement || produit?.prix_unitaire == null) return "—";
-  return `${fmt(produit.prix_unitaire - cout / rendement)} €`;
-}
-
-function fmt(n: number): string {
-  return n.toFixed(2).replace(".", ",");
+/** Marge brute matière affichable — « — » dès qu'un terme manque (jamais NaN). */
+function afficherMarge(cout: number | null, rendement: number | null, produit: Produit | undefined): string {
+  const marge = margeBruteMatiere(produit?.prix_unitaire ?? null, coutParPortion(cout, rendement));
+  return marge == null ? "—" : `${fmtEuro(marge)} €`;
 }
 
 function fmtQte(n: number): string {
