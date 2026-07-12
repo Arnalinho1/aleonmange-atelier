@@ -90,12 +90,14 @@ export function ProdBoard({
   );
 
   // Prévision demain : moyenne 7 j × buffer +10 % (règle INDICATIVE inchangée).
+  // Arrondi du suggéré : ENTIER SUPÉRIEUR (décision du 12/07/2026 — politique
+  // d'affichage rattachée au point ouvert #2, révisable avec les chefs).
   const prevision = useMemo(
     () =>
       plan.produits.map((p) => ({
         ...p,
         moyenne: p.portions / 7,
-        suggere: Math.ceil(((p.portions / 7) * 1.1) * 10) / 10,
+        suggere: Math.ceil((p.portions / 7) * 1.1),
       })),
     [plan.produits]
   );
@@ -200,7 +202,14 @@ export function ProdBoard({
                   {fmtPortions(p.portions)} portion{p.portions > 1 ? "s" : ""}
                 </span>
                 <span className="font-mono" style={{ fontSize: 12, color: "#bfdce7", textAlign: "right" }}>{p.moyenne.toFixed(1).replace(".", ",")}</span>
-                <span className="font-display" style={{ fontSize: 19, fontWeight: 800, color: "#8fcfe2", textAlign: "right" }}>×{fmtPortions(p.suggere)}</span>
+                <span style={{ textAlign: "right" }}>
+                  <span className="font-display" style={{ fontSize: 19, fontWeight: 800, color: "#8fcfe2" }}>×{fmtPortions(p.suggere)}</span>
+                  {p.kg != null && portionG.get(p.recette_id) != null && (
+                    <span className="font-mono" style={{ display: "block", fontSize: 9.5, color: "#5c8593" }}>
+                      ≈ {((p.suggere * (portionG.get(p.recette_id) ?? 0)) / 1000).toFixed(1).replace(".", ",")} kg à peser
+                    </span>
+                  )}
+                </span>
               </div>
             ))}
             {plan.libresPortions > 0 && (
@@ -231,6 +240,11 @@ export function ProdBoard({
               prevision.map((p) => (
                 <div key={p.produit_id} className="flex items-center gap-2" style={{ padding: "6px 0", borderBottom: "1px solid #efe7d6" }}>
                   <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: "#0e3947" }}>{p.nom}</span>
+                  {p.kg != null && portionG.get(p.recette_id) != null && (
+                    <span className="font-mono" style={{ fontSize: 10, color: "#a79b84" }}>
+                      ≈ {((p.suggere * (portionG.get(p.recette_id) ?? 0)) / 1000).toFixed(1).replace(".", ",")} kg
+                    </span>
+                  )}
                   <span className="font-display" style={{ fontSize: 16, fontWeight: 800, color: "#1493be" }}>×{fmtPortions(p.suggere)}</span>
                 </div>
               ))
