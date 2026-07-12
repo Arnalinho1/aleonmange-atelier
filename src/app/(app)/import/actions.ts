@@ -129,7 +129,12 @@ export async function importerVentes(
     const { data: vente, error: venteError } = await supabase
       .from("vente")
       .insert({
+        // Comptoir importé : les TROIS dates coïncident au jour d'exploitation
+        // (0016) et l'encaissement est acquis — statut 'regle' + règlement (0017).
         occurred_at: occurredAt,
+        commande_le: occurredAt,
+        encaisse_le: occurredAt,
+        statut_paiement: "regle",
         canal: "boutique",
         emplacement_id: null,
         montant_total: v.montant,
@@ -143,6 +148,18 @@ export async function importerVentes(
       .select("id")
       .single();
     if (venteError) return { error: `${venteError.message} (après ${importees} ventes importées)` };
+
+    const { error: reglementError } = await supabase.from("reglement").insert({
+      vente_id: vente.id,
+      montant: v.montant,
+      encaisse_le: occurredAt,
+      moyen_paiement: v.paiement,
+      note: "Encaissement caisse (import)",
+    });
+    if (reglementError) {
+      await supabase.from("vente").delete().eq("id", vente.id);
+      return { error: `${reglementError.message} (après ${importees} ventes importées)` };
+    }
 
     const { error: ligneError } = await supabase.from("vente_ligne").insert({
       vente_id: vente.id,

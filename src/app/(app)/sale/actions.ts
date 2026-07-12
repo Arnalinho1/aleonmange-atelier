@@ -229,13 +229,23 @@ export async function createVente(
       ? p.couverts
       : null;
 
-  // ── Écriture. occurred_at = MAINTENANT, capturé à l'encaissement (jamais dérivé
-  // de created_at). fulfillment dérivé du mode_vente saisi (Contrat §01).
-  const occurredAt = new Date().toISOString();
+  // ── Écriture — TROIS DATES (0016) + statut de règlement (0017).
+  // commande_le = MAINTENANT (prise de commande, jamais dérivé de created_at).
+  // Comptoir : les 3 dates coïncident, statut 'regle' + événement de trésorerie.
+  // Précommande : occurred_at (= livre_le) PROVISOIRE à la saisie, réécrit à la
+  // remise par avancerFulfillment. Le 'du' est RÉSERVÉ au traiteur B2B (créance
+  // J+30) — un click & collect B2C n'est jamais un impayé : il garde 'regle'
+  // et son règlement naît au retrait.
+  const commandeLe = new Date().toISOString();
+  const estInstantane = p.mode_vente === "instantane";
+  const estTraiteurB2B = p.canal === "traiteur";
   const { data: vente, error: venteError } = await supabase
     .from("vente")
     .insert({
-      occurred_at: occurredAt,
+      occurred_at: commandeLe,
+      commande_le: commandeLe,
+      encaisse_le: estInstantane ? commandeLe : null,
+      statut_paiement: estTraiteurB2B ? "du" : "regle",
       canal: p.canal,
       emplacement_id: p.canal === "truck" ? p.emplacement_id : null,
       montant_total: total,
@@ -244,7 +254,7 @@ export async function createVente(
       moyen_paiement: p.moyen_paiement,
       origine: p.origine,
       mode_vente: p.mode_vente,
-      fulfillment: p.mode_vente === "instantane" ? "remis" : "a_produire",
+      fulfillment: estInstantane ? "remis" : "a_produire",
       source_vente: "manuel",
       due_at: dueAt,
     })
@@ -286,11 +296,28 @@ export async function createVente(
     }
   }
 
+  // ── TRÉSORERIE (0017) : le comptoir encaisse à l'instant — un règlement =
+  // un événement de trésorerie (source de v_encaissement). Rollback commun :
+  // supprimer la vente cascade le règlement.
+  if (estInstantane) {
+    const { error: reglementError } = await supabase.from("reglement").insert({
+      vente_id: vente.id,
+      montant: total,
+      encaisse_le: commandeLe,
+      moyen_paiement: p.moyen_paiement,
+      note: "Encaissement comptoir",
+    });
+    if (reglementError) {
+      await supabase.from("vente").delete().eq("id", vente.id);
+      return { error: reglementError.message };
+    }
+  }
+
   // ── CONSOMMÉ (B8) : une vente instantanée naît « remis » → les sorties de
   // stock s'écrivent dans la même chaîne (rollback commun). Une précommande
   // n'écrit RIEN ici : elle pèse en RÉSERVÉ (calcul dynamique côté Stocks)
   // jusqu'à sa remise (orders/avancerFulfillment).
-  if (p.mode_vente === "instantane") {
+  if (estInstantane) {
     const totaux = new Map<string, number>();
     for (const l of lignes) {
       const dep = deplierLigneEnGrammes(
@@ -317,7 +344,7 @@ export async function createVente(
         if (q == null) continue;
         const arrondie = Math.round(q * 100) / 100;
         if (arrondie <= 0) continue;
-        sorties.push({ composant_id: cid, type: "sortie", quantite: -arrondie, note: "Consommation vente", occurred_at: occurredAt });
+        sorties.push({ composant_id: cid, type: "sortie", quantite: -arrondie, note: "Consommation vente", occurred_at: commandeLe });
       }
       if (sorties.length > 0) {
         const { error: sortieError } = await supabase.from("mouvement_stock").insert(sorties);

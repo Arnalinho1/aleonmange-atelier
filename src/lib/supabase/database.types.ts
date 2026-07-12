@@ -82,10 +82,19 @@ export type Client = {
   id: string;
   nom: string;
   type: string | null;
+  /** Identifiant de rapprochement PRIORITAIRE — unique si renseigné, normalisé minuscules/trim (0015). */
   email: string | null;
+  /** Identifiant de rapprochement SECOURS — unique si renseigné, normalisé E.164 (0015). */
   telephone: string | null;
   code_postal: string | null;
   notes: string | null;
+  /** Consentement marketing RGPD — toujours daté par consentement_le (0015). */
+  consentement_marketing: boolean;
+  consentement_le: string | null;
+  /** Adresse postale — mentions de facturation B2B (0015). */
+  adresse: string | null;
+  /** SIRET (clients pro, facturation B2B) — optionnel (0015). */
+  siret: string | null;
   actif: boolean;
   created_at: string;
 };
@@ -98,8 +107,12 @@ export type Profil = {
   created_at: string;
 };
 
+/** Machine d'état du RÈGLEMENT — indépendante du fulfillment (livré ≠ réglé). 'du' = créance traiteur B2B uniquement. */
+export type StatutPaiement = "regle" | "du" | "partiel";
+
 export type Vente = {
   id: string;
+  /** LIVRE_LE — instant de remise/prestation (0016). Porte le CA FACTURÉ et la saisonnalité de service. Précommande : provisoire à la saisie, RÉÉCRIT à la remise. */
   occurred_at: string;
   canal: Canal;
   emplacement_id: string | null;
@@ -113,6 +126,24 @@ export type Vente = {
   source_vente: SourceVente;
   /** Échéance de remise (précommande) — jour/créneau des Commandes. NULL si instantané. */
   due_at: string | null;
+  /** Prise de commande (0016) — borne de départ du cycle de commande. */
+  commande_le: string;
+  /** Entrée d'argent — date du règlement SOLDANT. NULL tant que non soldé (0016). */
+  encaisse_le: string | null;
+  statut_paiement: StatutPaiement;
+  /** Échéance de PAIEMENT (traiteur B2B : remise + 30 j) — DISTINCTE de due_at (0017). */
+  echeance_paiement: string | null;
+  created_at: string;
+};
+
+/** Un règlement = un événement de trésorerie (0017) — source de v_encaissement. */
+export type Reglement = {
+  id: string;
+  vente_id: string;
+  montant: number;
+  encaisse_le: string;
+  moyen_paiement: Paiement;
+  note: string | null;
   created_at: string;
 };
 
@@ -309,7 +340,8 @@ export type Database = {
       produit: TableDef<Produit, MakeInsert<Produit, "nom" | "canal" | "mode">>;
       client: TableDef<Client, MakeInsert<Client, "nom">>;
       profil: TableDef<Profil, MakeInsert<Profil, "id" | "nom">>;
-      vente: TableDef<Vente, MakeInsert<Vente, "occurred_at" | "canal" | "montant_total" | "moyen_paiement" | "mode_vente" | "fulfillment">>;
+      vente: TableDef<Vente, MakeInsert<Vente, "occurred_at" | "canal" | "montant_total" | "moyen_paiement" | "mode_vente" | "fulfillment" | "commande_le">>;
+      reglement: TableDef<Reglement, MakeInsert<Reglement, "vente_id" | "montant" | "moyen_paiement">>;
       vente_ligne: TableDef<VenteLigne, MakeInsert<VenteLigne, "vente_id" | "type" | "mode" | "libelle" | "montant">>;
       vente_ligne_composant: TableDef<VenteLigneComposant, MakeInsert<VenteLigneComposant, "ligne_id" | "composant_id" | "categorie">>;
       fulfillment_event: TableDef<FulfillmentEvent, MakeInsert<FulfillmentEvent, "vente_id" | "de" | "vers">>;
@@ -328,8 +360,14 @@ export type Database = {
       notification: TableDef<Notification, MakeInsert<Notification, "categorie" | "titre">>;
     };
     Views: {
+      /** CA FACTURÉ — ventes remises, imputées à occurred_at (= livre_le). Colonnes 0016-0017 exposées en fin (0018). */
       v_vente_remise: { Row: Omit<Vente, "fulfillment" | "created_at">; Relationships: [] };
       v_commande_ouverte: { Row: Vente; Relationships: [] };
+      /** CA ENCAISSÉ — un événement de trésorerie par règlement, imputé à encaisse_le (0018). */
+      v_encaissement: {
+        Row: Omit<Reglement, "created_at"> & Pick<Vente, "canal" | "emplacement_id" | "client_id" | "mode_vente" | "source_vente">;
+        Relationships: [];
+      };
     };
     Functions: Record<string, never>;
     Enums: {
