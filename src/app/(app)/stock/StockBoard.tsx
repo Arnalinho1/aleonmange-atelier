@@ -110,12 +110,12 @@ export function StockBoard({ lignes }: { lignes: StockComposant[] }) {
                       <span style={{ minWidth: 0 }}>
                         <span style={{ display: "block", fontSize: 13.5, fontWeight: 600, color: "#0e3947" }}>{l.composant.nom}</span>
                         <span className="font-mono" style={{ fontSize: 10, color: "#a79b84" }}>
-                          {CATEGORIE_LABEL[l.composant.categorie]} · seuil {l.seuil != null ? `${fmtKg(l.seuil)} kg` : "—"} · {l.lots.length} lot{l.lots.length > 1 ? "s" : ""}
+                          {CATEGORIE_LABEL[l.composant.categorie]} · seuil {l.seuil != null ? `${fmtKg(l.seuil)} ${uniteAbr(l.composant.unite)}` : "—"} · {l.lots.length} lot{l.lots.length > 1 ? "s" : ""}
                         </span>
                       </span>
                     </button>
                     <span className="font-mono" style={{ fontSize: 13, fontWeight: 700, color: "#0e3947", textAlign: "right" }}>
-                      {fmtKg(l.stock)} kg
+                      {fmtKg(l.stock)} {uniteAbr(l.composant.unite)}
                     </span>
                     <span><Badge tone={statut.tone}>{statut.label}</Badge></span>
                     <span className="flex items-center justify-end gap-2">
@@ -151,7 +151,7 @@ export function StockBoard({ lignes }: { lignes: StockComposant[] }) {
                               <div key={lot.id} className="font-mono" style={{ display: "grid", gridTemplateColumns: "1fr .8fr .6fr .8fr", gap: 6, fontSize: 11.5, color: "#0e3947", padding: "3px 0", borderTop: "1px solid #e4dac6" }}>
                                 <span>{lot.numero ?? "—"}</span>
                                 <span>{lot.recu_le ? fmtDate(lot.recu_le) : "—"}</span>
-                                <span style={{ textAlign: "right" }}>{lot.quantite != null ? `${fmtKg(lot.quantite)} kg` : "—"}</span>
+                                <span style={{ textAlign: "right" }}>{lot.quantite != null ? `${fmtKg(lot.quantite)} ${uniteAbr(l.composant.unite)}` : "—"}</span>
                                 <span style={{ textAlign: "right", color: "#b07a2e", fontWeight: 600 }}>{lot.dlc ? fmtDate(lot.dlc) : "—"}</span>
                               </div>
                             ))}
@@ -178,7 +178,7 @@ export function StockBoard({ lignes }: { lignes: StockComposant[] }) {
                   <span style={{ flex: 1, minWidth: 0 }}>
                     <span style={{ display: "block", fontSize: 12.5, fontWeight: 600, color: "#0e3947" }}>{composant.nom}</span>
                     <span className="font-mono" style={{ fontSize: 10, color: "#a79b84" }}>
-                      {lot.numero ?? "sans n°"} · {lot.quantite != null ? `${fmtKg(lot.quantite)} kg` : "—"}
+                      {lot.numero ?? "sans n°"} · {lot.quantite != null ? `${fmtKg(lot.quantite)} ${uniteAbr(composant.unite)}` : "—"}
                     </span>
                   </span>
                   <span className="font-mono" style={{ fontSize: 11.5, fontWeight: 600, color: "#b07a2e" }}>
@@ -221,7 +221,7 @@ export function StockBoard({ lignes }: { lignes: StockComposant[] }) {
                   </select>
                 </label>
                 <label className="flex flex-col gap-1.5">
-                  <Libelle>Quantité reçue (kg)</Libelle>
+                  <Libelle>Quantité reçue (kg / pièces / L selon le composant)</Libelle>
                   <input name="quantite" required inputMode="decimal" placeholder="ex : 5,0" className="outline-none" style={champ} />
                 </label>
                 <label className="flex flex-col gap-1.5">
@@ -240,10 +240,10 @@ export function StockBoard({ lignes }: { lignes: StockComposant[] }) {
               <form action={(fd) => soumettre(ajusterStock, fd)} className="flex flex-col gap-4" style={{ padding: 20 }}>
                 <input type="hidden" name="composant_id" value={drawer.ligne.composant.id} />
                 <p style={{ fontSize: 13, color: "#6b7469" }}>
-                  Stock théorique actuel : <strong className="font-mono" style={{ color: "#0e3947" }}>{fmtKg(drawer.ligne.stock)} kg</strong>
+                  Stock théorique actuel : <strong className="font-mono" style={{ color: "#0e3947" }}>{fmtKg(drawer.ligne.stock)} {uniteAbr(drawer.ligne.composant.unite)}</strong>
                 </p>
                 <label className="flex flex-col gap-1.5">
-                  <Libelle>Comptage réel (kg)</Libelle>
+                  <Libelle>Comptage réel (dans l&apos;unité du composant)</Libelle>
                   <input name="comptage" required inputMode="decimal" placeholder="ex : 3,2" className="outline-none font-display" style={{ ...champ, fontSize: 22, fontWeight: 700 }} />
                 </label>
                 <p style={{ fontSize: 12, color: "#9a927f", background: "#f1ead9", borderRadius: 8, padding: "8px 10px" }}>
@@ -257,7 +257,7 @@ export function StockBoard({ lignes }: { lignes: StockComposant[] }) {
               <form action={(fd) => soumettre(definirSeuil, fd)} className="flex flex-col gap-4" style={{ padding: 20 }}>
                 <input type="hidden" name="composant_id" value={drawer.ligne.composant.id} />
                 <label className="flex flex-col gap-1.5">
-                  <Libelle>Seuil bas (kg) — vide pour retirer</Libelle>
+                  <Libelle>Seuil bas (unité du composant) — vide pour retirer</Libelle>
                   <input
                     name="seuil"
                     defaultValue={drawer.ligne.seuil != null ? String(drawer.ligne.seuil).replace(".", ",") : ""}
@@ -307,6 +307,11 @@ function PiedDrawer({ pending, error, onCancel, label }: { pending: boolean; err
       </div>
     </>
   );
+}
+
+/** Abréviation d'affichage de l'unité de stock du composant (0009). */
+function uniteAbr(unite: string): string {
+  return unite === "piece" ? "pc" : unite === "l" ? "L" : "kg";
 }
 
 function fmtKg(n: number): string {

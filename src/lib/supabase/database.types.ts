@@ -34,6 +34,8 @@ export type Composant = {
   nom: string;
   categorie: CategorieComposant;
   cout_matiere_kg: number | null;
+  /** Unité de STOCK (kg | piece | l) — les coûts restent en €/kg (recettes en g). */
+  unite: string;
   actif: boolean;
   created_at: string;
 };
@@ -252,6 +254,7 @@ export type Notification = {
   ecran: string | null;
   lu: boolean;
   occurred_at: string;
+  created_at: string;
 };
 
 /**
