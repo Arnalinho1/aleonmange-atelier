@@ -108,6 +108,46 @@ export type Vente = {
   created_at: string;
 };
 
+export type Lot = {
+  id: string;
+  composant_id: string;
+  numero: string | null;
+  dlc: string | null;
+  quantite: number | null;
+  recu_le: string | null;
+  created_at: string;
+};
+
+/** Mouvement de stock — quantite SIGNÉE (réception +, sortie −, ajustement ±). */
+export type MouvementStock = {
+  id: string;
+  composant_id: string;
+  lot_id: string | null;
+  type: string; // 'reception' | 'ajustement' | 'sortie'
+  quantite: number;
+  occurred_at: string;
+  note: string | null;
+  created_at: string;
+};
+
+export type SeuilStock = {
+  composant_id: string;
+  seuil_bas: number | null;
+};
+
+export type ReleveHaccp = {
+  id: string;
+  type: string; // 'temperature' | 'nettoyage' | 'controle'
+  cible: string | null;
+  valeur: number | null;
+  conforme: boolean | null;
+  lot_id: string | null;
+  note: string | null;
+  occurred_at: string;
+  operateur_id: string | null;
+  created_at: string;
+};
+
 /** Singleton (id=true) — charges par portion pour la marge nette (Finances). */
 export type ParametreRentabilite = {
   id: boolean;
@@ -204,6 +244,10 @@ export type Database = {
       vente_ligne_composant: TableDef<VenteLigneComposant, MakeInsert<VenteLigneComposant, "ligne_id" | "composant_id" | "categorie">>;
       fulfillment_event: TableDef<FulfillmentEvent, MakeInsert<FulfillmentEvent, "vente_id" | "de" | "vers">>;
       parametre_rentabilite: TableDef<ParametreRentabilite, MakeInsert<ParametreRentabilite, never>>;
+      lot: TableDef<Lot, MakeInsert<Lot, "composant_id">>;
+      mouvement_stock: TableDef<MouvementStock, MakeInsert<MouvementStock, "composant_id" | "type" | "quantite">>;
+      seuil_stock: TableDef<SeuilStock, MakeInsert<SeuilStock, "composant_id">>;
+      releve_haccp: TableDef<ReleveHaccp, MakeInsert<ReleveHaccp, "type">>;
       insight: TableDef<Insight, MakeInsert<Insight, "urgence" | "constat">>;
       notification: TableDef<Notification, MakeInsert<Notification, "categorie" | "titre">>;
     };
