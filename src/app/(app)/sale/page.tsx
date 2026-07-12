@@ -1,26 +1,79 @@
 import { ScreenHeader } from "@/components/ui/ScreenHeader";
-import { EmptyState } from "@/components/ui/EmptyState";
 import { SCREEN_META } from "@/lib/nav";
-import { ShoppingBag } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
+import type {
+  CategorieComposant,
+  Client,
+  Composant,
+  Emplacement,
+  Produit,
+  RecetteComposant,
+} from "@/lib/supabase/database.types";
+import { SaleComposer } from "./SaleComposer";
 
 export const metadata = { title: "Saisie de vente — Atelier ALM" };
 
 /**
- * Saisie de vente = LA source de vérité transactionnelle.
- * État vide (HANDOFF §02) : catalogue vide → inviter à créer des produits.
- * La composition réelle (panier multi-mode, encaissement, occurred_at, dérivation
- * fulfillment) est construite en Phase 2, une fois le catalogue alimentable.
+ * Saisie de vente — LA source de vérité transactionnelle (Contrat §01).
+ * Lit le référentiel (catalogue par canal, emplacements, clients) et écrit
+ * vente + lignes + composants via l'action serveur. occurred_at est capturé
+ * à l'encaissement ; le fulfillment dérive du mode_vente SAISI (pas du canal).
  */
-export default function SalePage() {
+export default async function SalePage() {
   const m = SCREEN_META.sale;
+  let produits: Produit[] = [];
+  let composants: Composant[] = [];
+  let emplacements: Emplacement[] = [];
+  let clients: Client[] = [];
+  const compositionParProduit: Record<string, Partial<Record<CategorieComposant, string>>> = {};
+
+  if (isSupabaseConfigured()) {
+    const supabase = await createClient();
+    const [p, c, e, cl, rc] = await Promise.all([
+      supabase.from("produit").select("*").eq("actif", true).order("nom"),
+      supabase.from("composant").select("*").eq("actif", true).order("nom"),
+      supabase.from("emplacement").select("*").eq("actif", true).order("jour_semaine"),
+      supabase.from("client").select("*").eq("actif", true).order("nom"),
+      supabase.from("recette_composant").select("*"),
+    ]);
+    produits = p.data ?? [];
+    composants = c.data ?? [];
+    emplacements = e.data ?? [];
+    clients = cl.data ?? [];
+
+    // Composition signature d'un bowl = 1er composant de chaque catégorie de sa fiche.
+    const lignesParRecette = new Map<string, RecetteComposant[]>();
+    for (const l of (rc.data ?? []) as RecetteComposant[]) {
+      const arr = lignesParRecette.get(l.recette_id) ?? [];
+      arr.push(l);
+      lignesParRecette.set(l.recette_id, arr);
+    }
+    for (const produit of produits) {
+      if (!produit.is_bowl || !produit.recette_id) continue;
+      const composition: Partial<Record<CategorieComposant, string>> = {};
+      for (const l of lignesParRecette.get(produit.recette_id) ?? []) {
+        if (!composition[l.categorie]) composition[l.categorie] = l.composant_id;
+      }
+      compositionParProduit[produit.id] = composition;
+    }
+  }
+
+  // Jour de semaine 1=lundi…7=dimanche en Europe/Paris (badge « AUJ. » des emplacements).
+  const dayName = new Intl.DateTimeFormat("en-GB", { weekday: "long", timeZone: "Europe/Paris" }).format(new Date());
+  const jourSemaineAuj =
+    ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].indexOf(dayName) + 1;
+
   return (
     <>
       <ScreenHeader rubrique={m.rubrique} titre={m.titre} desc={m.desc} />
-      <EmptyState
-        icon={<ShoppingBag size={30} strokeWidth={1.6} />}
-        titre="Aucun produit à vendre pour l'instant"
-        message="Le catalogue est vide. Ajoutez des produits au Catalogue pour pouvoir composer et encaisser une vente."
-        cta={{ label: "Aller au Catalogue", href: "/catalog" }}
+      <SaleComposer
+        produits={produits}
+        composants={composants}
+        emplacements={emplacements}
+        clients={clients}
+        compositionParProduit={compositionParProduit}
+        jourSemaineAuj={jourSemaineAuj}
       />
     </>
   );
