@@ -120,6 +120,17 @@ export function NewRecipeDrawer({ composants }: { composants: Composant[] }) {
                 type="number"
                 placeholder="ex : 12"
               />
+              <div className="flex flex-col gap-1.5">
+                <Field
+                  label="Temps de préparation (min, pour le batch — optionnel)"
+                  name="temps_prepa"
+                  placeholder="ex : 45"
+                />
+                <span style={{ fontSize: 11.5, color: "#9a927f" }}>
+                  Assemblage inclus. Alimente le temps de production ESTIMÉ de Productivité
+                  (÷ rendement × quantités vendues). Vide = « temps non défini ».
+                </span>
+              </div>
 
               <div className="flex flex-col gap-1.5">
                 <Label>Composition</Label>

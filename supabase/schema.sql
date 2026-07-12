@@ -1,4 +1,4 @@
--- Atelier ALM — schéma complet (concaténation des migrations 0001→0012).
+-- Atelier ALM — schéma complet (concaténation des migrations 0001→0014).
 -- À exécuter dans le SQL Editor Supabase du projet DÉDIÉ ALM (base vide).
 -- Généré à partir de supabase/migrations/*.sql
 
@@ -697,3 +697,43 @@ alter table composant
   add column poids_piece_g numeric(10, 2);
 comment on column composant.poids_piece_g is
   'Poids d''UNE pièce en grammes (composants unite=piece) — requis pour convertir les sorties recettes (g) en pièces.';
+
+
+-- ═══════════════════════════════════════════════════════════════════
+-- 0013_cout_achat_produit.sql
+-- ═══════════════════════════════════════════════════════════════════
+
+-- Atelier ALM — Migration 0013 : coût d'achat des produits REVENDUS.
+--
+-- Le coût matière vit sur les fiches (composant.cout_matiere_kg) — mais les
+-- revendus tels quels (boissons, épicerie, charcuterie à la coupe) n'ont pas
+-- de fiche : leur coût était INCONNU (58 % du CA boutique couvert seulement).
+-- cout_achat comble ce trou. Interprété dans l'UNITÉ DE VENTE du produit,
+-- symétrique de prix_unitaire/prix_kg : €/pièce si mode unite, €/kg si poids.
+-- La fiche reste PRIORITAIRE quand elle existe (source unique calculs.ts).
+
+alter table produit
+  add column cout_achat numeric(8, 2);
+
+comment on column produit.cout_achat is
+  'Coût d''achat d''un produit REVENDU (sans fiche) — €/pièce si mode unite, €/kg si mode poids. La fiche liée reste prioritaire pour le coût matière. NULL = coût inconnu (compte dans l''indicateur de couverture).';
+
+
+-- ═══════════════════════════════════════════════════════════════════
+-- 0014_temps_prepa_recette.sql
+-- ═══════════════════════════════════════════════════════════════════
+
+-- Atelier ALM — Migration 0014 : temps de préparation déclaratif des fiches.
+--
+-- Ouvre la métrique « temps de production estimé » de Productivité :
+-- temps PAR BATCH de la fiche, ASSEMBLAGE INCLUS (décision Arnaud — pas de
+-- forfait d'assemblage séparé pour les bowls). Temps par portion = temps ÷
+-- rendement (même mécanique que le coût). Valeur DÉCLARATIVE chef → la
+-- métrique est toujours affichée ESTIMÉE, jamais « réelle ».
+-- NULL = « temps non défini » (affiché tel quel, jamais 0 silencieux).
+
+alter table recette
+  add column temps_prepa_min numeric(6, 1);
+
+comment on column recette.temps_prepa_min is
+  'Temps de préparation du BATCH de la fiche, en minutes, assemblage inclus (déclaratif chef — métrique ESTIMÉE). Temps/portion = temps ÷ rendement. NULL = temps non défini.';

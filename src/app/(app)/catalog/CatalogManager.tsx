@@ -247,6 +247,19 @@ export function CatalogManager({
                 required
               />
 
+              <div className="flex flex-col gap-1.5">
+                <Field
+                  label={mode === "unite" ? "Coût d'achat (€/pièce, optionnel)" : "Coût d'achat (€/kg, optionnel)"}
+                  name="cout_achat"
+                  defaultValue={edition ? fmtInput(edition.cout_achat) : undefined}
+                  inputMode="decimal"
+                  placeholder="0,00"
+                />
+                <span style={{ fontSize: 11.5, color: "#9a927f" }}>
+                  Pour les produits revendus sans fiche — la fiche technique liée reste prioritaire pour le coût matière.
+                </span>
+              </div>
+
               <Field label="Catégorie (optionnel)" name="categorie" defaultValue={edition?.categorie ?? ""} placeholder="ex : Plat mijoté" />
 
               <label className="flex flex-col gap-1.5">

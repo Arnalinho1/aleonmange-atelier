@@ -52,6 +52,9 @@ export async function createRecette(
   const nom = String(formData.get("nom") ?? "").trim();
   const rendementRaw = String(formData.get("rendement") ?? "").trim();
   const rendement = rendementRaw ? Number(rendementRaw) : null;
+  // Temps du batch (min) — déclaratif chef, nourrit le temps ESTIMÉ de Productivité.
+  const tempsRaw = String(formData.get("temps_prepa") ?? "").replace(",", ".").trim();
+  const tempsPrepaMin = tempsRaw ? Number(tempsRaw) : null;
   const etapes = String(formData.get("etapes") ?? "")
     .split("\n")
     .map((l) => l.trim())
@@ -67,6 +70,8 @@ export async function createRecette(
   if (!nom) return { error: "Le nom de la fiche est requis." };
   if (rendement !== null && (!Number.isInteger(rendement) || rendement <= 0))
     return { error: "Le rendement doit être un nombre entier de portions." };
+  if (tempsPrepaMin !== null && (!Number.isFinite(tempsPrepaMin) || tempsPrepaMin <= 0))
+    return { error: "Le temps de préparation doit être un nombre de minutes positif." };
   if (lignes.length === 0) return { error: "Ajoutez au moins un composant à la fiche." };
   for (const l of lignes) {
     if (l.quantite_g !== null && (!Number.isFinite(l.quantite_g) || l.quantite_g <= 0))
@@ -88,7 +93,7 @@ export async function createRecette(
 
   const { data: recette, error: recError } = await supabase
     .from("recette")
-    .insert({ nom, rendement, etapes })
+    .insert({ nom, rendement, etapes, temps_prepa_min: tempsPrepaMin })
     .select("id")
     .single();
   if (recError) return { error: recError.message };

@@ -47,6 +47,8 @@ export type Recette = {
   nom: string;
   rendement: number | null;
   etapes: unknown;
+  /** Temps du BATCH en minutes, assemblage inclus — DÉCLARATIF (métrique estimée) ; NULL = non défini (0014). */
+  temps_prepa_min: number | null;
   is_virtuelle: boolean;
   actif: boolean;
   created_at: string;
@@ -68,6 +70,8 @@ export type Produit = {
   mode: LigneMode;
   prix_unitaire: number | null;
   prix_kg: number | null;
+  /** Coût d'achat d'un REVENDU — €/pièce (unite) ou €/kg (poids) ; la fiche reste prioritaire (0013). */
+  cout_achat: number | null;
   is_bowl: boolean;
   recette_id: string | null;
   actif: boolean;

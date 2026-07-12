@@ -15,7 +15,10 @@ function lireProduit(formData: FormData) {
   const recetteId = String(formData.get("recette_id") ?? "").trim() || null;
   const prixRaw = String(formData.get("prix") ?? "").replace(",", ".");
   const prix = prixRaw ? Number(prixRaw) : NaN;
-  return { nom, canal, mode, categorie, isBowl, recetteId, prix };
+  // Coût d'achat (revendus sans fiche) — même unité que le prix (€/pièce ou €/kg).
+  const coutAchatRaw = String(formData.get("cout_achat") ?? "").replace(",", ".").trim();
+  const coutAchat = coutAchatRaw ? Number(coutAchatRaw) : null;
+  return { nom, canal, mode, categorie, isBowl, recetteId, prix, coutAchat };
 }
 
 function validerProduit(p: ReturnType<typeof lireProduit>): string | null {
@@ -23,6 +26,7 @@ function validerProduit(p: ReturnType<typeof lireProduit>): string | null {
   if (!["truck", "boutique", "traiteur"].includes(p.canal)) return "Canal invalide.";
   if (!["unite", "poids"].includes(p.mode)) return "Mode invalide.";
   if (!Number.isFinite(p.prix) || p.prix <= 0) return "Prix invalide.";
+  if (p.coutAchat !== null && (!Number.isFinite(p.coutAchat) || p.coutAchat < 0)) return "Coût d'achat invalide.";
   return null;
 }
 
@@ -50,6 +54,7 @@ export async function createProduit(
     // Selon le mode : prix_unitaire (unite) OU prix_kg (poids). Jamais les deux.
     prix_unitaire: p.mode === "unite" ? p.prix : null,
     prix_kg: p.mode === "poids" ? p.prix : null,
+    cout_achat: p.coutAchat,
   });
 
   if (error) return { error: error.message };
@@ -79,6 +84,7 @@ export async function updateProduit(
       recette_id: p.recetteId,
       prix_unitaire: p.mode === "unite" ? p.prix : null,
       prix_kg: p.mode === "poids" ? p.prix : null,
+      cout_achat: p.coutAchat,
     })
     .eq("id", id);
 

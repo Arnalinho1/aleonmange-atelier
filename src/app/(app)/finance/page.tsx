@@ -4,7 +4,8 @@ import { SCREEN_META } from "@/lib/nav";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { enLots } from "@/lib/supabase/lots";
-import { coutPortionProduit } from "@/lib/calculs";
+import { coutMatiereLigneVente } from "@/lib/calculs";
+import type { ContexteDepliage } from "@/lib/stock";
 import type {
   Composant,
   ParametreRentabilite,
@@ -13,6 +14,7 @@ import type {
   RecetteComposant,
   Vente,
   VenteLigne,
+  VenteLigneComposant,
 } from "@/lib/supabase/database.types";
 import { Wallet } from "lucide-react";
 import { FinanceBoard, type LigneFinance, type VenteFinance } from "./FinanceBoard";
@@ -21,9 +23,11 @@ export const metadata = { title: "Finances — Atelier ALM" };
 
 /**
  * Finances — lit v_vente_remise, LA MÊME source que l'Historique (HANDOFF
- * §03 : un calcul, plusieurs vues). Le coût matière d'une ligne dérive de la
- * fiche technique liée au produit (source unique lib/calculs.ts) — pour une
- * composition libre de bowl, la fiche du produit sert de proxy de coût.
+ * §03 : un calcul, plusieurs vues). Le coût matière d'une ligne vient de
+ * coutMatiereLigneVente (source unique calculs.ts, partagée avec
+ * Productivité) : dépliage B8 des fiches — bowls libres inclus via leurs
+ * composants réels, lignes au poids au prorata — et cout_achat pour les
+ * revendus. cout NULL = non couvert (jamais un faux zéro).
  */
 export default async function FinancePage() {
   const m = SCREEN_META.finance;
@@ -61,28 +65,43 @@ export default async function FinancePage() {
       const lignes = (await enLots(remises.map((x) => x.id), (lot) =>
         supabase.from("vente_ligne").select("*").in("vente_id", lot)
       )) as VenteLigne[];
+      // Composants dépliés des bowls (grammes figés à l'encaissement — B8).
+      const vlc = await enLots<VenteLigneComposant>(
+        lignes.map((l) => l.id),
+        (lot) => supabase.from("vente_ligne_composant").select("*").in("ligne_id", lot)
+      );
 
       const recetteParId = new Map(((r.data ?? []) as Recette[]).map((x) => [x.id, x]));
       const compParId = new Map(((c.data ?? []) as Composant[]).map((x) => [x.id, x]));
       const prodParId = new Map(((p.data ?? []) as Produit[]).map((x) => [x.id, x]));
-      const lignesParRecette = new Map<string, RecetteComposant[]>();
+      const fichesParRecette = new Map<string, RecetteComposant[]>();
       for (const li of (rc.data ?? []) as RecetteComposant[]) {
-        const arr = lignesParRecette.get(li.recette_id) ?? [];
+        const arr = fichesParRecette.get(li.recette_id) ?? [];
         arr.push(li);
-        lignesParRecette.set(li.recette_id, arr);
+        fichesParRecette.set(li.recette_id, arr);
       }
+      const vlcParLigne = new Map<string, VenteLigneComposant[]>();
+      for (const x of vlc) {
+        const arr = vlcParLigne.get(x.ligne_id) ?? [];
+        arr.push(x);
+        vlcParLigne.set(x.ligne_id, arr);
+      }
+      const ctx: ContexteDepliage = { produitParId: prodParId, recetteParId, fichesParRecette };
 
       lignesOut = lignes.map((li) => {
         const produit = li.produit_id ? prodParId.get(li.produit_id) : undefined;
-        const coutPortion = produit
-          ? coutPortionProduit(produit, recetteParId, lignesParRecette, compParId)
-          : null;
+        const cout = coutMatiereLigneVente(
+          { ...li, composants: vlcParLigne.get(li.id) ?? [] },
+          ctx,
+          compParId,
+          produit
+        );
         return {
           vente_id: li.vente_id,
           libelle: li.libelle,
           qte: li.qte,
           montant: li.montant,
-          cout: coutPortion != null ? coutPortion * (li.qte ?? 1) : null,
+          cout: cout?.cout ?? null,
         };
       });
     }
