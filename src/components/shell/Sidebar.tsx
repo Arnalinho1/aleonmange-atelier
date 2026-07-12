@@ -3,7 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { LogOut } from "lucide-react";
 import { NAV_GROUPS } from "@/lib/nav";
+import { signOut } from "@/app/login/actions";
 
 /**
  * Sidebar persistante (250px, fond canard #0E3947). Structure & groupes exacts
@@ -91,12 +93,22 @@ export function Sidebar({
         >
           {(profil?.nom ?? "A").charAt(0).toUpperCase()}
         </span>
-        <div style={{ minWidth: 0 }}>
+        <div style={{ minWidth: 0, flex: 1 }}>
           <p style={{ fontSize: 13.5, fontWeight: 600, color: "#f6f1e7", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {profil?.nom ?? "Compte propriétaire"}
           </p>
           <p style={{ fontSize: 11, color: "#8fcfe2" }}>{profil?.role ?? "A Léon Mange"}</p>
         </div>
+        <form action={signOut}>
+          <button
+            type="submit"
+            title="Se déconnecter"
+            className="grid place-items-center rounded-lg transition-colors hover:bg-white/10"
+            style={{ width: 30, height: 30, color: "#8fcfe2" }}
+          >
+            <LogOut size={16} />
+          </button>
+        </form>
       </div>
     </aside>
   );

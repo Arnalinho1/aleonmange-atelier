@@ -2,6 +2,11 @@
  * Types de la base Atelier ALM — alignés sur supabase/migrations/*.
  * Écrits à la main (la base dédiée n'est pas encore branchée). À terme,
  * régénérables via `supabase gen types typescript`.
+ *
+ * IMPORTANT : les lignes sont des alias `type` (et non `interface`). postgrest-js
+ * exige que chaque Row/Insert soit assignable à `Record<string, unknown>` ; or une
+ * `interface` n'a pas de signature d'index implicite et casse l'inférence (Insert
+ * résolu en `never`). Les `type` l'ont — ne pas reconvertir en interface.
  */
 
 export type Canal = "truck" | "boutique" | "traiteur";
@@ -15,25 +20,25 @@ export type CategorieComposant = "proteine" | "feculent" | "legume" | "sauce";
 export type SourceVente = "manuel" | "import";
 export type RoleEquipe = "owner" | "chef" | "equipe";
 
-export interface Emplacement {
+export type Emplacement = {
   id: string;
   code: string;
   libelle: string;
   jour_semaine: number | null;
   actif: boolean;
   created_at: string;
-}
+};
 
-export interface Composant {
+export type Composant = {
   id: string;
   nom: string;
   categorie: CategorieComposant;
   cout_matiere_kg: number | null;
   actif: boolean;
   created_at: string;
-}
+};
 
-export interface Recette {
+export type Recette = {
   id: string;
   nom: string;
   rendement: number | null;
@@ -41,17 +46,17 @@ export interface Recette {
   is_virtuelle: boolean;
   actif: boolean;
   created_at: string;
-}
+};
 
-export interface RecetteComposant {
+export type RecetteComposant = {
   id: string;
   recette_id: string;
   composant_id: string;
   quantite: number | null;
   categorie: CategorieComposant;
-}
+};
 
-export interface Produit {
+export type Produit = {
   id: string;
   nom: string;
   categorie: string | null;
@@ -63,9 +68,9 @@ export interface Produit {
   recette_id: string | null;
   actif: boolean;
   created_at: string;
-}
+};
 
-export interface Client {
+export type Client = {
   id: string;
   nom: string;
   type: string | null;
@@ -75,17 +80,17 @@ export interface Client {
   notes: string | null;
   actif: boolean;
   created_at: string;
-}
+};
 
-export interface Profil {
+export type Profil = {
   id: string;
   nom: string;
   role: RoleEquipe;
   actif: boolean;
   created_at: string;
-}
+};
 
-export interface Vente {
+export type Vente = {
   id: string;
   occurred_at: string;
   canal: Canal;
@@ -99,9 +104,9 @@ export interface Vente {
   fulfillment: Fulfillment;
   source_vente: SourceVente;
   created_at: string;
-}
+};
 
-export interface VenteLigne {
+export type VenteLigne = {
   id: string;
   vente_id: string;
   type: LigneType;
@@ -114,16 +119,16 @@ export interface VenteLigne {
   qte: number | null;
   prix_unitaire: number | null;
   montant: number;
-}
+};
 
-export interface VenteLigneComposant {
+export type VenteLigneComposant = {
   id: string;
   ligne_id: string;
   composant_id: string;
   categorie: CategorieComposant;
-}
+};
 
-export interface Insight {
+export type Insight = {
   id: string;
   urgence: string;
   impact: number | null;
@@ -135,9 +140,9 @@ export interface Insight {
   origine_calcul: string;
   statut: string;
   created_at: string;
-}
+};
 
-export interface Notification {
+export type Notification = {
   id: string;
   categorie: string;
   severite: string;
@@ -146,45 +151,56 @@ export interface Notification {
   ecran: string | null;
   lu: boolean;
   occurred_at: string;
-}
+};
 
-/** Helper générique pour un enregistrement Insert (champs auto optionnels). */
-type Insertable<T, AutoKeys extends keyof T> = Omit<T, AutoKeys> &
-  Partial<Pick<T, AutoKeys>>;
+/**
+ * Insert = colonnes `Req` obligatoires, tout le reste optionnel (auto / nullable /
+ * à défaut base). Pratique et fidèle aux CHECK/defaults des migrations.
+ */
+type MakeInsert<Row, Req extends keyof Row> = { [K in Req]: Row[K] } & {
+  [K in Exclude<keyof Row, Req>]?: Row[K] | undefined;
+};
 
-type Row<T> = { Row: T; Insert: Partial<T>; Update: Partial<T> };
+type TableDef<TRow, TInsert> = {
+  Row: TRow;
+  Insert: TInsert;
+  Update: Partial<TInsert>;
+  Relationships: [];
+};
 
-export interface Database {
+export type Database = {
   public: {
     Tables: {
-      emplacement: Row<Emplacement> & {
-        Insert: Insertable<Emplacement, "id" | "created_at" | "actif">;
-      };
-      composant: Row<Composant> & {
-        Insert: Insertable<Composant, "id" | "created_at" | "actif">;
-      };
-      recette: Row<Recette>;
-      recette_composant: Row<RecetteComposant>;
-      produit: Row<Produit> & {
-        Insert: Insertable<Produit, "id" | "created_at" | "actif">;
-      };
-      client: Row<Client> & {
-        Insert: Insertable<Client, "id" | "created_at" | "actif">;
-      };
-      profil: Row<Profil>;
-      vente: Row<Vente> & {
-        Insert: Insertable<Vente, "id" | "created_at" | "source_vente" | "origine">;
-      };
-      vente_ligne: Row<VenteLigne> & { Insert: Insertable<VenteLigne, "id"> };
-      vente_ligne_composant: Row<VenteLigneComposant> & {
-        Insert: Insertable<VenteLigneComposant, "id">;
-      };
-      insight: Row<Insight>;
-      notification: Row<Notification>;
+      emplacement: TableDef<Emplacement, MakeInsert<Emplacement, "code" | "libelle">>;
+      composant: TableDef<Composant, MakeInsert<Composant, "nom" | "categorie">>;
+      recette: TableDef<Recette, MakeInsert<Recette, "nom">>;
+      recette_composant: TableDef<RecetteComposant, MakeInsert<RecetteComposant, "recette_id" | "composant_id" | "categorie">>;
+      produit: TableDef<Produit, MakeInsert<Produit, "nom" | "canal" | "mode">>;
+      client: TableDef<Client, MakeInsert<Client, "nom">>;
+      profil: TableDef<Profil, MakeInsert<Profil, "id" | "nom">>;
+      vente: TableDef<Vente, MakeInsert<Vente, "occurred_at" | "canal" | "montant_total" | "moyen_paiement" | "mode_vente" | "fulfillment">>;
+      vente_ligne: TableDef<VenteLigne, MakeInsert<VenteLigne, "vente_id" | "type" | "mode" | "libelle" | "montant">>;
+      vente_ligne_composant: TableDef<VenteLigneComposant, MakeInsert<VenteLigneComposant, "ligne_id" | "composant_id" | "categorie">>;
+      insight: TableDef<Insight, MakeInsert<Insight, "urgence" | "constat">>;
+      notification: TableDef<Notification, MakeInsert<Notification, "categorie" | "titre">>;
     };
     Views: {
-      v_vente_remise: { Row: Omit<Vente, "fulfillment" | "created_at"> };
-      v_commande_ouverte: { Row: Vente };
+      v_vente_remise: { Row: Omit<Vente, "fulfillment" | "created_at">; Relationships: [] };
+      v_commande_ouverte: { Row: Vente; Relationships: [] };
     };
+    Functions: Record<string, never>;
+    Enums: {
+      canal: Canal;
+      mode_vente: ModeVente;
+      fulfillment: Fulfillment;
+      paiement: Paiement;
+      origine: Origine;
+      ligne_type: LigneType;
+      ligne_mode: LigneMode;
+      categorie_composant: CategorieComposant;
+      source_vente: SourceVente;
+      role_equipe: RoleEquipe;
+    };
+    CompositeTypes: Record<string, never>;
   };
-}
+};
