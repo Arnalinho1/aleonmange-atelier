@@ -125,6 +125,13 @@ export const CATEGORIE_COLOR: Record<string, string> = {
   sauce: "#1493be",
 };
 
+export const CATEGORIE_LABEL: Record<string, string> = {
+  proteine: "Protéine",
+  feculent: "Féculent",
+  legume: "Légume",
+  sauce: "Sauce",
+};
+
 export const PAIEMENT_LABEL: Record<string, string> = {
   especes: "Espèces",
   cb: "CB",
