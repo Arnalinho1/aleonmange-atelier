@@ -7,6 +7,7 @@ import { enLots } from "@/lib/supabase/lots";
 import { coutMatiereLigneVente } from "@/lib/calculs";
 import type { ContexteDepliage } from "@/lib/stock";
 import type {
+  Canal,
   Composant,
   ParametreRentabilite,
   Produit,
@@ -17,7 +18,13 @@ import type {
   VenteLigneComposant,
 } from "@/lib/supabase/database.types";
 import { Wallet } from "lucide-react";
-import { FinanceBoard, type LigneFinance, type VenteFinance } from "./FinanceBoard";
+import {
+  FinanceBoard,
+  type AttenteReglement,
+  type EncaissementFinance,
+  type LigneFinance,
+  type VenteFinance,
+} from "./FinanceBoard";
 
 export const metadata = { title: "Finances — Atelier ALM" };
 
@@ -33,19 +40,25 @@ export default async function FinancePage() {
   const m = SCREEN_META.finance;
   let ventes: VenteFinance[] = [];
   let lignesOut: LigneFinance[] = [];
+  let encaissements: EncaissementFinance[] = [];
+  let enAttente: AttenteReglement[] = [];
   let parametres: ParametreRentabilite | null = null;
 
   if (isSupabaseConfigured()) {
     const supabase = await createClient();
     const maintenant = new Date();
     const depuis = new Date(maintenant.getTime() - 90 * 86400000).toISOString();
-    const [v, p, r, rc, c, params] = await Promise.all([
+    const [v, p, r, rc, c, params, enc, attente] = await Promise.all([
       supabase.from("v_vente_remise").select("*").gte("occurred_at", depuis).order("occurred_at", { ascending: false }),
       supabase.from("produit").select("*"),
       supabase.from("recette").select("*"),
       supabase.from("recette_composant").select("*"),
       supabase.from("composant").select("*"),
       supabase.from("parametre_rentabilite").select("*").maybeSingle(),
+      // CA ENCAISSÉ — source unique v_encaissement (0018), imputé à encaisse_le.
+      supabase.from("v_encaissement").select("*").gte("encaisse_le", depuis).order("encaisse_le", { ascending: false }),
+      // Créances en cours (traiteur B2B) — hors fenêtre de période : une créance reste due.
+      supabase.from("vente").select("id, canal, montant_total, statut_paiement, echeance_paiement, due_at, fulfillment, client_id").in("statut_paiement", ["du", "partiel"]).order("echeance_paiement", { ascending: true, nullsFirst: false }),
     ]);
     parametres = (params.data as ParametreRentabilite | null) ?? null;
     const remises = (v.data ?? []) as Omit<Vente, "fulfillment" | "created_at">[];
@@ -60,6 +73,37 @@ export default async function FinancePage() {
       moyen_paiement: x.moyen_paiement,
       source_vente: x.source_vente,
     }));
+
+    encaissements = ((enc.data ?? []) as { id: string; encaisse_le: string; canal: Canal; montant: number }[]).map((x) => ({
+      id: x.id,
+      encaisse_le: x.encaisse_le,
+      canal: x.canal,
+      montant: Number(x.montant),
+    }));
+
+    const creances = (attente.data ?? []) as Pick<Vente, "id" | "canal" | "montant_total" | "statut_paiement" | "echeance_paiement" | "due_at" | "fulfillment" | "client_id">[];
+    if (creances.length > 0) {
+      const clientIds = [...new Set(creances.map((x) => x.client_id).filter((x): x is string => x != null))];
+      const [{ data: clients }, { data: regles }] = await Promise.all([
+        clientIds.length ? supabase.from("client").select("id, nom").in("id", clientIds) : { data: [] },
+        supabase.from("reglement").select("vente_id, montant").in("vente_id", creances.map((x) => x.id)),
+      ]);
+      const nomParClient = new Map((clients ?? []).map((x) => [x.id, x.nom]));
+      const reglePar = new Map<string, number>();
+      for (const reg of (regles ?? []) as { vente_id: string; montant: number }[]) {
+        reglePar.set(reg.vente_id, (reglePar.get(reg.vente_id) ?? 0) + Number(reg.montant));
+      }
+      enAttente = creances.map((x) => ({
+        id: x.id,
+        canal: x.canal,
+        client_nom: x.client_id ? nomParClient.get(x.client_id) ?? null : null,
+        montant_total: Number(x.montant_total),
+        restant: Math.round((Number(x.montant_total) - (reglePar.get(x.id) ?? 0)) * 100) / 100,
+        statut_paiement: x.statut_paiement,
+        echeance_paiement: x.echeance_paiement,
+        livree: x.fulfillment === "remis",
+      }));
+    }
 
     if (remises.length > 0) {
       const lignes = (await enLots(remises.map((x) => x.id), (lot) =>
@@ -117,7 +161,7 @@ export default async function FinancePage() {
           message="CA, coûts et marges (brute matière vs nette — libellés distincts) apparaîtront avec les ventes remises. Même source que l'Historique, jamais de recompte."
         />
       ) : (
-        <FinanceBoard ventes={ventes} lignes={lignesOut} parametres={parametres} />
+        <FinanceBoard ventes={ventes} lignes={lignesOut} encaissements={encaissements} enAttente={enAttente} parametres={parametres} />
       )}
     </>
   );

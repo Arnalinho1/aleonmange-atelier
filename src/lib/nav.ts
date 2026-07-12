@@ -92,7 +92,7 @@ export const SCREEN_META: Record<string, { rubrique: string; titre: string; desc
   notifs: { rubrique: "Accueil", titre: "Notifications", desc: "Alertes et préférences." },
   sale: { rubrique: "Activité", titre: "Saisie de vente", desc: "Le point d'entrée de toutes les ventes." },
   orders: { rubrique: "Activité", titre: "Commandes du jour", desc: "La file de production des précommandes." },
-  history: { rubrique: "Activité", titre: "Historique des ventes", desc: "Les ventes remises, par jour." },
+  history: { rubrique: "Activité", titre: "Historique des ventes", desc: "Les ventes livrées, par jour de livraison." },
   import: { rubrique: "Activité", titre: "Import caisse", desc: "Reconstituer les ventes boutique depuis un export." },
   catalog: { rubrique: "Cuisine", titre: "Catalogue", desc: "Les produits par canal." },
   recipes: { rubrique: "Cuisine", titre: "Recettes & plats", desc: "Les fiches techniques de production." },

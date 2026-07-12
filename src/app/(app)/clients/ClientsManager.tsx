@@ -90,7 +90,7 @@ export function ClientsManager({ clients, stats }: { clients: Client[]; stats: C
             <span>Type</span>
             <span>Contact</span>
             <span style={{ textAlign: "right" }}>Cmd</span>
-            <span>Dernière</span>
+            <span>Dern. livraison</span>
             <span style={{ textAlign: "right" }}>CA remis</span>
             <span>Statut</span>
             <span style={{ textAlign: "right" }}>Actions</span>

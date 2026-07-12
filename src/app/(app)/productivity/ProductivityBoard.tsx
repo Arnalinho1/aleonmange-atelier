@@ -22,7 +22,7 @@ export type CycleCommande = {
   vente_id: string;
   canal: Canal;
   portions: number;
-  saisie: string; // occurred_at de la vente
+  saisie: string; // commande_le de la vente (prise de commande — 0016)
   en_prod: string | null;
   pret: string | null;
   remis: string | null;
@@ -169,7 +169,7 @@ export function ProductivityBoard({
         <Card style={{ overflow: "hidden" }}>
           <SectionHeader
             titre="Rythme de vente par heure"
-            sous="Heure d'encaissement réelle (Europe/Paris), toutes journées de la période cumulées."
+            sous="Heure de service réelle (Europe/Paris), toutes journées de la période cumulées."
             action={<Badge tone="calcule">Calculé</Badge>}
           />
           <div style={{ padding: "12px 16px" }}>
@@ -257,7 +257,7 @@ export function ProductivityBoard({
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(190px,1fr))", gap: 12, marginBottom: 20 }}>
         <KpiCard variant="light" label="Commandes remises" value={String(remises.length)} tag={{ label: "Calculé", tone: "calcule" }} sub="sur la période (90 j)" />
-        <KpiCard variant="light" label="Cycle complet" value={cycleTotal != null ? fmtDuree(cycleTotal) : "—"} sub="saisie → remise (moyenne)" />
+        <KpiCard variant="light" label="Cycle complet" value={cycleTotal != null ? fmtDuree(cycleTotal) : "—"} sub="commande → remise (moyenne)" />
         <KpiCard variant="light" label="Temps de production" value={tempsProd != null ? fmtDuree(tempsProd) : "—"} sub="lancement → prêt (moyenne)" />
         <KpiCard variant="light" label="Attente de retrait" value={attenteRetrait != null ? fmtDuree(attenteRetrait) : "—"} sub="prêt → remis (moyenne)" />
       </div>

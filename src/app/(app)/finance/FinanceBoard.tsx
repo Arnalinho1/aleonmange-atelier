@@ -8,7 +8,8 @@ import { Badge, Dot } from "@/components/ui/Badge";
 import { Card, SectionHeader } from "@/components/ui/Card";
 import { KpiCard } from "@/components/ui/KpiCard";
 import { fmtEuro } from "@/lib/calculs";
-import type { Canal, Paiement, ParametreRentabilite, SourceVente } from "@/lib/supabase/database.types";
+import type { Canal, Paiement, ParametreRentabilite, SourceVente, StatutPaiement } from "@/lib/supabase/database.types";
+import { enregistrerReglement } from "../orders/actions";
 import { saveParametres } from "./actions";
 
 /** Vente remise aplatie + lignes costées côté serveur (source unique calculs.ts). */
@@ -29,6 +30,24 @@ export type LigneFinance = {
   /** Coût matière de la ligne (fiche liée × qte) — null si non calculable. */
   cout: number | null;
 };
+/** Événement de trésorerie (v_encaissement) — CA ENCAISSÉ, imputé à encaisse_le. */
+export type EncaissementFinance = {
+  id: string;
+  encaisse_le: string;
+  canal: Canal;
+  montant: number;
+};
+/** Créance en cours (statut du/partiel) — le pipeline B2B en attente de règlement. */
+export type AttenteReglement = {
+  id: string;
+  canal: Canal;
+  client_nom: string | null;
+  montant_total: number;
+  restant: number;
+  statut_paiement: StatutPaiement;
+  echeance_paiement: string | null;
+  livree: boolean;
+};
 
 const PERIODES = [
   { id: "7j", label: "7 jours", jours: 7 },
@@ -37,17 +56,24 @@ const PERIODES = [
 ] as const;
 
 /**
- * Finances — lit v_vente_remise (MÊME source que Historique, jamais de
- * recompte). Marges aux libellés DISTINCTS : « brute matière » (CA − coût
- * matière) vs « nette » (après MO + transport par portion). Export CSV réel.
+ * Finances — DEUX CA, deux sources, deux libellés, jamais confondus :
+ * « CA facturé » (v_vente_remise, imputé au jour de LIVRAISON) et
+ * « CA encaissé » (v_encaissement, imputé au jour de RÈGLEMENT). Au comptoir
+ * ils coïncident ; l'écart vit sur le traiteur B2B (créances J+30, encart
+ * « En attente de règlement »). Marges aux libellés DISTINCTS : « brute
+ * matière » vs « nette » (après MO + transport par portion). Export CSV réel.
  */
 export function FinanceBoard({
   ventes,
   lignes,
+  encaissements,
+  enAttente,
   parametres,
 }: {
   ventes: VenteFinance[];
   lignes: LigneFinance[];
+  encaissements: EncaissementFinance[];
+  enAttente: AttenteReglement[];
   parametres: ParametreRentabilite | null;
 }) {
   const router = useRouter();
@@ -79,6 +105,22 @@ export function FinanceBoard({
       ? (parametres.mo_par_portion ?? 0) + (parametres.transport_par_portion ?? 0)
       : null;
   const margeNette = chargesPortion != null ? margeBrute - chargesPortion * portions : null;
+
+  // CA ENCAISSÉ (trésorerie) — même fenêtre période × canal, imputé à encaisse_le.
+  const encaisseFiltre = useMemo(() => {
+    const p = PERIODES.find((x) => x.id === periode)!;
+    const limite = maintenant - p.jours * 86400000;
+    return encaissements.filter(
+      (e) => new Date(e.encaisse_le).getTime() >= limite && (canal === "all" || e.canal === canal)
+    );
+  }, [encaissements, periode, canal, maintenant]);
+  const caEncaisse = encaisseFiltre.reduce((acc, e) => acc + e.montant, 0);
+
+  // Créances en cours — filtrées par canal SEULEMENT (une créance reste due,
+  // quelle que soit la fenêtre d'analyse).
+  const attenteFiltree = enAttente.filter((a) => canal === "all" || a.canal === canal);
+  const totalAttente = attenteFiltree.reduce((acc, a) => acc + a.restant, 0);
+  const aujourdhuiIso = new Intl.DateTimeFormat("fr-CA", { timeZone: "Europe/Paris" }).format(new Date(maintenant));
 
   // Table par plat
   const parPlat = useMemo(() => {
@@ -180,8 +222,17 @@ export function FinanceBoard({
         </span>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 12, marginBottom: 20 }} className="fz-fin-kpi">
-        <KpiCard label="CA (remis)" value={`${fmtEuro(ca)} €`} sub={`${filtrees.length} vente${filtrees.length > 1 ? "s" : ""}`} />
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 12, marginBottom: 16 }} className="fz-fin-kpi">
+        <KpiCard
+          label="CA facturé"
+          value={`${fmtEuro(ca)} €`}
+          sub={`prestations livrées · ${filtrees.length} vente${filtrees.length > 1 ? "s" : ""} · au jour de livraison`}
+        />
+        <KpiCard
+          label="CA encaissé"
+          value={`${fmtEuro(caEncaisse)} €`}
+          sub={`trésorerie · ${encaisseFiltre.length} règlement${encaisseFiltre.length > 1 ? "s" : ""} · au jour de règlement`}
+        />
         <KpiCard
           label="Coût matière"
           value={lignesCostees.length > 0 ? `${fmtEuro(cout)} €` : "—"}
@@ -190,7 +241,7 @@ export function FinanceBoard({
         <KpiCard
           label="Marge brute matière"
           value={lignesCostees.length > 0 ? `${fmtEuro(margeBrute)} €` : "—"}
-          sub="CA − coût matière"
+          sub="CA facturé − coût matière"
         />
         <KpiCard
           label="Marge nette"
@@ -198,6 +249,52 @@ export function FinanceBoard({
           sub={chargesPortion == null ? "paramètres MO/transport manquants" : "après MO + transport"}
         />
       </div>
+
+      {/* En attente de règlement — le pipeline des créances traiteur B2B (livré ≠ réglé) */}
+      <Card style={{ overflow: "hidden", marginBottom: 20 }}>
+        <SectionHeader
+          titre="En attente de règlement"
+          sous="Créances en cours (dû / partiel) — hors filtre de période : une créance reste due tant qu'elle n'est pas soldée."
+          compteur={attenteFiltree.length > 0 ? `${attenteFiltree.length} créance${attenteFiltree.length > 1 ? "s" : ""} · ${fmtEuro(totalAttente)} €` : undefined}
+        />
+        {attenteFiltree.length === 0 ? (
+          <p style={{ fontSize: 13, color: "#6b7469", padding: 16 }}>Aucune créance en cours — tout est réglé.</p>
+        ) : (
+          <div>
+            {attenteFiltree.map((a) => {
+              const enRetard = a.echeance_paiement != null && a.echeance_paiement < aujourdhuiIso;
+              return (
+                <div key={a.id} className="flex items-center gap-3 flex-wrap" style={{ padding: "10px 16px", borderBottom: "1px solid #efe7d6" }}>
+                  <Dot color={CANAL_COLOR[a.canal]} size={7} />
+                  <span style={{ minWidth: 160 }}>
+                    <span style={{ display: "block", fontSize: 13.5, fontWeight: 600, color: "#0e3947" }}>{a.client_nom ?? "Sans client"}</span>
+                    <span className="font-mono" style={{ fontSize: 10, color: "#a79b84" }}>
+                      {CANAL_LABEL[a.canal]} · {a.livree ? "livrée" : "à livrer"}
+                    </span>
+                  </span>
+                  <Badge tone={a.statut_paiement === "du" ? "critique" : "alerte"}>
+                    {a.statut_paiement === "du" ? "Dû" : "Partiel"}
+                  </Badge>
+                  <span className="font-mono" style={{ fontSize: 13, fontWeight: 700, color: "#0e3947" }}>
+                    {fmtEuro(a.restant)} €
+                    {a.statut_paiement === "partiel" && (
+                      <span style={{ fontWeight: 400, color: "#9a927f" }}> / {fmtEuro(a.montant_total)} €</span>
+                    )}
+                  </span>
+                  <span className="font-mono" style={{ fontSize: 11.5, color: enRetard ? "#b00d1a" : "#6b7469", fontWeight: enRetard ? 700 : 400 }}>
+                    {a.echeance_paiement != null
+                      ? `échéance ${fmtDateCourt(a.echeance_paiement)}${enRetard ? " · EN RETARD" : ""}`
+                      : "échéance posée à la livraison"}
+                  </span>
+                  <span style={{ marginLeft: "auto" }}>
+                    <ReglementRapide venteId={a.id} restant={a.restant} onDone={() => router.refresh()} onError={setError} />
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </Card>
 
       <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: 16, alignItems: "start" }} className="fz-users-grid">
         {/* CA & marge par plat */}
@@ -346,4 +443,70 @@ export function FinanceBoard({
       </div>
     </>
   );
+}
+
+/**
+ * Règlement rapide d'une créance (action enregistrerReglement du temps 1) —
+ * montant prérempli = restant dû ; partiel possible, dépassement rejeté serveur.
+ */
+function ReglementRapide({
+  venteId,
+  restant,
+  onDone,
+  onError,
+}: {
+  venteId: string;
+  restant: number;
+  onDone: () => void;
+  onError: (msg: string | undefined) => void;
+}) {
+  const [montant, setMontant] = useState(fmtEuro(restant));
+  const [moyen, setMoyen] = useState<Paiement>("virement");
+  const [enCours, setEnCours] = useState(false);
+
+  return (
+    <span className="flex items-center gap-1.5 flex-wrap">
+      <input
+        value={montant}
+        onChange={(e) => setMontant(e.target.value)}
+        inputMode="decimal"
+        aria-label="Montant du règlement"
+        className="outline-none font-mono"
+        style={{ width: 88, background: "#fff", border: "1px solid #dfd4bf", borderRadius: 9, padding: "7px 9px", fontSize: 12.5, color: "#0e3947" }}
+      />
+      <select
+        value={moyen}
+        onChange={(e) => setMoyen(e.target.value as Paiement)}
+        aria-label="Moyen de paiement"
+        className="outline-none"
+        style={{ background: "#fff", border: "1px solid #dfd4bf", borderRadius: 9, padding: "7px 8px", fontSize: 12.5, color: "#0e3947" }}
+      >
+        <option value="virement">Virement</option>
+        <option value="cb">CB</option>
+        <option value="especes">Espèces</option>
+        <option value="ticket">Ticket resto</option>
+      </select>
+      <button
+        onClick={async () => {
+          onError(undefined);
+          setEnCours(true);
+          try {
+            const res = await enregistrerReglement(venteId, Number(montant.replace(",", ".")), moyen);
+            if (res?.error) onError(res.error);
+            else onDone();
+          } finally {
+            setEnCours(false);
+          }
+        }}
+        disabled={enCours}
+        style={{ padding: "7px 12px", borderRadius: 9, background: "#0e3947", color: "#f6f1e7", fontSize: 12, fontWeight: 600, opacity: enCours ? 0.5 : 1 }}
+      >
+        {enCours ? "…" : "Enregistrer le règlement"}
+      </button>
+    </span>
+  );
+}
+
+function fmtDateCourt(iso: string): string {
+  return new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "2-digit", year: "2-digit", timeZone: "Europe/Paris" }).format(new Date(`${iso.slice(0, 10)}T12:00:00Z`));
 }

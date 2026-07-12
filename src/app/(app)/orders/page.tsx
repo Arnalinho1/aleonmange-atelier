@@ -42,14 +42,26 @@ export default async function OrdersPage() {
     if (ventes.length > 0) {
       const ids = ventes.map((v) => v.id);
       const clientIds = [...new Set(ventes.map((v) => v.client_id).filter(Boolean))] as string[];
-      const [lignesBrutes, cl, produitsBruts] = await Promise.all([
+      const [lignesBrutes, cl, produitsBruts, reglementsBruts, paiements] = await Promise.all([
         enLots(ids, (lot) => supabase.from("vente_ligne").select("*").in("vente_id", lot)),
         enLots(clientIds, (lot) => supabase.from("client").select("id, nom").in("id", lot)),
         supabase.from("produit").select("id, recette_id").then(({ data }) => data ?? []),
+        enLots(ids, (lot) => supabase.from("reglement").select("vente_id, montant").in("vente_id", lot)),
+        // v_commande_ouverte (v.* figé en 0004) n'expose pas les colonnes
+        // 0016-0017 — l'état de PAIEMENT se lit sur la table vente.
+        enLots(ids, (lot) => supabase.from("vente").select("id, statut_paiement, encaisse_le").in("id", lot)),
       ]);
       const lignes = lignesBrutes as VenteLigne[];
       const clientParId = new Map((cl as { id: string; nom: string }[]).map((x) => [x.id, x.nom]));
       const recetteProduit = new Map((produitsBruts as Pick<Produit, "id" | "recette_id">[]).map((x) => [x.id, x.recette_id]));
+      // Déjà réglé par commande (acomptes/partiels) → restant dû affiché à l'écran.
+      const reglePar = new Map<string, number>();
+      for (const r of reglementsBruts as { vente_id: string; montant: number }[]) {
+        reglePar.set(r.vente_id, (reglePar.get(r.vente_id) ?? 0) + Number(r.montant));
+      }
+      const paiementPar = new Map(
+        (paiements as Pick<Vente, "id" | "statut_paiement" | "encaisse_le">[]).map((x) => [x.id, x])
+      );
 
       const ligneIds = lignes.map((x) => x.id);
       const vlc = await enLots(ligneIds, (lot) =>
@@ -71,6 +83,10 @@ export default async function OrdersPage() {
           id: v.id,
           canal: v.canal,
           fulfillment: v.fulfillment,
+          // Machine d'état du RÈGLEMENT (0017) — indépendante du fulfillment.
+          statut_paiement: paiementPar.get(v.id)?.statut_paiement ?? "regle",
+          encaisse_le: paiementPar.get(v.id)?.encaisse_le ?? null,
+          restant_du: Math.round((v.montant_total - (reglePar.get(v.id) ?? 0)) * 100) / 100,
           montant_total: v.montant_total,
           couverts: v.couverts,
           due_at: v.due_at,

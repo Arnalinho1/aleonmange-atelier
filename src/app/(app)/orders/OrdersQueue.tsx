@@ -8,14 +8,18 @@ import { Badge, Dot } from "@/components/ui/Badge";
 import { Card, SectionHeader } from "@/components/ui/Card";
 import { fmtEuro } from "@/lib/calculs";
 import { besoinsMatieres, fmtGrammes, fmtPortions } from "@/lib/plan";
-import type { Canal, Composant, Fulfillment, Recette, RecetteComposant } from "@/lib/supabase/database.types";
-import { avancerFulfillment } from "./actions";
+import type { Canal, Composant, Fulfillment, Paiement, Recette, RecetteComposant, StatutPaiement } from "@/lib/supabase/database.types";
+import { avancerFulfillment, enregistrerReglement } from "./actions";
 
 /** Commande ouverte aplatie côté serveur (sérialisable). */
 export type CommandeOuverte = {
   id: string;
   canal: Canal;
   fulfillment: Fulfillment;
+  /** RÈGLEMENT (0017) — machine d'état séparée : livré ≠ réglé. */
+  statut_paiement: StatutPaiement;
+  encaisse_le: string | null;
+  restant_du: number;
   montant_total: number;
   couverts: number | null;
   due_at: string | null;
@@ -52,6 +56,15 @@ const ACTION_LABEL: Partial<Record<Fulfillment, string>> = {
   en_prod: "Marquer prêt",
   pret: "Remettre",
 };
+
+/** Badge de RÈGLEMENT — jamais fusionné avec le fulfillment (livré ≠ réglé). */
+function badgeReglement(c: Pick<CommandeOuverte, "statut_paiement" | "encaisse_le">): { tone: "critique" | "alerte" | "succes" | "neutre"; label: string } {
+  if (c.statut_paiement === "du") return { tone: "critique", label: "Dû" };
+  if (c.statut_paiement === "partiel") return { tone: "alerte", label: "Partiel" };
+  // 'regle' sans encaissement = B2C payé au retrait (pas une créance).
+  if (c.encaisse_le == null) return { tone: "neutre", label: "Paiement au retrait" };
+  return { tone: "succes", label: "Réglé" };
+}
 
 export function OrdersQueue({
   commandes,
@@ -221,7 +234,10 @@ export function OrdersQueue({
                             {c.couverts ? ` · ${c.couverts} couverts` : ""} · {fmtEuro(c.montant_total)} €
                           </p>
                         </div>
-                        <Badge tone={ETAPE_TONE[c.fulfillment]}>{ETAPE_LABEL[c.fulfillment]}</Badge>
+                        <span className="flex items-center gap-1.5 flex-wrap justify-end">
+                          <Badge tone={ETAPE_TONE[c.fulfillment]}>{ETAPE_LABEL[c.fulfillment]}</Badge>
+                          <Badge tone={badgeReglement(c).tone}>{badgeReglement(c).label}</Badge>
+                        </span>
                       </button>
                       {depliee && (
                         <div style={{ padding: "0 16px 14px 16px" }}>
@@ -253,6 +269,14 @@ export function OrdersQueue({
                             >
                               {pending ? "…" : `${ACTION_LABEL[c.fulfillment]} →`}
                             </button>
+                          )}
+                          {c.canal === "traiteur" && c.statut_paiement !== "regle" && (
+                            <FormReglement
+                              venteId={c.id}
+                              restant={c.restant_du}
+                              onDone={() => router.refresh()}
+                              onError={setError}
+                            />
                           )}
                         </div>
                       )}
@@ -349,6 +373,76 @@ export function OrdersQueue({
         </div>
       </div>
     </>
+  );
+}
+
+/**
+ * Saisie d'un règlement sur une créance traiteur B2B (action du temps 1).
+ * Montant prérempli = restant dû ; un règlement partiel passe la commande en
+ * « Partiel », le règlement soldant la passe en « Réglé » (encaisse_le posé).
+ */
+function FormReglement({
+  venteId,
+  restant,
+  onDone,
+  onError,
+}: {
+  venteId: string;
+  restant: number;
+  onDone: () => void;
+  onError: (msg: string | undefined) => void;
+}) {
+  const [montant, setMontant] = useState(fmtEuro(restant));
+  const [moyen, setMoyen] = useState<Paiement>("virement");
+  const [enCours, setEnCours] = useState(false);
+
+  return (
+    <div className="flex items-end gap-2 flex-wrap" style={{ marginTop: 10, background: "#fbf8f1", border: "1px solid #e4dac6", borderRadius: 10, padding: "10px 12px" }}>
+      <label className="flex flex-col gap-1">
+        <span className="font-mono uppercase" style={{ fontSize: 9, letterSpacing: ".08em", color: "#9a927f" }}>
+          Règlement (restant dû {fmtEuro(restant)} €)
+        </span>
+        <input
+          value={montant}
+          onChange={(e) => setMontant(e.target.value)}
+          inputMode="decimal"
+          className="outline-none font-mono"
+          style={{ width: 110, background: "#fff", border: "1px solid #dfd4bf", borderRadius: 9, padding: "8px 10px", fontSize: 13, color: "#0e3947" }}
+        />
+      </label>
+      <label className="flex flex-col gap-1">
+        <span className="font-mono uppercase" style={{ fontSize: 9, letterSpacing: ".08em", color: "#9a927f" }}>Moyen</span>
+        <select
+          value={moyen}
+          onChange={(e) => setMoyen(e.target.value as Paiement)}
+          className="outline-none"
+          style={{ background: "#fff", border: "1px solid #dfd4bf", borderRadius: 9, padding: "8px 10px", fontSize: 13, color: "#0e3947" }}
+        >
+          <option value="virement">Virement</option>
+          <option value="cb">CB</option>
+          <option value="especes">Espèces</option>
+          <option value="ticket">Ticket resto</option>
+        </select>
+      </label>
+      <button
+        onClick={async () => {
+          onError(undefined);
+          setEnCours(true);
+          try {
+            const res = await enregistrerReglement(venteId, Number(montant.replace(",", ".")), moyen);
+            if (res?.error) onError(res.error);
+            else onDone();
+          } finally {
+            setEnCours(false);
+          }
+        }}
+        disabled={enCours}
+        className="font-display transition-opacity hover:opacity-90"
+        style={{ padding: "9px 14px", borderRadius: 10, background: "#0e3947", color: "#f6f1e7", fontWeight: 700, fontSize: 13, opacity: enCours ? 0.5 : 1 }}
+      >
+        {enCours ? "…" : "Enregistrer le règlement"}
+      </button>
+    </div>
   );
 }
 
