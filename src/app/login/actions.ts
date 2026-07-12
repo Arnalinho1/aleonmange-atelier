@@ -16,6 +16,11 @@ export async function signIn(_prev: AuthState, formData: FormData): Promise<Auth
   redirect("/dashboard");
 }
 
+/**
+ * ⚠ Les inscriptions publiques sont DÉSACTIVÉES côté Supabase (arbitrage
+ * sécurité du 12 juil. 2026) : cet appel renvoie signup_disabled. Conservé
+ * comme base du futur écran d'invitation (point ouvert §7.3).
+ */
 export async function signUp(_prev: AuthState, formData: FormData): Promise<AuthState> {
   if (!isSupabaseConfigured()) return { error: "Connexion base non configurée." };
   const email = String(formData.get("email") ?? "");

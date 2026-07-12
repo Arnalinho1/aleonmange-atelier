@@ -1,13 +1,17 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 import Image from "next/image";
-import { signIn, signUp, type AuthState } from "./actions";
+import { signIn, type AuthState } from "./actions";
 
+/**
+ * Connexion — accès réservé à l'équipe. Les inscriptions publiques sont
+ * DÉSACTIVÉES (arbitrage sécurité du 12 juil. 2026, option A) : l'ajout d'un
+ * membre passe par le dashboard Supabase (Invite user) en attendant l'écran
+ * d'invitation propre (point ouvert §7.3).
+ */
 export default function LoginPage() {
-  const [mode, setMode] = useState<"in" | "up">("in");
-  const action = mode === "in" ? signIn : signUp;
-  const [state, formAction, pending] = useActionState<AuthState, FormData>(action, undefined);
+  const [state, formAction, pending] = useActionState<AuthState, FormData>(signIn, undefined);
 
   return (
     <div className="min-h-screen grid place-items-center" style={{ padding: 24 }}>
@@ -28,16 +32,13 @@ export default function LoginPage() {
 
         <div style={{ background: "#f6f1e7", border: "1px solid #dfd4bf", borderRadius: 16, padding: 24 }}>
           <h1 className="font-display" style={{ fontSize: 22, fontWeight: 800, color: "#0e3947", marginBottom: 4 }}>
-            {mode === "in" ? "Connexion" : "Créer le compte"}
+            Connexion
           </h1>
           <p style={{ fontSize: 13, color: "#6b7469", marginBottom: 18 }}>
-            {mode === "in"
-              ? "Accès réservé à l'équipe A Léon Mange."
-              : "Le premier compte créé devient propriétaire."}
+            Accès réservé à l&apos;équipe A Léon Mange.
           </p>
 
           <form action={formAction} className="flex flex-col gap-3">
-            {mode === "up" && <Field name="nom" label="Nom" type="text" placeholder="Audrey Depouilly" />}
             <Field name="email" label="E-mail" type="email" placeholder="vous@aleonmange.fr" required />
             <Field name="password" label="Mot de passe" type="password" placeholder="••••••••" required />
 
@@ -53,16 +54,13 @@ export default function LoginPage() {
               className="font-display transition-opacity hover:opacity-90"
               style={{ background: "#d81020", color: "#f6f1e7", fontWeight: 700, fontSize: 15, padding: "11px", borderRadius: 11, marginTop: 4, opacity: pending ? 0.6 : 1 }}
             >
-              {pending ? "…" : mode === "in" ? "Se connecter" : "Créer le compte"}
+              {pending ? "…" : "Se connecter"}
             </button>
           </form>
 
-          <button
-            onClick={() => setMode(mode === "in" ? "up" : "in")}
-            style={{ marginTop: 14, fontSize: 13, color: "#1493be", fontWeight: 600 }}
-          >
-            {mode === "in" ? "Créer un compte" : "J'ai déjà un compte"}
-          </button>
+          <p style={{ marginTop: 14, fontSize: 12, color: "#9a927f" }}>
+            Pas de compte ? L&apos;accès est ouvert par l&apos;équipe — contactez Arnaud.
+          </p>
         </div>
       </div>
     </div>
