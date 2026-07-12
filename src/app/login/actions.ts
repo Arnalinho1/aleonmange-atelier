@@ -13,7 +13,21 @@ export async function signIn(_prev: AuthState, formData: FormData): Promise<Auth
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) return { error: erreurFr(error.message) };
-  redirect("/dashboard");
+  // Écran d'accueil = préférence PERSONNELLE (user_preference) — une source,
+  // plusieurs lecteurs (handoff Profil & Stock §01).
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  let accueil = "dashboard";
+  if (user) {
+    const { data: pref } = await supabase
+      .from("user_preference")
+      .select("ecran_accueil")
+      .eq("profil_id", user.id)
+      .maybeSingle();
+    if (pref?.ecran_accueil) accueil = pref.ecran_accueil;
+  }
+  redirect(`/${accueil}`);
 }
 
 /**

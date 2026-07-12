@@ -150,6 +150,14 @@ export type ReleveHaccp = {
   created_at: string;
 };
 
+/** Préférences PERSONNELLES (RLS owner-only) — une source, plusieurs lecteurs. */
+export type UserPreference = {
+  profil_id: string;
+  canal_defaut: "ask" | Canal;
+  ecran_accueil: "dashboard" | "sale" | "orders";
+  updated_at: string;
+};
+
 export type NotificationPreference = {
   id: string;
   profil_id: string;
@@ -292,6 +300,7 @@ export type Database = {
       seuil_stock: TableDef<SeuilStock, MakeInsert<SeuilStock, "composant_id">>;
       releve_haccp: TableDef<ReleveHaccp, MakeInsert<ReleveHaccp, "type">>;
       notification_preference: TableDef<NotificationPreference, MakeInsert<NotificationPreference, "profil_id" | "categorie">>;
+      user_preference: TableDef<UserPreference, MakeInsert<UserPreference, "profil_id">>;
       social_post: TableDef<SocialPost, MakeInsert<SocialPost, "reseau">>;
       import_mapping: TableDef<ImportMapping, MakeInsert<ImportMapping, "nom">>;
       import_batch: TableDef<ImportBatch, MakeInsert<ImportBatch, never>>;

@@ -107,6 +107,7 @@ export const SCREEN_META: Record<string, { rubrique: string; titre: string; desc
   commu: { rubrique: "Marque & marketing", titre: "Réseaux sociaux", desc: "Publications et attribution." },
   users: { rubrique: "Réglages", titre: "Utilisateurs & rôles", desc: "L'équipe et ses accès." },
   settings: { rubrique: "Réglages", titre: "Emplacements & réglages", desc: "Référentiels éditables." },
+  profile: { rubrique: "Réglages", titre: "Mon profil", desc: "Votre compte et vos réglages personnels — pour l'équipe et les accès, voir Utilisateurs & rôles." },
 };
 
 /** Libellés FR des enums (affichage uniquement — clés stockées inchangées). */

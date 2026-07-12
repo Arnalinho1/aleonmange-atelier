@@ -3,6 +3,7 @@ import { SCREEN_META } from "@/lib/nav";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import type {
+  Canal,
   CategorieComposant,
   Client,
   Composant,
@@ -26,6 +27,7 @@ export default async function SalePage() {
   let composants: Composant[] = [];
   let emplacements: Emplacement[] = [];
   let clients: Client[] = [];
+  let canalInitial: Canal | null = null;
   const compositionParProduit: Record<string, Partial<Record<CategorieComposant, string>>> = {};
 
   if (isSupabaseConfigured()) {
@@ -41,6 +43,19 @@ export default async function SalePage() {
     composants = c.data ?? [];
     emplacements = e.data ?? [];
     clients = cl.data ?? [];
+
+    // Préférence PERSONNELLE : canal présélectionné à l'ouverture (« ask » = rien).
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      const { data: pref } = await supabase
+        .from("user_preference")
+        .select("canal_defaut")
+        .eq("profil_id", user.id)
+        .maybeSingle();
+      if (pref && pref.canal_defaut !== "ask") canalInitial = pref.canal_defaut as Canal;
+    }
 
     // Composition signature d'un bowl = 1er composant de chaque catégorie de sa fiche.
     const lignesParRecette = new Map<string, RecetteComposant[]>();
@@ -68,6 +83,7 @@ export default async function SalePage() {
     <>
       <ScreenHeader rubrique={m.rubrique} titre={m.titre} desc={m.desc} />
       <SaleComposer
+        canalInitial={canalInitial}
         produits={produits}
         composants={composants}
         emplacements={emplacements}
