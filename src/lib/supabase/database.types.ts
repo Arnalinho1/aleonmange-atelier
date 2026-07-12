@@ -103,6 +103,19 @@ export type Vente = {
   mode_vente: ModeVente;
   fulfillment: Fulfillment;
   source_vente: SourceVente;
+  /** Échéance de remise (précommande) — jour/créneau des Commandes. NULL si instantané. */
+  due_at: string | null;
+  created_at: string;
+};
+
+/** Transition horodatée du cycle de production — source des cadences (Productivité). */
+export type FulfillmentEvent = {
+  id: string;
+  vente_id: string;
+  de: Fulfillment;
+  vers: Fulfillment;
+  occurred_at: string;
+  operateur_id: string | null;
   created_at: string;
 };
 
@@ -181,6 +194,7 @@ export type Database = {
       vente: TableDef<Vente, MakeInsert<Vente, "occurred_at" | "canal" | "montant_total" | "moyen_paiement" | "mode_vente" | "fulfillment">>;
       vente_ligne: TableDef<VenteLigne, MakeInsert<VenteLigne, "vente_id" | "type" | "mode" | "libelle" | "montant">>;
       vente_ligne_composant: TableDef<VenteLigneComposant, MakeInsert<VenteLigneComposant, "ligne_id" | "composant_id" | "categorie">>;
+      fulfillment_event: TableDef<FulfillmentEvent, MakeInsert<FulfillmentEvent, "vente_id" | "de" | "vers">>;
       insight: TableDef<Insight, MakeInsert<Insight, "urgence" | "constat">>;
       notification: TableDef<Notification, MakeInsert<Notification, "categorie" | "titre">>;
     };
