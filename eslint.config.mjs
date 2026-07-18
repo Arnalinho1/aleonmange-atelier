@@ -14,8 +14,7 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Dossier de handoff = matériel de référence (maquette + runtime support.js),
     // pas du code d'app. Ne pas le porter ni le linter.
-    "handoff/**",
-  ]),
+    "handoff/**", "site/**",]),
 ]);
 
 export default eslintConfig;

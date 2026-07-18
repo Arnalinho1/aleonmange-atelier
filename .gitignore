@@ -41,3 +41,10 @@ yarn-error.log*
 next-env.d.ts
 supabase/.temp/
 scripts/demo/derniere-injection.txt
+
+# site public (app independante)
+site/node_modules
+site/.next
+site/*.tsbuildinfo
+site/next-env.d.ts
+!site/.env.local.example

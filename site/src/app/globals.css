@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+/*
+  Design system du SITE PUBLIC — tokens extraits du handoff CD
+  (docs/handoff-site/INTEGRATION.md §02). Distinct du design system de
+  l'Atelier : meme famille visuelle creme/canard, accent ROUGE expose en
+  variable --accent (reglable), polices identiques.
+  Ne pas inventer d'autres teintes.
+*/
+
+@theme {
+  /* Fonds */
+  --color-page: #ede7da;        /* fond de page creme */
+  --color-surface: #fbf8f1;     /* carte claire */
+  --color-surface-2: #f6f1e7;   /* carte creme */
+  --color-voile: #e9e0ce;       /* fonds d'images / bandes */
+
+  /* Encres */
+  --color-canard: #0e3947;      /* texte fort, primaire */
+  --color-texte-2: #5a6b62;     /* texte secondaire */
+  --color-texte-3: #6b7469;
+  --color-muet: #7a857c;
+
+  /* Accent et compagnons */
+  --color-vert: #2e6b4a;
+  --color-vert-fond: #e3efe4;
+  --color-terracotta: #b0704c;
+  --color-or: #f0c173;
+
+  /* Bordures */
+  --color-bord: #ece3d2;
+  --color-bord-2: #e4dac6;
+  --color-bord-3: #dfd4bf;
+  --color-bord-4: #d8cbb2;
+
+  /* Rayons */
+  --radius-pille: 100px;
+  --radius-carte: 16px;
+  --radius-carte-lg: 18px;
+
+  /* Polices (chargees via next/font dans layout.tsx) */
+  --font-display: var(--font-bricolage);
+  --font-sans: var(--font-hanken);
+  --font-mono: var(--font-spline-mono);
+}
+
+:root {
+  /* Token de theme expose par la maquette : accent reglable. */
+  --accent: #d81020;
+}
+
+body {
+  background: var(--color-page);
+  color: var(--color-canard);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* Carrousel signatures : defilement horizontal sans barre visible */
+.alm-defile {
+  scrollbar-width: none;
+}
+.alm-defile::-webkit-scrollbar {
+  display: none;
+}
