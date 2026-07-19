@@ -39,17 +39,22 @@ export type CommandeOuverte = {
   }[];
 };
 
+// web_a_confirmer : commande web en attente de confirmation chef. EXCLUE de
+// v_commande_ouverte (0029) donc jamais affichee dans cette file en Vague 2 ;
+// l'entree satisfait l'exhaustivite du type (l'ecran de confirmation = Vague 3).
 const ETAPE_LABEL: Record<Fulfillment, string> = {
   a_produire: "À produire",
   en_prod: "En production",
   pret: "Prêt",
   remis: "Remis",
+  web_a_confirmer: "À confirmer (web)",
 };
 const ETAPE_TONE: Record<Fulfillment, "alerte" | "info" | "succes" | "neutre"> = {
   a_produire: "alerte",
   en_prod: "info",
   pret: "succes",
   remis: "neutre",
+  web_a_confirmer: "info",
 };
 const ACTION_LABEL: Partial<Record<Fulfillment, string>> = {
   a_produire: "Lancer en prod",
