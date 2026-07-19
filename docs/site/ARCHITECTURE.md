@@ -123,6 +123,34 @@ Amendement de regle (decision Arnaud) : « pas d'image IA » visait les FAUSSES 
 - **Ecartes** : logo sur fond noir (detourage sale — demander a CD un vectoriel fond transparent), image « plan d'acces » (figee, mail @yahoo d'artefact) — a la place, le lien « Voir le plan d'acces » (pied de page + Contact + boutique) ouvre Google Maps ITINERAIRE sur l'adresse reelle (`COORDONNEES.plan`).
 - **En attente** : bowl + tartines (signatures truck), blanquette + paella (aucun produit correspondant au catalogue) — a associer plus tard ; upload d'images produit par les chefs depuis l'Atelier (Vague 4).
 
+## Vague 4 — refonte RLS + espace client (backend EN PRODUCTION, 2026-07-19)
+
+LE document de reference du modele de securite RLS. Backend prouve, committe sur `site-vague-4` (migrations 0034-0038, chacune prouvee par requetes sous role) ; le CODE (auth site + ecrans client + Atelier fiche client) reste a faire. Conformite : `CONFORMITE_VAGUE_4.md`.
+
+### Identite : chef vs client (fail-closed)
+- **Chef = un JWT portant le claim `app_role=equipe`.** Pose a l'emission du jeton par un **Custom Access Token Hook** (`public.custom_access_token_hook`, SECURITY DEFINER, ACTIVE dans la config Auth), dont la SOURCE DE VERITE est la table `profil` (l'equipe) : `exists profil where id = user_id`. Un utilisateur sans profil -> event inchange -> **pas de claim**.
+- **`public.est_chef()`** = `coalesce((auth.jwt() ->> 'app_role') = 'equipe', false)` : **fail-closed** (jeton sans claim => jamais equipe).
+- **Trigger `handle_new_user` DURCI (0034)** : une inscription marquee `raw_user_meta_data.kind='client'` (route site) NE cree PAS de profil (donc pas de claim) ; les invitations chef (sans marqueur) gardent le comportement d'origine (owner/equipe). Les clients n'entrent jamais dans l'equipe.
+- **Client = un compte auth SANS claim**, rattache a un `client` par `client.auth_user_id` (0036). `public.mon_client_id()` (SECURITY DEFINER) = le `client.id` du JWT courant (NULL si pas un client).
+
+### Policies (0035, 0036) — RESTREINT ou MAINTIENT, jamais n'elargit
+- **Tables internes** : les 55 policies `authenticated using(true)` sont passees en `using(est_chef())` (+ 5 scoped durcies en `est_chef() and auth.uid()=...`). Chef (claim) = acces INCHANGE ; client (sans claim) = RIEN. Prouve : chef == baseline sur 28 tables, client/bidon = 0 partout.
+- **Client** : policies ADDITIVES (permissives, OR avec les policies equipe) — le client lit SES ventes / lignes / reglements / son client (`= mon_client_id()`) et gere ses `client_preference`. Prouve : un client voit 9 ventes (0 des autres), 1 client, 0 table interne.
+- **INTOUCHES** : `site_lecteur` (5 policies + la config fidelite), `site_ecrivain` + les 4 RPC SECURITY DEFINER (bypass RLS), `service_role`, `anon`.
+
+### Fidelite (0037) — compteur DERIVE, jamais stocke
+- Opt-in : `client.fidelite_opt_in` + `fidelite_opt_in_le` (les passages comptent a partir de cette date).
+- Config : `parametre_fidelite` (singleton, `seuil`/`recompense` editables en Reglages ; seed 10 / « 1 plat offert »).
+- Vue `v_fidelite_client` (security_invoker) : `passages` = ventes `fulfillment='remis'`, canal boutique+truck, depuis l'opt-in (web/traiteur exclus) ; `recompenses_utilisees` = `fidelite_redemption`. Disponibles = `floor(passages/seuil) - rachats`. Prouve : vue == compte direct. Le client lit SA ligne (RLS) ; le chef toutes (fiche client).
+
+### TTL + REVOCATION immediate
+- Le claim vit DANS le jeton (pose a l'emission). TTL access token = defaut Supabase (court, ~1 h) : le conserver court.
+- **Revoquer un acces equipe** : supprimer la ligne `profil` PUIS forcer la re-emission (`auth.admin.signOut(<uid>)` cote admin, ou attendre le refresh) — le prochain jeton n'aura plus le claim. Au pire, le claim survit le temps du TTL apres le retrait du profil.
+- **Verifier un claim** (chef reconnecte) : DevTools > Console, decoder le cookie `sb-<ref>-auth-token` (payload JWT) -> `app_role` doit valoir `equipe`.
+
+### Storage
+- Aucun bucket aujourd'hui. **Convention** : tout bucket futur recoit, des sa creation, des policies `est_chef()` (+ cadrage client si besoin), **fail-closed** (jamais de policy publique par defaut).
+
 ## Pieges connus
 
 ### Enum ADD VALUE : dry-run partiel, dependance de commit
