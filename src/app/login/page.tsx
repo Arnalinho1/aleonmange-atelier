@@ -5,10 +5,11 @@ import Image from "next/image";
 import { signIn, type AuthState } from "./actions";
 
 /**
- * Connexion — accès réservé à l'équipe. Les inscriptions publiques sont
- * DÉSACTIVÉES (arbitrage sécurité du 12 juil. 2026, option A) : l'ajout d'un
- * membre passe par le dashboard Supabase (Invite user) en attendant l'écran
- * d'invitation propre (point ouvert §7.3).
+ * Connexion : accès réservé à l'équipe. Les inscriptions Supabase sont ouvertes
+ * globalement (espace client du site public, Vague 4), mais un compte SANS profil
+ * n'a AUCUN accès (fail-closed via le hook app_role / est_chef()) : se créer un
+ * compte ici ne donnerait rien. L'ajout d'un membre d'équipe se fait par la table
+ * profil (futur écran d'invitation /users) ; aucune auto-inscription sur cet écran.
  */
 export default function LoginPage() {
   const [state, formAction, pending] = useActionState<AuthState, FormData>(signIn, undefined);
