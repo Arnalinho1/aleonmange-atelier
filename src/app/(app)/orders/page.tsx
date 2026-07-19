@@ -10,8 +10,20 @@ import type { Composant, Produit, Recette, RecetteComposant, Vente, VenteLigne }
 import { ClipboardList } from "lucide-react";
 import Link from "next/link";
 import { OrdersQueue, type CommandeOuverte } from "./OrdersQueue";
+import { WebAConfirmer, type CommandeWeb } from "./WebAConfirmer";
 
 export const metadata = { title: "Commandes du jour — Atelier ALM" };
+
+/** Libellé de retrait FR (Europe/Paris) : boutique = date + heure, truck = jour. */
+function labelWeb(dueAt: string | null, canal: string): string {
+  if (!dueAt) return "à préciser";
+  const d = new Date(dueAt);
+  const date = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", weekday: "long", day: "numeric", month: "long" }).format(d);
+  const cap = date.charAt(0).toUpperCase() + date.slice(1);
+  if (canal === "truck") return cap;
+  const heure = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", hour: "2-digit", minute: "2-digit" }).format(d).replace(":", "h");
+  return `${cap}, ${heure}`;
+}
 
 /**
  * File de production — lit UNIQUEMENT v_commande_ouverte (précommandes non
@@ -25,6 +37,8 @@ export default async function OrdersPage() {
   let recettes: Recette[] = [];
   let lignesRecettes: RecetteComposant[] = [];
   let composants: Composant[] = [];
+  let aConfirmer: CommandeWeb[] = [];
+  let refusees: CommandeWeb[] = [];
 
   if (isSupabaseConfigured()) {
     const supabase = await createClient();
@@ -107,6 +121,42 @@ export default async function OrdersPage() {
         };
       });
     }
+
+    // Commandes web (hors v_commande_ouverte). REGLE 0031 : filtre refuse_le —
+    // IS NULL = à confirmer, IS NOT NULL = refusées récentes.
+    const { data: webBrutes } = await supabase
+      .from("vente")
+      .select("*")
+      .eq("source_vente", "web")
+      .eq("fulfillment", "web_a_confirmer")
+      .order("due_at", { ascending: true, nullsFirst: false });
+    const web = (webBrutes ?? []) as Vente[];
+    if (web.length > 0) {
+      const wids = web.map((v) => v.id);
+      const wclients = [...new Set(web.map((v) => v.client_id).filter(Boolean))] as string[];
+      const [wlignes, wcl] = await Promise.all([
+        enLots(wids, (lot) => supabase.from("vente_ligne").select("vente_id, libelle, qte, poids_g").in("vente_id", lot)),
+        enLots(wclients, (lot) => supabase.from("client").select("id, nom").in("id", lot)),
+      ]);
+      const lignesWeb = wlignes as { vente_id: string; libelle: string; qte: number | null; poids_g: number | null }[];
+      const nomParClient = new Map((wcl as { id: string; nom: string }[]).map((x) => [x.id, x.nom]));
+      const mapper = (v: Vente): CommandeWeb => ({
+        id: v.id,
+        canal: v.canal,
+        montant_total: v.montant_total,
+        due_label: labelWeb(v.due_at, v.canal),
+        client_nom: v.client_id ? nomParClient.get(v.client_id) ?? null : null,
+        refuse_le: v.refuse_le,
+        motif_refus: v.motif_refus,
+        lignes: lignesWeb.filter((l) => l.vente_id === v.id).map((l) => ({ libelle: l.libelle, qte: l.qte, poids_g: l.poids_g })),
+      });
+      aConfirmer = web.filter((v) => v.refuse_le == null).map(mapper);
+      refusees = web
+        .filter((v) => v.refuse_le != null)
+        .sort((a, b) => (b.refuse_le ?? "").localeCompare(a.refuse_le ?? ""))
+        .slice(0, 12)
+        .map(mapper);
+    }
   }
 
   const portionsTotal = commandes.reduce(
@@ -119,6 +169,10 @@ export default async function OrdersPage() {
   return (
     <>
       <ScreenHeader rubrique={m.rubrique} titre={m.titre} desc={m.desc} />
+
+      {(aConfirmer.length > 0 || refusees.length > 0) && (
+        <WebAConfirmer aConfirmer={aConfirmer} refusees={refusees} />
+      )}
 
       <p style={{ fontSize: 12.5, color: "#6b7469", background: "#f1ead9", borderRadius: 10, padding: "9px 12px", marginBottom: 16 }}>
         Seules les <strong>précommandes non remises</strong> apparaissent ici (traiteur, click &amp; collect).

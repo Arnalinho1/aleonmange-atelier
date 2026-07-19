@@ -10,8 +10,9 @@ import { KpiCard } from "@/components/ui/KpiCard";
 import type { Notification, NotificationPreference } from "@/lib/supabase/database.types";
 import { marquerLue, toutMarquerLu, togglePreference } from "./actions";
 
-const CATEGORIES = ["stock", "dlc", "seuil", "traiteur"] as const;
+const CATEGORIES = ["commande", "stock", "dlc", "seuil", "traiteur"] as const;
 const CATEGORIE_NOTIF_LABEL: Record<string, string> = {
+  commande: "Commandes web",
   stock: "Stock",
   dlc: "DLC",
   seuil: "Seuils",

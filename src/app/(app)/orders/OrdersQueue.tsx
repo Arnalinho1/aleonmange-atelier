@@ -153,10 +153,10 @@ export function OrdersQueue({
   );
   const maxBesoin = Math.max(1, ...besoins.map((b) => b.grammes));
 
-  function avancer(id: string) {
+  function avancer(id: string, moyen?: Paiement) {
     setError(undefined);
     startTransition(async () => {
-      const res = await avancerFulfillment(id);
+      const res = await avancerFulfillment(id, moyen);
       if (res?.error) setError(res.error);
       else router.refresh();
     });
@@ -265,7 +265,10 @@ export function OrdersQueue({
                               </div>
                             ))}
                           </div>
-                          {ACTION_LABEL[c.fulfillment] && (
+                          {c.fulfillment === "pret" && c.canal !== "traiteur" ? (
+                            // Remise B2C : le chef confirme le moyen de paiement RÉEL au retrait.
+                            <RemiseB2C onRemettre={(m) => avancer(c.id, m)} pending={pending} />
+                          ) : ACTION_LABEL[c.fulfillment] ? (
                             <button
                               onClick={() => avancer(c.id)}
                               disabled={pending}
@@ -274,7 +277,7 @@ export function OrdersQueue({
                             >
                               {pending ? "…" : `${ACTION_LABEL[c.fulfillment]} →`}
                             </button>
-                          )}
+                          ) : null}
                           {c.canal === "traiteur" && c.statut_paiement !== "regle" && (
                             <FormReglement
                               venteId={c.id}
@@ -378,6 +381,37 @@ export function OrdersQueue({
         </div>
       </div>
     </>
+  );
+}
+
+/** Remise B2C (click & collect / truck) : encaissement AU RETRAIT — le chef
+ * confirme le moyen de paiement réel (une commande web naît 'especes' placeholder). */
+function RemiseB2C({ onRemettre, pending }: { onRemettre: (moyen: Paiement) => void; pending: boolean }) {
+  const [moyen, setMoyen] = useState<Paiement>("especes");
+  return (
+    <div className="flex items-center gap-2" style={{ marginTop: 10 }}>
+      <select
+        value={moyen}
+        onChange={(e) => setMoyen(e.target.value as Paiement)}
+        disabled={pending}
+        aria-label="Moyen de paiement au retrait"
+        className="outline-none"
+        style={{ background: "#fff", border: "1px solid #dfd4bf", borderRadius: 9, padding: "8px 10px", fontSize: 13, color: "#0e3947" }}
+      >
+        <option value="especes">Espèces</option>
+        <option value="cb">CB</option>
+        <option value="ticket">Ticket resto</option>
+        <option value="virement">Virement</option>
+      </select>
+      <button
+        onClick={() => onRemettre(moyen)}
+        disabled={pending}
+        className="font-display transition-opacity hover:opacity-90"
+        style={{ padding: "9px 16px", borderRadius: 10, background: "#1493be", color: "#f6f1e7", fontWeight: 700, fontSize: 13.5, opacity: pending ? 0.5 : 1 }}
+      >
+        {pending ? "…" : "Remettre →"}
+      </button>
+    </div>
   );
 }
 

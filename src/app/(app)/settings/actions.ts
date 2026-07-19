@@ -237,3 +237,50 @@ export async function toggleFamilleCarteActif(id: string, actif: boolean): Promi
   revalidatePath("/settings");
   return { ok: true };
 }
+
+/**
+ * Config des créneaux click & collect (0024) — LUE par le site pour générer les
+ * créneaux. N'est PAS un singleton : on met à jour la ligne active. Validation
+ * miroir de la contrainte `plage_coherente` (plages par paire, fin > début).
+ */
+export async function saveCreneauRetrait(
+  _prev: EmplacementFormState,
+  formData: FormData
+): Promise<EmplacementFormState> {
+  const entier = (nom: string): number | { error: string } => {
+    const n = Number(String(formData.get(nom) ?? "").trim());
+    if (!Number.isInteger(n) || n <= 0) return { error: "Valeurs (pas, délai, horizon) : entiers positifs requis." };
+    return n;
+  };
+  const pas = entier("pas_minutes");
+  if (typeof pas === "object") return pas;
+  const delai = entier("delai_min_minutes");
+  if (typeof delai === "object") return delai;
+  const horizon = entier("horizon_jours");
+  if (typeof horizon === "object") return horizon;
+
+  const plageDebut = String(formData.get("plage_debut") ?? "").trim() || null;
+  const plageFin = String(formData.get("plage_fin") ?? "").trim() || null;
+  if ((plageDebut === null) !== (plageFin === null))
+    return { error: "Plage de retrait : début et fin vont par paire (ou laissez les deux vides = horaires d'ouverture)." };
+  if (plageDebut !== null && plageFin !== null && plageFin <= plageDebut)
+    return { error: "La fin de la plage de retrait doit être après son début." };
+
+  const supabase = await createClient();
+  const { data: actif } = await supabase
+    .from("creneau_retrait")
+    .select("id")
+    .eq("actif", true)
+    .order("created_at")
+    .limit(1)
+    .maybeSingle();
+  if (!actif) return { error: "Aucune configuration de créneaux active." };
+
+  const { error } = await supabase
+    .from("creneau_retrait")
+    .update({ pas_minutes: pas, delai_min_minutes: delai, horizon_jours: horizon, plage_debut: plageDebut, plage_fin: plageFin })
+    .eq("id", actif.id);
+  if (error) return { error: error.message };
+  revalidatePath("/settings");
+  return { ok: true };
+}

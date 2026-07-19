@@ -30,7 +30,7 @@ export async function togglePreference(
   canal: "in_app" | "email",
   valeur: boolean
 ): Promise<NotifActionState> {
-  if (!["stock", "dlc", "seuil", "traiteur"].includes(categorie)) return { error: "Catégorie invalide." };
+  if (!["commande", "stock", "dlc", "seuil", "traiteur"].includes(categorie)) return { error: "Catégorie invalide." };
 
   const supabase = await createClient();
   const {
