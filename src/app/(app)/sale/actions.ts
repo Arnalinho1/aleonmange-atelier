@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import type { Canal, ModeVente, Paiement, Origine, RecetteComposant } from "@/lib/supabase/database.types";
-import { deplierLigneEnGrammes, grammesBowlComposant, grammesVersUnite, type ContexteDepliage } from "@/lib/stock";
+import { composerLignesComposantBowl, deplierLigneEnGrammes, grammesVersUnite, type ContexteDepliage } from "@/lib/stock";
 
 export type SaleFormState = { error?: string; ok?: boolean } | undefined;
 
@@ -183,20 +183,17 @@ export async function createVente(
     if (produit.is_bowl) {
       const ids = l.composants ?? [];
       if (ids.length === 0) return { error: `Composez le bowl « ${produit.nom} » (composants manquants).` };
-      const fiche = produit.recette_id ? fichesParRecette.get(produit.recette_id) ?? [] : [];
-      const rendement = produit.recette_id ? ctx.recetteParId.get(produit.recette_id)?.rendement ?? null : null;
+      // Valide chaque composant choisi (existant + actif) puis délègue le montage
+      // des lignes composant à la source unique partagée (identique à la Vague 3).
+      const composantsChoisis: { composant_id: string; categorie: (typeof comps)[number]["categorie"] }[] = [];
       for (const id of ids) {
         const c = compParId.get(id);
         if (!c || !c.actif) return { error: "Un composant du bowl n'existe plus." };
-        // Grammes FIGÉS à l'encaissement (B8) : fiche du bowl ; composant
-        // échangé (libre) → grammes du composant de base de la même catégorie.
-        const parPortion = grammesBowlComposant(fiche, rendement, id, c.categorie);
-        comps.push({
-          composant_id: id,
-          categorie: c.categorie,
-          quantite_g: parPortion != null ? Math.round(parPortion * qte * 100) / 100 : null,
-        });
+        composantsChoisis.push({ composant_id: id, categorie: c.categorie });
       }
+      const fiche = produit.recette_id ? fichesParRecette.get(produit.recette_id) ?? [] : [];
+      const rendement = produit.recette_id ? ctx.recetteParId.get(produit.recette_id)?.rendement ?? null : null;
+      comps.push(...composerLignesComposantBowl(fiche, rendement, composantsChoisis, qte));
       // Signature (fiche du produit) ou composition libre (dépliée sans parent).
       recetteId = l.composition_libre ? null : produit.recette_id;
     }
