@@ -110,7 +110,9 @@ Le chef confirme ou refuse les commandes web depuis l'Atelier. Detail : `docs/si
 - **Productivite** : `'web'` compte comme `'manuel'` (aucun changement — decision Vague 3 tranchee).
 - **Editeur `creneau_retrait`** : Reglages Atelier (delai/pas/horizon/plage), met a jour la ligne active.
 
-## Visuels du site (integration handoff CD, 2026-07-19)
+## Visuels du site (integration handoff CD, EN PRODUCTION depuis le 2026-07-19)
+
+Merge `--no-ff` `3cb18b2` (`CLAUDE.md` + migration 0033 pre-commits hors du merge -> le tip ne touche que `site/` + `docs/` -> l'Atelier SAUTE, prouve : deploiement Atelier CANCELED ; seul le site a rebuilde). Verif prod OK (images rendues sur les 5 pages, portraits chefs en placeholder, poids source 79-165 Ko webp, next/image sert ~67 Ko).
 
 Amendement de regle (decision Arnaud) : « pas d'image IA » visait les FAUSSES representations non validees, pas les visuels du handoff CD (direction artistique validee). Ces visuels sont integres et RESTENT remplacables par un shooting reel plus tard SANS changement de code (memes emplacements, memes noms de fichiers). Controle anti-Foodizy MAINTENU (RAS sur les 22 visuels).
 
