@@ -32,9 +32,10 @@
 
 | Donnee site | Source | Note |
 |---|---|---|
-| Cartes truck / traiteur / vitrine boutique | table `produit` (canal, actif) groupee par `categorie` | La MEME source que le pipeline de vente : les precommandes V2 refereceront ces `produit_id`. Descriptions/notes de famille : plan de migration ci-dessous |
-| Emplacements truck | table `emplacement` (libelle, jour_semaine) | « Aujourd'hui » calcule ; lieu precis + horaire par emplacement : plan de migration |
-| Horaires boutique, coordonnees | `site/src/lib/contenu.ts` (§06 du handoff, valeurs REELLES) | Provisoire-editable : table a venir |
+| Cartes truck / traiteur / vitrine boutique | table `produit` (canal, `actif AND visible_site`) groupee par `categorie` | La MEME source que le pipeline de vente : les precommandes V2 refereceront ces `produit_id`. Descriptions affichees si renseignees (Catalogue) ; ordre + notes de familles via `famille_carte` (Reglages), fallback tri alphabetique |
+| Emplacements truck | table `emplacement` (libelle, jour_semaine, ville, lieu, horaire_service) | « Aujourd'hui » calcule ; horaire par emplacement avec fallback « 11h30 à 14h » |
+| Horaires boutique | table `horaire_boutique` (7 jours, plages time ; saisie Reglages) | Plages nulles = « Fermé » ; jours consecutifs identiques regroupes ; table VIDE = fallback integral `contenu.ts` |
+| Coordonnees | `site/src/lib/contenu.ts` (§06 du handoff, valeurs REELLES) | Provisoire-editable |
 | Annonces | AUCUNE surface dans la maquette | signale ; `social_post` disponible si un bloc actus est souhaite |
 
 ## Plan de migration referentiel (TERMINE : 0019 a 0023 APPLIQUEES le 2026-07-18 ; 0024 reportee au STOP Vague 2)
@@ -48,7 +49,9 @@ Ordre execute : **0019 → 0020 → 0022 → 0021 → 0023**, un feu vert PAR mi
 5. **0023 `horaire_boutique`** (`supabase/migrations/0023_horaire_boutique.sql`) : `jour smallint unique check 1-7`, `plage1/plage2` en `time` + 3 contraintes de coherence, RLS + policies + grant/policy site_lecteur, SEED des horaires reels dans la meme migration. APPLIQUEE et verifiee le 2026-07-18 : 7 lignes lues sous le role (Mar-Ven 9h-13h + 15h-19h, Sam 9h-14h, Dim/Lun fermes), ecritures refusees 42501. Jour FERME = ligne PRESENTE aux plages nulles (explicite) ; table VIDE = non configure → le site retombera sur contenu.ts. Consommation cote site a activer (statut « ouvert maintenant » calculable plus tard).
 6. **0024 `creneau_retrait`** : REPORTEE au STOP Vague 2 (delai/cutoff/horizon = decisions business ouvertes), avec `demande_devis`, `newsletter_abonne`, enum `source_vente` += `'web'`, etat `web_a_confirmer` (enum fulfillment), rapprochement client create-or-match (index uniques du socle client).
 
-Chaque table 1-5 recoit son `grant select` + policy `site_lecteur` dans sa propre migration (regle permanente ci-dessus). Chantier UI Atelier associe (hors migrations, a chiffrer apres) : Catalogue (description, interrupteur visible_site), Reglages (emplacements enrichis, horaires boutique, familles de carte).
+Chaque table 1-5 recoit son `grant select` + policy `site_lecteur` dans sa propre migration (regle permanente ci-dessus).
+
+FINITION du 2026-07-18 (apres les migrations) : UI Atelier livree — Catalogue (description, interrupteur « Visible sur le site », badge « Masqué du site ») et Reglages (emplacements enrichis ville/lieu/horaire, section Horaires boutique 7 jours a 2 plages time, section Familles de carte avec datalist des categories en usage et badge « Sans catégorie ») ; consommation cote site activee (filtre visible_site, descriptions, ordre/notes de familles, precisions d'emplacement, horaires en base) avec fallbacks integrals. ISR : `revalidate = 300` au niveau LAYOUT (le pied de page affiche les horaires en base sur toutes les routes) — toutes les pages suivent la fraicheur 5 min.
 
 ## Risques identifies pour les Vagues 2-3 (a traiter aux STOP migrations)
 

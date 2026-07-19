@@ -45,4 +45,22 @@ E2E Playwright (Chrome systeme) : 10 routes x 390 px et 1440 px, 23 captures, as
 - ✅ Coordonnees reelles : 1923 route de la vallee, 69620 Letra · 06 75 36 23 26 · contact@aleonmange.com · Mar-Ven 9h-13h / 15h-19h, Sam 9h-14h. La pastille accueil « Boutique ouverte · Mardi a vendredi 9h a 19h » reprend la maquette CD a l'identique (simplification de la coupure meridienne voulue par la maquette).
 - ✅ Preuve zero fuite : `service_role` et la VALEUR de la cle absents de `site/.next/static/` (0 fichier), valeur absente de tout `.next/` et de tout fichier suivi par git ; `site/.env.local` ignore.
 - ✅ Builds + lint + tsc verts pour `site/` ET l'Atelier (isolation maintenue).
-- 🟡 Favicon absente (`/favicon.ico` et `/icon.svg` en 404, une erreur console par premiere visite) : choix d'asset a valider (alm-mark.png ?), a traiter avant deploiement.
+- 🟡 Favicon absente (`/favicon.ico` et `/icon.svg` en 404, une erreur console par premiere visite) : choix d'asset a valider (alm-mark.png ?), a traiter avant deploiement. → Traite en finition, cf. section ci-dessous.
+
+## Finition du 2026-07-18 (UI Atelier + consommation site + favicon)
+
+| Chantier | Etat | Detail |
+|---|---|---|
+| Catalogue Atelier : description + « Visible sur le site » | ✅ | Textarea + interrupteur (coche par defaut) dans le drawer, badge « Masqué du site » en liste. Ecritures sous authenticated, aucune migration |
+| Reglages : emplacements enrichis | ✅ | Ville, lieu precis, horaire de service (bloc « Affiché sur le site public » du drawer, sous-ligne en liste) |
+| Reglages : horaires boutique | ✅ | 7 jours (affiches mardi → lundi), 2 plages time nullables, plages vides = ferme, validation serveur miroir des contraintes 0023, upsert sur jour |
+| Reglages : familles de carte | ✅ | Par canal (nom, note, ordre), datalist des categories EN USAGE, badge « Sans catégorie », liste des categories sans famille ; desactivation, jamais de suppression |
+| Site : filtre visible_site + descriptions | ✅ | `actif AND visible_site` sur toutes les lectures produit ; description sous le nom quand renseignee (rendu inchange sinon) |
+| Site : ordre/notes de familles | ✅ | famille_carte (reglees d'abord — ordre puis nom —, autres en alphabetique) ; note sous le titre de famille |
+| Site : precisions d'emplacement | ✅ | Ville · lieu sur les cartes truck, horaire par emplacement (fallback « 11h30 à 14h »), bandeau accueil du jour a l'horaire de l'emplacement |
+| Site : horaires boutique en base | ✅ | Lus de horaire_boutique sur Boutique, Contact et pied de page (prop du layout serveur) ; iso-affichage verifie avec le seed ; table vide = fallback contenu.ts ; revalidate 300 au layout |
+| Favicon | 🟡 EN ATTENTE | Declinaisons generees depuis l'asset officiel (favicon.ico 16/32/48, icon.png, apple-icon 180 sur fond creme #EDE7DA) et verifiees servies (200, plus de 404 console). NON COMMITEES : a 16 px lunettes et sourire deviennent une bande claire (silhouette + beret restent identifiables) — captures soumises a Arnaud avant de figer, comme demande |
+
+Verification : E2E complet AUCUNE ANOMALIE (10 routes x 390/1440 px, 23 captures, menu mobile, modale, zero cadratin, zero NaN, zero erreur console) ; horaires seedes affiches iso sur toutes les surfaces ; preuve zero fuite re-passee (service_role, site_lecteur, valeurs JWT et anon : 0 partout) ; builds + lint + tsc verts des deux applications.
+
+Limites de cette verification (extension Chrome non connectee, ecriture directe en base refusee par le garde-fou de session) : les nouveaux ecrans Atelier n'ont pas ete verifies visuellement a 390/1440 px (builds verts seulement) et le jeu d'essai (description, emplacement enrichi, famille ordonnee) n'a pas ete saisi — a rejouer via l'UI par Arnaud ou en session avec l'extension connectee.
