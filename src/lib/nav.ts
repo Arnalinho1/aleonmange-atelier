@@ -106,7 +106,7 @@ export const SCREEN_META: Record<string, { rubrique: string; titre: string; desc
   clients: { rubrique: "Pilotage", titre: "Clients", desc: "Fiches et récurrence." },
   commu: { rubrique: "Marque & marketing", titre: "Réseaux sociaux", desc: "Publications et attribution." },
   users: { rubrique: "Réglages", titre: "Utilisateurs & rôles", desc: "L'équipe et ses accès." },
-  settings: { rubrique: "Réglages", titre: "Réglages de l'atelier", desc: "Emplacements du truck et paramètres de rentabilité — la configuration se fait ici, Finances consulte." },
+  settings: { rubrique: "Réglages", titre: "Réglages de l'atelier", desc: "Emplacements du truck, contenu du site public (familles de carte, horaires boutique) et paramètres de rentabilité — la configuration se fait ici." },
   profile: { rubrique: "Réglages", titre: "Mon profil", desc: "Votre compte et vos réglages personnels — pour l'équipe et les accès, voir Utilisateurs & rôles." },
 };
 

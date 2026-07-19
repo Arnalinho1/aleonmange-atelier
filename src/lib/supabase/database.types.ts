@@ -25,6 +25,11 @@ export type Emplacement = {
   code: string;
   libelle: string;
   jour_semaine: number | null;
+  /** Precisions affichees par le SITE PUBLIC (0022) — saisie Reglages, NULL = non renseigne. */
+  ville: string | null;
+  lieu: string | null;
+  /** Horaire de service affiche par le site — NULL = amplitude par defaut du site (0022). */
+  horaire_service: string | null;
   actif: boolean;
   created_at: string;
 };
@@ -74,7 +79,33 @@ export type Produit = {
   cout_achat: number | null;
   is_bowl: boolean;
   recette_id: string | null;
+  /** Description affichee par le SITE PUBLIC sous le nom du produit (0020) — NULL = rien d'affiche. */
+  description: string | null;
+  /** Visibilite sur le SITE PUBLIC (0020) — le site lit actif AND visible_site ; sans effet sur la vente. */
+  visible_site: boolean;
   actif: boolean;
+  created_at: string;
+};
+
+/** Famille de carte du SITE PUBLIC (0021) — ordre + note par canal, rapprochee de produit.categorie par (canal, nom). */
+export type FamilleCarte = {
+  id: string;
+  canal: Canal;
+  nom: string;
+  note: string | null;
+  ordre: number;
+  actif: boolean;
+  created_at: string;
+};
+
+/** Horaires boutique du SITE PUBLIC (0023) — 1 ligne par jour (1=lundi … 7=dimanche), plages nulles = ferme. */
+export type HoraireBoutique = {
+  id: string;
+  jour: number;
+  plage1_debut: string | null;
+  plage1_fin: string | null;
+  plage2_debut: string | null;
+  plage2_fin: string | null;
   created_at: string;
 };
 
@@ -334,6 +365,8 @@ export type Database = {
   public: {
     Tables: {
       emplacement: TableDef<Emplacement, MakeInsert<Emplacement, "code" | "libelle">>;
+      famille_carte: TableDef<FamilleCarte, MakeInsert<FamilleCarte, "canal" | "nom">>;
+      horaire_boutique: TableDef<HoraireBoutique, MakeInsert<HoraireBoutique, "jour">>;
       composant: TableDef<Composant, MakeInsert<Composant, "nom" | "categorie">>;
       recette: TableDef<Recette, MakeInsert<Recette, "nom">>;
       recette_composant: TableDef<RecetteComposant, MakeInsert<RecetteComposant, "recette_id" | "composant_id" | "categorie">>;

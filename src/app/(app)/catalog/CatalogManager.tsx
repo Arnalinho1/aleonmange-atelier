@@ -123,6 +123,7 @@ export function CatalogManager({
                         <Dot color={CANAL_COLOR[c]} />
                         <span style={{ fontSize: 14, fontWeight: 600, color: "#0e3947", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.nom}</span>
                         {p.is_bowl && <Badge tone="info">Bowl</Badge>}
+                        {!p.visible_site && <Badge tone="neutre">Masqué du site</Badge>}
                       </div>
                       <span style={{ fontSize: 12.5, color: "#6b7469" }}>{p.categorie ?? "—"}</span>
                       <span className="font-mono" style={{ fontSize: 12, color: "#6b7469" }}>
@@ -261,6 +262,28 @@ export function CatalogManager({
               </div>
 
               <Field label="Catégorie (optionnel)" name="categorie" defaultValue={edition?.categorie ?? ""} placeholder="ex : Plat mijoté" />
+
+              <div className="flex flex-col gap-1.5">
+                <label className="flex flex-col gap-1.5">
+                  <Label>Description pour le site (optionnel)</Label>
+                  <textarea
+                    name="description"
+                    defaultValue={edition?.description ?? ""}
+                    placeholder="ex : Pommes de terre fondantes, crème et muscade — la recette de la maison."
+                    rows={3}
+                    className="outline-none"
+                    style={{ background: "#fff", border: "1px solid #dfd4bf", borderRadius: 10, padding: "10px 12px", fontSize: 14, color: "#0e3947", resize: "vertical", fontFamily: "inherit" }}
+                  />
+                </label>
+                <span style={{ fontSize: 11.5, color: "#9a927f" }}>
+                  Affichée sous le nom du produit sur le site public. Vide = rien d&apos;affiché.
+                </span>
+              </div>
+
+              <label className="flex items-center gap-2" style={{ fontSize: 13, color: "#6b7469" }}>
+                <input type="checkbox" name="visible_site" defaultChecked={edition ? edition.visible_site : true} />
+                Visible sur le site — le site public n&apos;affiche que les produits actifs ET visibles
+              </label>
 
               <label className="flex flex-col gap-1.5">
                 <Label>Fiche technique liée (optionnel)</Label>

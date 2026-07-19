@@ -18,7 +18,10 @@ function lireProduit(formData: FormData) {
   // Coût d'achat (revendus sans fiche) — même unité que le prix (€/pièce ou €/kg).
   const coutAchatRaw = String(formData.get("cout_achat") ?? "").replace(",", ".").trim();
   const coutAchat = coutAchatRaw ? Number(coutAchatRaw) : null;
-  return { nom, canal, mode, categorie, isBowl, recetteId, prix, coutAchat };
+  // Contenu SITE PUBLIC (0020) : description affichée sous le nom, visibilité sur le site.
+  const description = String(formData.get("description") ?? "").trim() || null;
+  const visibleSite = formData.get("visible_site") === "on";
+  return { nom, canal, mode, categorie, isBowl, recetteId, prix, coutAchat, description, visibleSite };
 }
 
 function validerProduit(p: ReturnType<typeof lireProduit>): string | null {
@@ -55,6 +58,8 @@ export async function createProduit(
     prix_unitaire: p.mode === "unite" ? p.prix : null,
     prix_kg: p.mode === "poids" ? p.prix : null,
     cout_achat: p.coutAchat,
+    description: p.description,
+    visible_site: p.visibleSite,
   });
 
   if (error) return { error: error.message };
@@ -85,6 +90,8 @@ export async function updateProduit(
       prix_unitaire: p.mode === "unite" ? p.prix : null,
       prix_kg: p.mode === "poids" ? p.prix : null,
       cout_achat: p.coutAchat,
+      description: p.description,
+      visible_site: p.visibleSite,
     })
     .eq("id", id);
 

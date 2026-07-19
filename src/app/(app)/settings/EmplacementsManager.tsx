@@ -90,9 +90,16 @@ export function EmplacementsManager({ emplacements }: { emplacements: Emplacemen
                 opacity: e.actif ? 1 : 0.55,
               }}
             >
-              <div className="flex items-center gap-2">
-                <Dot color={e.actif ? "#e9a23b" : "#9a927f"} />
-                <span style={{ fontSize: 14, fontWeight: 600, color: "#0e3947" }}>{e.libelle}</span>
+              <div className="flex flex-col" style={{ minWidth: 0 }}>
+                <div className="flex items-center gap-2">
+                  <Dot color={e.actif ? "#e9a23b" : "#9a927f"} />
+                  <span style={{ fontSize: 14, fontWeight: 600, color: "#0e3947" }}>{e.libelle}</span>
+                </div>
+                {(e.lieu || e.ville || e.horaire_service) && (
+                  <span style={{ fontSize: 11.5, color: "#9a927f", paddingLeft: 16 }}>
+                    {[e.lieu, e.ville, e.horaire_service].filter(Boolean).join(" · ")}
+                  </span>
+                )}
               </div>
               <span className="font-mono" style={{ fontSize: 11.5, color: "#8a7f6a" }}>{e.code}</span>
               <span style={{ fontSize: 12.5, color: "#6b7469" }}>
@@ -177,6 +184,49 @@ export function EmplacementsManager({ emplacements }: { emplacements: Emplacemen
                     <option key={v} value={v}>{l}</option>
                   ))}
                 </select>
+              </label>
+
+              <div className="flex flex-col gap-1.5" style={{ borderTop: "1px solid #efe7d6", paddingTop: 14 }}>
+                <span className="font-mono uppercase" style={{ fontSize: 10, letterSpacing: ".12em", color: "#b08d3f" }}>
+                  Affiché sur le site public
+                </span>
+                <span style={{ fontSize: 11.5, color: "#9a927f" }}>
+                  Optionnel — le site affiche ces précisions sur la carte de l&apos;emplacement.
+                  Horaire vide = amplitude par défaut du site (11h30 à 14h).
+                </span>
+              </div>
+
+              <label className="flex flex-col gap-1.5">
+                <Label>Ville (optionnel)</Label>
+                <input
+                  name="ville"
+                  defaultValue={edition?.ville ?? ""}
+                  placeholder="ex : Le Bois-d'Oingt"
+                  className="outline-none"
+                  style={{ background: "#fff", border: "1px solid #dfd4bf", borderRadius: 10, padding: "10px 12px", fontSize: 14, color: "#0e3947" }}
+                />
+              </label>
+
+              <label className="flex flex-col gap-1.5">
+                <Label>Lieu précis (optionnel)</Label>
+                <input
+                  name="lieu"
+                  defaultValue={edition?.lieu ?? ""}
+                  placeholder="ex : Place de la Libération"
+                  className="outline-none"
+                  style={{ background: "#fff", border: "1px solid #dfd4bf", borderRadius: 10, padding: "10px 12px", fontSize: 14, color: "#0e3947" }}
+                />
+              </label>
+
+              <label className="flex flex-col gap-1.5">
+                <Label>Horaire de service (optionnel)</Label>
+                <input
+                  name="horaire_service"
+                  defaultValue={edition?.horaire_service ?? ""}
+                  placeholder="ex : 11h30 à 14h"
+                  className="outline-none"
+                  style={{ background: "#fff", border: "1px solid #dfd4bf", borderRadius: 10, padding: "10px 12px", fontSize: 14, color: "#0e3947" }}
+                />
               </label>
 
               {edition ? (
