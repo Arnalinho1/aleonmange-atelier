@@ -38,6 +38,6 @@
 - 🟡 Depliage bowl (`vente_ligne_composant`) : DIFFERE a la confirmation Vague 3 (une commande non confirmee ne reserve aucune matiere). `vente_ligne.recette_id` pose pour les bowls signature.
 - 🟡 Confirmation chef (« Commandes web a confirmer », depliage, reglement au retrait) : Vague 3 (par decision : go-live gate).
 
-## Donnees d'essai E2E (en attente de nettoyage validbe par Arnaud)
+## Donnees d'essai E2E : NETTOYEES le 2026-07-19 (feu vert Arnaud)
 
-6 ventes web + 3 clients + 1 devis + 1 newsletter (patterns `%exemple-alm%`). Toutes les ventes web de la base sont d'essai (aucune vraie commande). Cleanup pret (ventes -> clients -> devis -> newsletter, ordre FK).
+Les 6 ventes web + 3 clients + 1 devis + 1 newsletter d'essai (patterns `%exemple-alm%`) ont ete supprimees (ordre FK : ventes -> clients -> devis -> newsletter). Comptages verifies a 0 : zero vente web en base, zero artefact d'essai. La base est propre.
