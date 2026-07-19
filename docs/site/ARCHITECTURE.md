@@ -18,6 +18,13 @@
   - elle contourne toute RLS → SERVEUR UNIQUEMENT, jamais `NEXT_PUBLIC`, LECTURE SEULE par discipline en Vague 1 (aucun insert/update/delete dans `site/`).
   - cle absente → echec CLAIR : avertissement explicite dans les logs serveur + etats vides propres a l'ecran (pas de crash silencieux).
   - preuve a chaque livraison : `grep -r "service_role" site/.next/static/` = 0 fichier.
+- Cible approuvee (migration 0019, APPLIQUEE le 2026-07-18) : role Postgres `site_lecteur` NOLOGIN, lecture seule par GRANT explicite, endosse par PostgREST via la claim `role` d'un JWT. REGLE PERMANENTE : `site_lecteur` ne bypasse PAS la RLS (contrairement a service_role) et reste HORS des default privileges de la migration 0006 — chaque future table lisible par le site recoit son `grant select` ET sa policy de lecture (`for select to site_lecteur using (true)`) dans la MEME migration, sinon les SELECT renvoient zero ligne malgre les grants.
+- JWT `site_lecteur` (remplacera la service_role dans `site/.env.local`, variable cible `SUPABASE_SITE_LECTEUR_JWT`, des 0019 appliquee) :
+  - claims `{ "iss": "supabase", "ref": "yecxgmuryrmztymxjbxo", "role": "site_lecteur", "iat": <frappe>, "exp": <frappe + 10 ans> }`, signees HS256 avec le secret JWT legacy du projet (dashboard Supabase → Settings → API → JWT Secret).
+  - `exp` EXPLICITE : duree 10 ans ; la date d'echeance est NOTEE en commentaire dans `site/.env.local` a la frappe (et reportee ici).
+  - Frappe : script local ponctuel, jamais commite ; verification avant bascule : `curl` REST avec le JWT → lecture `produit` OK, INSERT refuse (42501).
+  - Rotation : re-frapper un JWT avec un nouvel `exp` et remplacer la variable (local + env Vercel au deploiement). Revocation d'urgence : rotation du secret JWT du projet — invalide TOUTES les cles legacy (anon et service_role de l'Atelier comprises), operation lourde a coordonner.
+  - Disciplines inchangees : jamais NEXT_PUBLIC, jamais commite, grep du bundle a chaque livraison.
 - Pages a donnees en ISR (`revalidate = 300`) : fraicheur du flag « aujourd'hui » (CALCULE : jour courant Europe/Paris vs `jour_semaine`, jamais stocke) et de la carte, performance mobile.
 
 ## Lectures de la Vague 1 (sources uniques Atelier)
@@ -29,11 +36,18 @@
 | Horaires boutique, coordonnees | `site/src/lib/contenu.ts` (§06 du handoff, valeurs REELLES) | Provisoire-editable : table a venir |
 | Annonces | AUCUNE surface dans la maquette | signale ; `social_post` disponible si un bloc actus est souhaite |
 
-## Plan de migration referentiel (STOP semi-supervise — A SOUMETTRE, rien d'execute)
+## Plan de migration referentiel (STOP semi-supervise — APPROUVE le 2026-07-18, un feu vert PAR migration)
 
-1. **Role Postgres LECTURE SEULE dedie au site** (`site_lecteur` : `GRANT SELECT` sur les seules tables lues — produit, emplacement, et les futures tables de contenu), destine a REMPLACER la service_role des la Vague 2 (les ecritures passeront par les routes API avec leur propre validation).
-2. Contenu editable depuis « Reglages de l'atelier » : `produit.description` + `produit.visible_site` · `famille_carte` (canal, nom, note, ordre) · `emplacement.ville / lieu / horaire_service` · `horaire_boutique` · `creneau_retrait` (plage + pas configurables).
-3. Vague 2 (ecritures) : `demande_devis`, `newsletter_abonne`, enum `source_vente` += `'web'`, etat `web_a_confirmer` (enum fulfillment), rapprochement client create-or-match (index uniques du socle client).
+Ordre approuve : **0019 → 0020 → 0022 → 0021 → 0023**, dry-run en transaction annulee + rollback ecrit AVANT chaque execution, jamais deux migrations d'affilee. Decisions tranchees : `visible_site` default `true` (preserve le rendu actuel) · `famille_carte` rapprochee par `(canal, nom = produit.categorie)` SANS FK (zero backfill, pipeline de vente intact) · `horaire_boutique` en colonnes `time` (2 plages nullables par jour). Colonnes additives : aucune rupture des ecrans Atelier (Catalogue et Reglages font `select("*")`).
+
+1. **0019 `site_lecteur`** (`supabase/migrations/0019_site_lecteur.sql`) : role lecture seule + grants produit/emplacement + policies « site lit … » (RLS active sur ces tables). APPLIQUEE et verifiee le 2026-07-18 (dry-run puis execution : role NOLOGIN sans bypass RLS, membre d'authenticator, lecture OK sous le role — 100 produits, 3 emplacements —, INSERT refuse 42501). Reste a faire : frappe du JWT (script `site/scripts/frappe-jwt.mjs`, commande a executer par Arnaud), bascule de `site/.env.local` vers `SUPABASE_SITE_LECTEUR_JWT` et sortie de la service_role.
+2. **0020 `produit`** : `+ description text`, `+ visible_site boolean not null default true` ; le site lira `actif AND visible_site`. Aucun index (100 lignes, ISR 5 min).
+3. **0022 `emplacement`** : `+ ville text`, `+ lieu text`, `+ horaire_service text` (fallback « 11h30 à 14h » cote site).
+4. **0021 `famille_carte`** : `(id, canal, nom, note, ordre, actif, created_at)` + `unique (canal, nom)` (sert d'index de jointure) ; famille absente de la table → tri alphabetique actuel.
+5. **0023 `horaire_boutique`** : `jour smallint unique check 1-7`, `plage1_debut/fin`, `plage2_debut/fin` (`time`, null = pas de plage) + seed des horaires reels dans la meme migration.
+6. **0024 `creneau_retrait`** : REPORTEE au STOP Vague 2 (delai/cutoff/horizon = decisions business ouvertes), avec `demande_devis`, `newsletter_abonne`, enum `source_vente` += `'web'`, etat `web_a_confirmer` (enum fulfillment), rapprochement client create-or-match (index uniques du socle client).
+
+Chaque table 1-5 recoit son `grant select` + policy `site_lecteur` dans sa propre migration (regle permanente ci-dessus). Chantier UI Atelier associe (hors migrations, a chiffrer apres) : Catalogue (description, interrupteur visible_site), Reglages (emplacements enrichis, horaires boutique, familles de carte).
 
 ## Risques identifies pour les Vagues 2-3 (a traiter aux STOP migrations)
 
