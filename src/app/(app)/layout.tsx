@@ -28,15 +28,19 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         .maybeSingle();
       if (p) profil = { nom: p.nom, role: `${ROLE_LABEL[p.role] ?? ""} · A Léon Mange` };
 
-      const [{ count: unread }, { count: openOrders }] = await Promise.all([
+      const [{ count: unread }, { count: openOrders }, { count: webPending }] = await Promise.all([
         supabase.from("notification").select("id", { count: "exact", head: true }).eq("lu", false),
         supabase.from("v_commande_ouverte").select("id", { count: "exact", head: true }),
+        // web_a_confirmer est EXCLU de v_commande_ouverte (0029) → compte à part.
+        // REGLE 0031 : filtre refuse_le IS NULL (les refusées ne sont plus en attente).
+        supabase.from("vente").select("id", { count: "exact", head: true }).eq("fulfillment", "web_a_confirmer").is("refuse_le", null),
       ]);
       if (unread && unread > 0) {
         badges.notifs = unread;
         hasUnread = true;
       }
-      if (openOrders && openOrders > 0) badges.orders = openOrders;
+      const totalOrders = (openOrders ?? 0) + (webPending ?? 0);
+      if (totalOrders > 0) badges.orders = totalOrders;
     }
   }
 

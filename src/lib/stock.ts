@@ -77,6 +77,31 @@ export function grammesBowlComposant(
 }
 
 /**
+ * Construit les lignes `vente_ligne_composant` (moins `ligne_id`) d'un bowl —
+ * SOURCE UNIQUE partagée par la saisie manuelle (createVente) et la confirmation
+ * d'une commande web (Vague 3), pour une sortie byte-identique. `quantite_g` =
+ * grammes par portion (fiche) × qte, figés, arrondis 2 décimales (null si la
+ * fiche ne couvre pas la catégorie). Les composants doivent être pré-validés
+ * (existants/actifs) par l'appelant ; pour un bowl SIGNATURE ils sont les
+ * composants de la fiche elle-même (chacun tombe sur la branche « exacte »).
+ */
+export function composerLignesComposantBowl(
+  fiche: Pick<RecetteComposant, "composant_id" | "categorie" | "quantite">[],
+  rendement: number | null,
+  composants: { composant_id: string; categorie: CategorieComposant }[],
+  qte: number
+): { composant_id: string; categorie: CategorieComposant; quantite_g: number | null }[] {
+  return composants.map(({ composant_id, categorie }) => {
+    const parPortion = grammesBowlComposant(fiche, rendement, composant_id, categorie);
+    return {
+      composant_id,
+      categorie,
+      quantite_g: parPortion != null ? Math.round(parPortion * qte * 100) / 100 : null,
+    };
+  });
+}
+
+/**
  * Déplie une ligne de vente en grammes TOTAUX par composant.
  * - bowl : vlc.quantite_g figés à l'encaissement ; fallback fiche du produit
  *   (historique antérieur à B8, grammes du composant de base par catégorie) ;

@@ -78,7 +78,7 @@ export default async function FoodTruck() {
                   {e.jour ? `Chaque ${e.jour.toLowerCase()}` : "Jour à confirmer"} · {e.horaire}
                 </p>
                 <Link
-                  href="/food-truck/precommander"
+                  href={`/food-truck/precommander?emplacement=${encodeURIComponent(e.code)}`}
                   className="mt-4 font-display font-bold text-[14px] text-[var(--accent)]"
                 >
                   {e.aujourdhui

@@ -1,25 +1,33 @@
 import { SurTitre } from "@/components/ui";
-import { BientotDisponible } from "@/components/BientotDisponible";
+import { PanierPrecommande } from "@/components/PanierPrecommande";
+import { carteDuCanal } from "@/lib/data/carte";
+import { emplacementsTruck } from "@/lib/data/emplacements";
 
 export const metadata = {
-  title: "Précommande food truck · bientôt disponible",
+  title: "Precommande food truck",
   robots: { index: false },
 };
 
-/** Precommande truck (d-precmd) — l'ECRITURE arrive en Vague 2 (panier contextualise emplacement + jour). */
-export default function Precommander() {
+/** Precommande truck (d-precmd) : panier truck + emplacement du marche -> precommande web a confirmer. */
+export default async function Precommander({ searchParams }: { searchParams: Promise<{ emplacement?: string }> }) {
+  const { emplacement } = await searchParams;
+  const [familles, emplacements] = await Promise.all([carteDuCanal("truck"), emplacementsTruck()]);
+  const choix = emplacements.map((e) => ({ code: e.code, nom: e.nom, jour: e.jour }));
+  const initial = choix.some((c) => c.code === emplacement) ? (emplacement as string) : "";
+
   return (
-    <section className="mx-auto max-w-[1280px] px-4 md:px-8 py-14 md:py-20">
-      <div className="text-center mb-8">
-        <SurTitre>Précommande food truck</SurTitre>
+    <section className="mx-auto max-w-[1280px] px-4 md:px-8 py-12 md:py-16">
+      <div className="mb-8">
+        <SurTitre>Precommande food truck</SurTitre>
         <h1 className="font-display font-extrabold text-[clamp(26px,4vw,36px)] tracking-[-.02em] text-canard mt-2">
-          Précommander sur le truck
+          Precommander sur le truck
         </h1>
+        <p className="text-[14.5px] text-texte-2 mt-2 max-w-[560px] leading-relaxed">
+          Choisissez votre marche et composez votre commande. Retrait sur place, paiement au retrait.
+          La precommande est ouverte jusqu&apos;a la veille au soir, et confirmee par l&apos;atelier.
+        </p>
       </div>
-      <BientotDisponible
-        titre="La précommande en ligne ouvre bientôt"
-        detail="Vous pourrez commander pour l'emplacement de votre choix et récupérer votre repas sans attendre. Paiement au retrait, sur place."
-      />
+      <PanierPrecommande canal="truck" familles={familles} emplacements={choix} emplacementInitial={initial} />
     </section>
   );
 }

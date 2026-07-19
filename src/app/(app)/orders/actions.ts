@@ -2,8 +2,20 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import type { Fulfillment, Paiement, RecetteComposant, VenteLigneComposant } from "@/lib/supabase/database.types";
-import { deplierLigneEnGrammes, grammesVersUnite, type ContexteDepliage } from "@/lib/stock";
+import type { CategorieComposant, Fulfillment, Paiement, RecetteComposant, VenteLigneComposant } from "@/lib/supabase/database.types";
+import { composerLignesComposantBowl, deplierLigneEnGrammes, grammesVersUnite, type ContexteDepliage } from "@/lib/stock";
+import { emailCommandeConfirmee, emailCommandeRefusee } from "@/lib/email";
+
+/** Libellé de retrait FR (Europe/Paris) pour les emails : boutique = date + heure, truck = jour de marché. */
+function labelRetrait(dueAtIso: string | null, canal: string): string {
+  if (!dueAtIso) return "a preciser";
+  const d = new Date(dueAtIso);
+  const date = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", weekday: "long", day: "numeric", month: "long" }).format(d);
+  const cap = date.charAt(0).toUpperCase() + date.slice(1);
+  if (canal === "truck") return cap;
+  const heure = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", hour: "2-digit", minute: "2-digit" }).format(d).replace(":", "h");
+  return `${cap}, ${heure}`;
+}
 
 export type OrderActionState = { error?: string; ok?: boolean } | undefined;
 
@@ -24,8 +36,9 @@ const ETAPE_SUIVANTE: Partial<Record<Fulfillment, Fulfillment>> = {
  * les sorties de stock réelles s'écrivent ICI, une seule fois (la garde de
  * concurrence sur l'update vérifie qu'on a bien réalisé la transition).
  */
-export async function avancerFulfillment(venteId: string): Promise<OrderActionState> {
+export async function avancerFulfillment(venteId: string, moyenReel?: Paiement): Promise<OrderActionState> {
   if (!venteId) return { error: "Commande introuvable." };
+  if (moyenReel && !["especes", "cb", "ticket", "virement"].includes(moyenReel)) return { error: "Moyen de paiement invalide." };
 
   const supabase = await createClient();
   const { data: vente, error: venteError } = await supabase
@@ -71,13 +84,16 @@ export async function avancerFulfillment(venteId: string): Promise<OrderActionSt
     // · B2C (click & collect boutique) → le cash entre AU RETRAIT : règlement
     //   créé ici, encaisse_le posé — jamais un faux impayé.
     const estTraiteurB2B = vente.canal === "traiteur";
+    // B2C : le chef peut corriger le moyen de paiement RÉEL au retrait (une
+    // commande web naît 'especes' placeholder). Défaut = valeur stockée.
+    const moyenFinal: Paiement = !estTraiteurB2B && moyenReel ? moyenReel : vente.moyen_paiement;
     const { error: datesError } = await supabase
       .from("vente")
       .update({
         occurred_at: maintenant,
         ...(estTraiteurB2B
           ? { echeance_paiement: new Date(new Date(maintenant).getTime() + 30 * 86400000).toISOString().slice(0, 10) }
-          : { encaisse_le: maintenant }),
+          : { encaisse_le: maintenant, moyen_paiement: moyenFinal }),
       })
       .eq("id", venteId);
     if (datesError) return { error: `Commande remise, mais dates non écrites : ${datesError.message}` };
@@ -87,7 +103,7 @@ export async function avancerFulfillment(venteId: string): Promise<OrderActionSt
         vente_id: venteId,
         montant: vente.montant_total,
         encaisse_le: maintenant,
-        moyen_paiement: vente.moyen_paiement,
+        moyen_paiement: moyenFinal,
         note: "Encaissement au retrait",
       });
       if (reglementError) return { error: `Commande remise, mais règlement non enregistré : ${reglementError.message}` };
@@ -158,6 +174,144 @@ export async function enregistrerReglement(
   if (statutError) {
     await supabase.from("reglement").delete().eq("id", reglement.id); // rollback best-effort
     return { error: statutError.message };
+  }
+
+  revalidatePath("/orders");
+  return { ok: true };
+}
+
+/**
+ * CONFIRME une commande web (web_a_confirmer → a_produire) : elle entre alors dans
+ * v_commande_ouverte (RESERVE stock, charge, KPI). Déplie les lignes bowl en
+ * vente_ligne_composant depuis la fiche recette (source unique partagée avec la
+ * saisie manuelle). Aucun stock/règlement ici (ils naissent à la remise).
+ */
+export async function confirmerCommandeWeb(venteId: string): Promise<OrderActionState> {
+  if (!venteId) return { error: "Commande introuvable." };
+  const supabase = await createClient();
+  const { data: vente, error: venteError } = await supabase
+    .from("vente")
+    .select("id, fulfillment, refuse_le, canal, due_at, client_id")
+    .eq("id", venteId)
+    .maybeSingle();
+  if (venteError) return { error: venteError.message };
+  if (!vente) return { error: "Commande introuvable." };
+  if (vente.fulfillment !== "web_a_confirmer" || vente.refuse_le != null)
+    return { error: "Cette commande n'est plus à confirmer." };
+
+  const { data: transition, error: updateError } = await supabase
+    .from("vente")
+    .update({ fulfillment: "a_produire" })
+    .eq("id", venteId)
+    .eq("fulfillment", "web_a_confirmer") // garde concurrence : jamais confirmée deux fois
+    .is("refuse_le", null)
+    .select("id");
+  if (updateError) return { error: updateError.message };
+  if (!transition || transition.length === 0)
+    return { error: "La commande a déjà été traitée (rafraîchissez la file)." };
+
+  // Dépliage bowl : c'est LE moment (recette_id posé en V2, composants créés ici).
+  const erreurDepliage = await deplierBowlsConfirmation(supabase, venteId);
+  if (erreurDepliage) return { error: `Commande confirmée, mais dépliage bowl échoué : ${erreurDepliage}` };
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const { error: eventError } = await supabase.from("fulfillment_event").insert({
+    vente_id: venteId,
+    de: "web_a_confirmer",
+    vers: "a_produire",
+    occurred_at: new Date().toISOString(),
+    operateur_id: user?.id ?? null,
+  });
+  if (eventError) return { error: `Commande confirmée, mais journal non écrit : ${eventError.message}` };
+
+  // Email best-effort — ne bloque JAMAIS la confirmation.
+  if (vente.client_id) {
+    const { data: client } = await supabase.from("client").select("email").eq("id", vente.client_id).maybeSingle();
+    if (client?.email) await emailCommandeConfirmee(client.email, { retraitLabel: labelRetrait(vente.due_at, vente.canal) });
+  }
+
+  revalidatePath("/orders");
+  return { ok: true };
+}
+
+/** Crée les vente_ligne_composant des lignes bowl (signature) — source unique partagée. */
+async function deplierBowlsConfirmation(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  venteId: string
+): Promise<string | null> {
+  const { data: lignes, error: ligneError } = await supabase
+    .from("vente_ligne")
+    .select("id, recette_id, qte")
+    .eq("vente_id", venteId)
+    .eq("type", "bowl");
+  if (ligneError) return ligneError.message;
+  const bowls = (lignes ?? []).filter((l): l is { id: string; recette_id: string; qte: number | null } => l.recette_id != null);
+  if (bowls.length === 0) return null;
+
+  const recetteIds = [...new Set(bowls.map((l) => l.recette_id))];
+  const [{ data: recettes, error: recError }, { data: fiches, error: ficheError }] = await Promise.all([
+    supabase.from("recette").select("id, rendement").in("id", recetteIds),
+    supabase.from("recette_composant").select("*").in("recette_id", recetteIds),
+  ]);
+  if (recError) return recError.message;
+  if (ficheError) return ficheError.message;
+
+  const rendementParRecette = new Map((recettes ?? []).map((r) => [r.id, r.rendement]));
+  const fichesParRecette = new Map<string, RecetteComposant[]>();
+  for (const f of (fiches ?? []) as RecetteComposant[]) {
+    const arr = fichesParRecette.get(f.recette_id) ?? [];
+    arr.push(f);
+    fichesParRecette.set(f.recette_id, arr);
+  }
+
+  const rows: { ligne_id: string; composant_id: string; categorie: CategorieComposant; quantite_g: number | null }[] = [];
+  for (const l of bowls) {
+    const fiche = fichesParRecette.get(l.recette_id) ?? [];
+    if (fiche.length === 0) continue; // recette sans fiche : rien à déplier
+    const composants = fiche.map((f) => ({ composant_id: f.composant_id, categorie: f.categorie }));
+    const depl = composerLignesComposantBowl(fiche, rendementParRecette.get(l.recette_id) ?? null, composants, l.qte ?? 1);
+    for (const d of depl) rows.push({ ligne_id: l.id, ...d });
+  }
+  if (rows.length === 0) return null;
+  const { error: insError } = await supabase.from("vente_ligne_composant").insert(rows);
+  return insError ? insError.message : null;
+}
+
+/**
+ * REFUSE une commande web : refuse_le + motif_refus posés, fulfillment INCHANGÉ
+ * (reste web_a_confirmer → absente de tout agrégat). Email de refus doux.
+ * REGLE PERMANENTE : la file « à confirmer » filtre refuse_le IS NULL.
+ */
+export async function refuserCommandeWeb(venteId: string, motifCode: string, motifDetail?: string): Promise<OrderActionState> {
+  if (!venteId) return { error: "Commande introuvable." };
+  if (!["rupture", "capacite", "fermeture", "autre"].includes(motifCode)) return { error: "Motif invalide." };
+  const supabase = await createClient();
+  const { data: vente, error: venteError } = await supabase
+    .from("vente")
+    .select("id, fulfillment, refuse_le, client_id")
+    .eq("id", venteId)
+    .maybeSingle();
+  if (venteError) return { error: venteError.message };
+  if (!vente) return { error: "Commande introuvable." };
+  if (vente.fulfillment !== "web_a_confirmer" || vente.refuse_le != null)
+    return { error: "Cette commande n'est plus à confirmer." };
+
+  const motif = motifDetail?.trim() ? `${motifCode} - ${motifDetail.trim()}` : motifCode;
+  const { data: maj, error: updateError } = await supabase
+    .from("vente")
+    .update({ refuse_le: new Date().toISOString(), motif_refus: motif })
+    .eq("id", venteId)
+    .eq("fulfillment", "web_a_confirmer")
+    .is("refuse_le", null)
+    .select("id");
+  if (updateError) return { error: updateError.message };
+  if (!maj || maj.length === 0) return { error: "La commande a déjà été traitée (rafraîchissez la file)." };
+
+  if (vente.client_id) {
+    const { data: client } = await supabase.from("client").select("email").eq("id", vente.client_id).maybeSingle();
+    if (client?.email) await emailCommandeRefusee(client.email, { motifCode });
   }
 
   revalidatePath("/orders");

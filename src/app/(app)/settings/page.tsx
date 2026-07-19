@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import type {
   Canal,
+  CreneauRetrait,
   Emplacement,
   FamilleCarte,
   HoraireBoutique,
@@ -14,6 +15,7 @@ import { MapPin } from "lucide-react";
 import { EmplacementsManager } from "./EmplacementsManager";
 import { FamillesCarteManager } from "./FamillesCarteManager";
 import { HorairesBoutiqueForm } from "./HorairesBoutiqueForm";
+import { CreneauRetraitForm } from "./CreneauRetraitForm";
 import { RentabiliteForm } from "./RentabiliteForm";
 
 export const metadata = { title: "Réglages de l'atelier — Atelier ALM" };
@@ -30,12 +32,13 @@ export default async function SettingsPage() {
   let emplacements: Emplacement[] = [];
   let familles: FamilleCarte[] = [];
   let horaires: HoraireBoutique[] = [];
+  let creneau: CreneauRetrait | null = null;
   let parametres: ParametreRentabilite | null = null;
   const categoriesParCanal: Record<Canal, string[]> = { truck: [], boutique: [], traiteur: [] };
 
   if (isSupabaseConfigured()) {
     const supabase = await createClient();
-    const [{ data }, fam, hor, cats, params] = await Promise.all([
+    const [{ data }, fam, hor, cre, cats, params] = await Promise.all([
       supabase
         .from("emplacement")
         .select("*")
@@ -44,12 +47,14 @@ export default async function SettingsPage() {
         .order("libelle"),
       supabase.from("famille_carte").select("*").order("canal").order("ordre").order("nom"),
       supabase.from("horaire_boutique").select("*").order("jour"),
+      supabase.from("creneau_retrait").select("*").eq("actif", true).order("created_at").limit(1).maybeSingle(),
       supabase.from("produit").select("canal, categorie").eq("actif", true),
       supabase.from("parametre_rentabilite").select("*").maybeSingle(),
     ]);
     emplacements = data ?? [];
     familles = (fam.data as FamilleCarte[] | null) ?? [];
     horaires = (hor.data as HoraireBoutique[] | null) ?? [];
+    creneau = (cre.data as CreneauRetrait | null) ?? null;
     parametres = (params.data as ParametreRentabilite | null) ?? null;
     // Catégories EN USAGE par canal (aide au rapprochement famille ↔ categorie).
     for (const p of (cats.data as { canal: Canal; categorie: string | null }[] | null) ?? []) {
@@ -79,6 +84,9 @@ export default async function SettingsPage() {
       </div>
       <div style={{ marginTop: 20 }}>
         <HorairesBoutiqueForm horaires={horaires} />
+      </div>
+      <div style={{ marginTop: 20 }}>
+        <CreneauRetraitForm creneau={creneau} />
       </div>
 
       {/* La saisie des paramètres vit ICI (Réglages configure, Finances consulte). */}

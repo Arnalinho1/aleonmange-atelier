@@ -11,13 +11,13 @@
 
 export type Canal = "truck" | "boutique" | "traiteur";
 export type ModeVente = "instantane" | "precommande";
-export type Fulfillment = "a_produire" | "en_prod" | "pret" | "remis";
+export type Fulfillment = "a_produire" | "en_prod" | "pret" | "remis" | "web_a_confirmer";
 export type Paiement = "especes" | "cb" | "ticket" | "virement";
 export type Origine = "spontane" | "insta" | "tiktok" | "facebook" | "code";
 export type LigneType = "bowl" | "produit" | "formule";
 export type LigneMode = "unite" | "poids";
 export type CategorieComposant = "proteine" | "feculent" | "legume" | "sauce";
-export type SourceVente = "manuel" | "import";
+export type SourceVente = "manuel" | "import" | "web";
 export type RoleEquipe = "owner" | "chef" | "equipe";
 
 export type Emplacement = {
@@ -109,6 +109,46 @@ export type HoraireBoutique = {
   created_at: string;
 };
 
+/** Config du click & collect (0024) — creneaux derives : horaires d'ouverture INTERSECTES [now+delai, now+horizon] par pas. */
+export type CreneauRetrait = {
+  id: string;
+  pas_minutes: number;
+  delai_min_minutes: number;
+  horizon_jours: number;
+  plage_debut: string | null;
+  plage_fin: string | null;
+  actif: boolean;
+  created_at: string;
+};
+
+/** Demande de devis traiteur depuis le site (0025) — contact INLINE, aucun client cree tant que non transformee (Vague 3). */
+export type DemandeDevis = {
+  id: string;
+  type_evenement: string | null;
+  date_evenement: string | null;
+  nb_convives: number | null;
+  budget_indicatif: string | null;
+  description: string | null;
+  contact_nom: string;
+  contact_email: string | null;
+  contact_telephone: string | null;
+  statut: string;
+  client_id: string | null;
+  created_at: string;
+};
+
+/** Inscription newsletter (0026) — double opt-in : consentement_le NULL tant que statut='en_attente' (RGPD). */
+export type NewsletterAbonne = {
+  id: string;
+  email: string;
+  token: string;
+  statut: string;
+  consentement_le: string | null;
+  demande_le: string;
+  confirme_le: string | null;
+  created_at: string;
+};
+
 export type Client = {
   id: string;
   nom: string;
@@ -164,6 +204,10 @@ export type Vente = {
   statut_paiement: StatutPaiement;
   /** Échéance de PAIEMENT (traiteur B2B : remise + 30 j) — DISTINCTE de due_at (0017). */
   echeance_paiement: string | null;
+  /** Refus chef d'une commande web (0031). NULL = non refusée. Le fulfillment reste web_a_confirmer ; tout lecteur de web_a_confirmer filtre refuse_le. */
+  refuse_le: string | null;
+  /** Motif du refus (code + détail interne éventuel, 0031). L'email client n'expose qu'une phrase douce. */
+  motif_refus: string | null;
   created_at: string;
 };
 
@@ -367,6 +411,9 @@ export type Database = {
       emplacement: TableDef<Emplacement, MakeInsert<Emplacement, "code" | "libelle">>;
       famille_carte: TableDef<FamilleCarte, MakeInsert<FamilleCarte, "canal" | "nom">>;
       horaire_boutique: TableDef<HoraireBoutique, MakeInsert<HoraireBoutique, "jour">>;
+      creneau_retrait: TableDef<CreneauRetrait, MakeInsert<CreneauRetrait, never>>;
+      demande_devis: TableDef<DemandeDevis, MakeInsert<DemandeDevis, "contact_nom">>;
+      newsletter_abonne: TableDef<NewsletterAbonne, MakeInsert<NewsletterAbonne, "email">>;
       composant: TableDef<Composant, MakeInsert<Composant, "nom" | "categorie">>;
       recette: TableDef<Recette, MakeInsert<Recette, "nom">>;
       recette_composant: TableDef<RecetteComposant, MakeInsert<RecetteComposant, "recette_id" | "composant_id" | "categorie">>;
