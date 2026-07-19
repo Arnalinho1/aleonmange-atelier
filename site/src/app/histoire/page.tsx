@@ -1,4 +1,4 @@
-import { Carte, PhotoAvenir, SurTitre } from "@/components/ui";
+import { Carte, Photo, PhotoAvenir, SurTitre } from "@/components/ui";
 import { CHEFS, COORDONNEES } from "@/lib/contenu";
 
 export const metadata = {
@@ -36,7 +36,13 @@ export default function Histoire() {
 
       <section className="mx-auto max-w-[1280px] px-4 md:px-8 grid gap-5 md:grid-cols-2">
         <PhotoAvenir ratio="4/3" libelle="Photo à venir · Audrey et Victorien" className="rounded-carte-lg" />
-        <PhotoAvenir ratio="4/3" libelle="Photo à venir · le laboratoire" className="rounded-carte-lg" />
+        <Photo
+          src="/images/laboratoire.webp"
+          alt="Le laboratoire d'A Léon Mange, mise en place du jour"
+          ratio="4/3"
+          sizes="(max-width: 768px) 100vw, 50vw"
+          className="rounded-carte-lg"
+        />
       </section>
 
       <section className="mx-auto max-w-[1280px] px-4 md:px-8 py-12">

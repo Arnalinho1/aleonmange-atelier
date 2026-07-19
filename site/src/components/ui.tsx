@@ -1,8 +1,9 @@
 import type { ReactNode } from "react";
+import Image from "next/image";
 
 /**
  * Composants de base du design system site (handoff §02) :
- * carte, bouton pilule, badge mono, stepper, placeholder photo.
+ * carte, bouton pilule, badge mono, stepper, photo + placeholder photo.
  */
 
 export function BoutonPille({
@@ -79,8 +80,41 @@ export function SurTitre({ children }: { children: ReactNode }) {
 }
 
 /**
- * Placeholder photo NEUTRE et identifie — en attendant les vraies photos
- * (jamais de photo IA, jamais de visuel Foodizy, aucun asset de la maquette).
+ * Photo reelle (next/image) : visuels de la direction artistique du handoff CD
+ * (amendement du 2026-07-19, cf. CLAUDE.md : la regle « pas d'IA » vise les fausses
+ * representations non validees, pas ces visuels ; remplacables par un shooting reel
+ * plus tard sans changement de code). Meme enveloppe que PhotoAvenir (ratio + className)
+ * pour un remplacement 1:1. object-cover, lazy par defaut (priority sur le hero).
+ */
+export function Photo({
+  src,
+  alt,
+  ratio = "4/3",
+  className = "",
+  priority = false,
+  sizes = "(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 640px",
+}: {
+  src: string;
+  alt: string;
+  ratio?: string;
+  className?: string;
+  priority?: boolean;
+  sizes?: string;
+}) {
+  return (
+    <div
+      className={`relative w-full overflow-hidden bg-voile ${className}`}
+      style={{ aspectRatio: ratio }}
+    >
+      <Image src={src} alt={alt} fill sizes={sizes} priority={priority} className="object-cover" />
+    </div>
+  );
+}
+
+/**
+ * Placeholder photo NEUTRE et identifie — FALLBACK d'un emplacement SANS image
+ * assignee (ex. les portraits des chefs, en attente du shooting reel : jamais de
+ * visage genere presente comme un vrai chef). Les emplacements pourvus utilisent Photo.
  */
 export function PhotoAvenir({
   ratio = "4/3",

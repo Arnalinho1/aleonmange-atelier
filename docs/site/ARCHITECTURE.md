@@ -110,6 +110,17 @@ Le chef confirme ou refuse les commandes web depuis l'Atelier. Detail : `docs/si
 - **Productivite** : `'web'` compte comme `'manuel'` (aucun changement — decision Vague 3 tranchee).
 - **Editeur `creneau_retrait`** : Reglages Atelier (delai/pas/horizon/plage), met a jour la ligne active.
 
+## Visuels du site (integration handoff CD, 2026-07-19)
+
+Amendement de regle (decision Arnaud) : « pas d'image IA » visait les FAUSSES representations non validees, pas les visuels du handoff CD (direction artistique validee). Ces visuels sont integres et RESTENT remplacables par un shooting reel plus tard SANS changement de code (memes emplacements, memes noms de fichiers). Controle anti-Foodizy MAINTENU (RAS sur les 22 visuels).
+
+- **Source** : extraits du manifeste base64 des maquettes (`docs/handoff-site/*.html`, format « Bundled Page » : `<script type="__bundler/manifest">` = dict `{uuid: {mime, compressed, data(base64)}}`, references par `<img src="uuid">` avec alt descriptifs). Desktop et mobile portent les MEMES visuels (uuid distincts par fichier) : rien d'unique cote mobile. 22 visuels.
+- **Optimisation** : webp qualite 80, redimensionnes (<=1400px hero, 1000-1300px cartes/galerie, 900px plats), dans `site/public/images/` (ambiance) et `site/public/images/plats/` (plats). ~1,6 Mo au total (contre ~65 Mo de PNG source).
+- **Rendu** : composant `Photo` (`components/ui.tsx`, next/image `fill` + object-cover, `sizes` adaptes par emplacement, `priority` sur les hero). Meme enveloppe (ratio + className) que `PhotoAvenir`, qui reste le FALLBACK des emplacements sans image assignee. **Portraits des chefs** (« Audrey et Victorien », accueil + histoire) : `PhotoAvenir` maintenu (jamais de visage genere presente comme un vrai chef).
+- **Plats par la DONNEE** (jamais une galerie en dur) : migration 0033 `produit.image_url` (additif, nullable ; `site_lecteur` le lit via le grant de table, comme 0020). `carteDuCanal` renvoie `image` ; la boutique affiche « Nos recettes signatures » = produits portant une image (fallback etat vide propre). 3 produits boutique pourvus (Parmentier de boeuf, Cordon bleu, Lasagnes bolognaise).
+- **Ecartes** : logo sur fond noir (detourage sale — demander a CD un vectoriel fond transparent), image « plan d'acces » (figee, mail @yahoo d'artefact) — a la place, le lien « Voir le plan d'acces » (pied de page + Contact + boutique) ouvre Google Maps ITINERAIRE sur l'adresse reelle (`COORDONNEES.plan`).
+- **En attente** : bowl + tartines (signatures truck), blanquette + paella (aucun produit correspondant au catalogue) — a associer plus tard ; upload d'images produit par les chefs depuis l'Atelier (Vague 4).
+
 ## Pieges connus
 
 ### Enum ADD VALUE : dry-run partiel, dependance de commit

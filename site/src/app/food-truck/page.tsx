@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BadgeMono, Carte, PhotoAvenir, SurTitre } from "@/components/ui";
+import { BadgeMono, Carte, Photo, SurTitre } from "@/components/ui";
 import { carteDuCanal, fmtPrix } from "@/lib/data/carte";
 import { emplacementsTruck } from "@/lib/data/emplacements";
 
@@ -141,8 +141,20 @@ export default async function FoodTruck() {
           )}
         </Carte>
         <div className="grid gap-5">
-          <PhotoAvenir ratio="4/3" libelle="Photo à venir · le truck" className="rounded-carte-lg" />
-          <PhotoAvenir ratio="4/3" libelle="Photo à venir · au marché" className="rounded-carte-lg" />
+          <Photo
+            src="/images/truck-service.webp"
+            alt="Le food truck A Léon Mange installé en service, table dressée"
+            ratio="4/3"
+            sizes="(max-width: 1024px) 100vw, 34vw"
+            className="rounded-carte-lg"
+          />
+          <Photo
+            src="/images/truck-vignes.webp"
+            alt="Le food truck A Léon Mange sur un marché du Beaujolais, dans les vignes"
+            ratio="4/3"
+            sizes="(max-width: 1024px) 100vw, 34vw"
+            className="rounded-carte-lg"
+          />
         </div>
       </section>
     </>

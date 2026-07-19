@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BadgeMono, Carte, PhotoAvenir, SurTitre } from "@/components/ui";
+import { BadgeMono, Carte, Photo, SurTitre } from "@/components/ui";
 import { carteDuCanal, fmtPrix } from "@/lib/data/carte";
 
 /** ISR : fraicheur des lectures (emplacement du jour, carte pilotee par l'Atelier). */
@@ -12,10 +12,10 @@ export const metadata = {
 };
 
 const RECEPTIONS = [
-  { titre: "Mariages", detail: "Cocktail et repas assis" },
-  { titre: "Entreprises", detail: "Plateaux et buffets" },
-  { titre: "Cocktails", detail: "Pièces salées et sucrées" },
-  { titre: "Repas de famille", detail: "Grandes tablées" },
+  { titre: "Mariages", detail: "Cocktail et repas assis", img: "/images/reception-mariage.webp", alt: "Table de mariage dressée avec fleurs en extérieur" },
+  { titre: "Entreprises", detail: "Plateaux et buffets", img: "/images/reception-entreprise.webp", alt: "Réception d'entreprise, buffet de pièces cocktail" },
+  { titre: "Cocktails", detail: "Pièces salées et sucrées", img: "/images/reception-cocktail.webp", alt: "Pièces cocktail salées présentées sur plateau" },
+  { titre: "Repas de famille", detail: "Grandes tablées", img: "/images/reception-famille.webp", alt: "Grande tablée d'un repas de famille en extérieur" },
 ];
 
 const ETAPES = [
@@ -55,7 +55,14 @@ export default async function Traiteur() {
               Demander un devis
             </Link>
           </div>
-          <PhotoAvenir ratio="4/3" libelle="Photo à venir · une réception" className="rounded-carte-lg" />
+          <Photo
+            src="/images/reception-table.webp"
+            alt="Table de réception dressée en extérieur, dans les vignes du Beaujolais"
+            ratio="4/3"
+            priority
+            sizes="(max-width: 768px) 100vw, 42vw"
+            className="rounded-carte-lg"
+          />
         </div>
       </section>
 
@@ -65,7 +72,12 @@ export default async function Traiteur() {
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4 mt-5">
           {RECEPTIONS.map((r) => (
             <Carte key={r.titre} className="overflow-hidden">
-              <PhotoAvenir ratio="4/3" libelle={`Photo à venir · ${r.titre.toLowerCase()}`} />
+              <Photo
+                src={r.img}
+                alt={r.alt}
+                ratio="4/3"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+              />
               <div className="p-4">
                 <p className="font-display font-extrabold text-[17px] text-canard">{r.titre}</p>
                 <p className="text-[13px] text-texte-2 mt-1">{r.detail}</p>
