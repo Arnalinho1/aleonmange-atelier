@@ -12,17 +12,18 @@
 
 ## Acces aux donnees (regle de securite)
 
-- L'acces anonyme a la base est INTEGRALEMENT BLOQUE, et il le reste. Aucune cle anon cote client, aucun acces client direct.
-- Lectures publiques via `site/src/lib/supabase/serveur.ts` (`import "server-only"`) avec la cle **`SUPABASE_SERVICE_ROLE_KEY`** :
-  - a coller MANUELLEMENT dans `site/.env.local` (modele : `site/.env.local.example`, avec `SUPABASE_URL`). Jamais tiree automatiquement, jamais commitee.
-  - elle contourne toute RLS → SERVEUR UNIQUEMENT, jamais `NEXT_PUBLIC`, LECTURE SEULE par discipline en Vague 1 (aucun insert/update/delete dans `site/`).
-  - cle absente → echec CLAIR : avertissement explicite dans les logs serveur + etats vides propres a l'ecran (pas de crash silencieux).
-  - preuve a chaque livraison : `grep -r "service_role" site/.next/static/` = 0 fichier.
-- Cible approuvee (migration 0019, APPLIQUEE le 2026-07-18) : role Postgres `site_lecteur` NOLOGIN, lecture seule par GRANT explicite, endosse par PostgREST via la claim `role` d'un JWT. REGLE PERMANENTE : `site_lecteur` ne bypasse PAS la RLS (contrairement a service_role) et reste HORS des default privileges de la migration 0006 — chaque future table lisible par le site recoit son `grant select` ET sa policy de lecture (`for select to site_lecteur using (true)`) dans la MEME migration, sinon les SELECT renvoient zero ligne malgre les grants.
-- JWT `site_lecteur` (remplacera la service_role dans `site/.env.local`, variable cible `SUPABASE_SITE_LECTEUR_JWT`, des 0019 appliquee) :
+- L'acces anonyme a la base est INTEGRALEMENT BLOQUE, et il le reste (role `anon` : aucun grant, aucune policy — re-verifie a la bascule). Aucun acces client direct.
+- Lectures publiques via `site/src/lib/supabase/serveur.ts` (`import "server-only"`), role Postgres **`site_lecteur`** (migration 0019 ; la service_role est SORTIE du site le 2026-07-18). Mecanique a DEUX en-tetes — la passerelle API n'accepte en `apikey` que les cles ENREGISTREES du projet, un JWT custom seul est rejete « Invalid API key » :
+  - `SUPABASE_ANON_KEY` = ticket de passerelle (en-tete `apikey`), ZERO droit en base : seule, elle ne lit rien (42501) ;
+  - `SUPABASE_SITE_LECTEUR_JWT` = `Authorization: Bearer` → PostgREST endosse `site_lecteur` : lecture seule garantie par la BASE (grants produit + emplacement, RLS active, ecritures refusees 42501), plus seulement par discipline de code.
+  - les deux a coller MANUELLEMENT dans `site/.env.local` (modele : `site/.env.local.example`, avec `SUPABASE_URL`), valeur sur la MEME ligne que le nom. Jamais commitees, jamais `NEXT_PUBLIC`.
+  - variable absente → echec CLAIR : avertissement explicite dans les logs serveur + etats vides propres a l'ecran (pas de crash silencieux).
+  - preuve a chaque livraison : grep de `site/.next/static/` sur `service_role`, `site_lecteur` ET les VALEURS (JWT, cle anon) = 0 fichier.
+- REGLE PERMANENTE : `site_lecteur` (NOLOGIN, membre d'`authenticator`) ne bypasse PAS la RLS et reste HORS des default privileges de la migration 0006 — chaque future table lisible par le site recoit son `grant select` ET sa policy de lecture (`for select to site_lecteur using (true)`) dans la MEME migration, sinon les SELECT renvoient zero ligne malgre les grants.
+- JWT `site_lecteur` (EN SERVICE depuis le 2026-07-18 ; echeance du JWT courant : 2036-07-18, rappelee en commentaire dans `site/.env.local`) :
   - claims `{ "iss": "supabase", "ref": "yecxgmuryrmztymxjbxo", "role": "site_lecteur", "iat": <frappe>, "exp": <frappe + 10 ans> }`, signees HS256 avec le secret JWT legacy du projet (dashboard Supabase → Settings → API → JWT Secret).
   - `exp` EXPLICITE : duree 10 ans ; la date d'echeance est NOTEE en commentaire dans `site/.env.local` a la frappe (et reportee ici).
-  - Frappe : script local ponctuel, jamais commite ; verification avant bascule : `curl` REST avec le JWT → lecture `produit` OK, INSERT refuse (42501).
+  - Frappe : `site/scripts/frappe-jwt.mjs` (secret lu depuis `SUPABASE_JWT_SECRET`, jamais en argument ni commite — commande recommandee en tete du script) ; verification avant bascule : `curl` REST avec `apikey` anon + `Bearer` JWT → lecture `produit` OK, INSERT refuse (42501).
   - Rotation : re-frapper un JWT avec un nouvel `exp` et remplacer la variable (local + env Vercel au deploiement). Revocation d'urgence : rotation du secret JWT du projet — invalide TOUTES les cles legacy (anon et service_role de l'Atelier comprises), operation lourde a coordonner.
   - Disciplines inchangees : jamais NEXT_PUBLIC, jamais commite, grep du bundle a chaque livraison.
 - Pages a donnees en ISR (`revalidate = 300`) : fraicheur du flag « aujourd'hui » (CALCULE : jour courant Europe/Paris vs `jour_semaine`, jamais stocke) et de la carte, performance mobile.
@@ -40,7 +41,7 @@
 
 Ordre approuve : **0019 → 0020 → 0022 → 0021 → 0023**, dry-run en transaction annulee + rollback ecrit AVANT chaque execution, jamais deux migrations d'affilee. Decisions tranchees : `visible_site` default `true` (preserve le rendu actuel) · `famille_carte` rapprochee par `(canal, nom = produit.categorie)` SANS FK (zero backfill, pipeline de vente intact) · `horaire_boutique` en colonnes `time` (2 plages nullables par jour). Colonnes additives : aucune rupture des ecrans Atelier (Catalogue et Reglages font `select("*")`).
 
-1. **0019 `site_lecteur`** (`supabase/migrations/0019_site_lecteur.sql`) : role lecture seule + grants produit/emplacement + policies « site lit … » (RLS active sur ces tables). APPLIQUEE et verifiee le 2026-07-18 (dry-run puis execution : role NOLOGIN sans bypass RLS, membre d'authenticator, lecture OK sous le role — 100 produits, 3 emplacements —, INSERT refuse 42501). Reste a faire : frappe du JWT (script `site/scripts/frappe-jwt.mjs`, commande a executer par Arnaud), bascule de `site/.env.local` vers `SUPABASE_SITE_LECTEUR_JWT` et sortie de la service_role.
+1. **0019 `site_lecteur`** (`supabase/migrations/0019_site_lecteur.sql`) : role lecture seule + grants produit/emplacement + policies « site lit … » (RLS active sur ces tables). APPLIQUEE et verifiee le 2026-07-18 (dry-run puis execution : role NOLOGIN sans bypass RLS, membre d'authenticator, lecture OK sous le role — 100 produits, 3 emplacements —, INSERT refuse 42501). Bascule TERMINEE le meme jour : JWT frappe par Arnaud (echeance 2036-07-18), `serveur.ts` sur le duo `apikey` anon + `Bearer` site_lecteur, service_role SORTIE de `site/.env.local`, preuve zero fuite re-passee, E2E vert.
 2. **0020 `produit`** : `+ description text`, `+ visible_site boolean not null default true` ; le site lira `actif AND visible_site`. Aucun index (100 lignes, ISR 5 min).
 3. **0022 `emplacement`** : `+ ville text`, `+ lieu text`, `+ horaire_service text` (fallback « 11h30 à 14h » cote site).
 4. **0021 `famille_carte`** : `(id, canal, nom, note, ordre, actif, created_at)` + `unique (canal, nom)` (sert d'index de jointure) ; famille absente de la table → tri alphabetique actuel.
@@ -66,10 +67,16 @@ Chaque table 1-5 recoit son `grant select` + policy `site_lecteur` dans sa propr
 - **Fix** : l'overlay du menu est rendu HORS du `<header>` (fragment React dans EnTete.tsx, monte au niveau body via le layout).
 - **Regle** : jamais de `fixed inset-0` a l'interieur d'un element portant `backdrop-filter`, `transform` ou `filter`. Verifier les overlays au PIXEL (capture), pas seulement au DOM : les styles calcules ne revelent pas ce piege.
 
-### Cle service_role collee sur la ligne suivante dans .env.local
+### Valeur collee sur la ligne suivante dans .env.local
 - **Symptome** : lectures Supabase desactivees (etats vides + avertissement serveur) alors que la cle semble presente dans le fichier.
-- **Cause racine** : valeur collee sur la ligne SOUS `SUPABASE_SERVICE_ROLE_KEY=` : dotenv lit une valeur vide et ignore la ligne orpheline.
+- **Cause racine** : valeur collee sur la ligne SOUS le nom de la variable (`NOM=` vide + ligne orpheline) : dotenv lit une valeur vide et ignore le reste. Vecu avec la cle service_role de la Vague 1.
 - **Fix / Regle** : la valeur doit etre sur la MEME ligne que le nom. Au demarrage, verifier l'absence de l'avertissement « Lectures Supabase DESACTIVEES » dans les logs serveur.
+
+### JWT custom rejete par la passerelle API (« Invalid API key », 401)
+- **Symptome** : toutes les requetes REST echouent en 401 avec un JWT site_lecteur pourtant valide (signature et claims correctes).
+- **Cause racine** : la passerelle Supabase (Kong) ne valide en en-tete `apikey` que les cles API ENREGISTREES du projet (anon / service_role legacy, cles sb_*) ; un JWT custom n'en fait pas partie, quelle que soit sa validite.
+- **Fix** : duo d'en-tetes — `apikey` = cle anon (ticket de passerelle, zero droit dans ce projet) + `Authorization: Bearer` = JWT site_lecteur (le role effectif). Dans supabase-js : `createClient(url, cleAnon, { global: { headers: { Authorization } } })`.
+- **Regle** : la cle anon seule ne donne RIEN (verifie : 42501 sur produit) ; le controle d'acces reel reste porte par le role du Bearer. Re-verifier ce refus anon a chaque evolution des grants.
 
 ### E2E local : playwright-core sans navigateurs telecharges
 - La racine du repo fournit `playwright-core` (pas de runner, pas de download auto) ; le cache `~/Library/Caches/ms-playwright` peut ne pas correspondre a la version. Lancer avec `chromium.launch({ channel: "chrome" })` pour utiliser le Chrome systeme, zero telechargement.

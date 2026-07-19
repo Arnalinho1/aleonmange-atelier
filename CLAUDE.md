@@ -14,4 +14,4 @@
 - Vague en cours : Vague 1 (vitrine en lecture) TERMINEE et VERIFIEE avec les vraies lectures Supabase le 2026-07-18 (resultats : `docs/site/CONFORMITE_VAGUE_1.md`).
 - Branche : `site-vague-1` (posee sur main, RIEN de pushe). Dernier commit : correctif menu mobile (piege backdrop-filter) + verification donnees reelles, cf. `docs/site/ARCHITECTURE.md`.
 - Plan de migration referentiel APPROUVE le 2026-07-18 (ordre 0019 → 0020 → 0022 → 0021 → 0023, un feu vert PAR migration ; 0024 reportee au STOP Vague 2) : `docs/site/ARCHITECTURE.md`.
-- 0019 `site_lecteur` APPLIQUEE et verifiee le 2026-07-18. Prochaine etape : frappe du JWT par Arnaud (`site/scripts/frappe-jwt.mjs`), bascule de `site/.env.local` vers `SUPABASE_SITE_LECTEUR_JWT` + preuve zero fuite, puis 0020 apres feu vert. Avant deploiement : favicon a choisir.
+- 0019 `site_lecteur` APPLIQUEE le 2026-07-18, bascule du site TERMINEE le meme jour (JWT en service, echeance 2036-07-18 ; service_role sortie de `site/.env.local` ; preuve zero fuite + E2E verts). Prochaine etape : migration 0020 (`produit.description` + `visible_site`) apres feu vert. Avant deploiement : favicon a choisir.

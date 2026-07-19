@@ -29,7 +29,7 @@
 - ✅ Etats vides partout (zero NaN, zero moyenne sur zero) ; lectures desactivees sans cle = message serveur clair + etats vides.
 - ✅ Zero tiret cadratin dans les textes visibles (verifie par E2E sur les 10 routes — la maquette en contenait, reecrits).
 - ✅ Zero photo IA, zero visuel Foodizy, zero asset maquette : placeholders neutres « Photo a venir ».
-- ✅ Cle service_role : serveur uniquement, zero occurrence dans le bundle client (grep = 0).
+- ✅ Acces donnees : role `site_lecteur` (lecture seule garantie par la base) via `apikey` anon + `Bearer` JWT depuis le 2026-07-18 — la service_role est sortie du site. Zero occurrence dans le bundle client (`service_role`, `site_lecteur`, valeurs des cles : grep = 0).
 - 🟡 « Annonces » : aucune surface dans la maquette → rien a porter (signale ; social_post disponible si besoin).
 - 🟡 Sitemap/robots avances : metadata + OG de base seulement en Vague 1 (a completer au deploiement).
 
