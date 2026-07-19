@@ -2,6 +2,7 @@
 
 > Grille : carte des ecrans d'INTEGRATION.md §03. Legende : ✅ present · 🟡 volontairement absent ou differe (raison) · 🔴 oubli.
 > Rien n'est simplifie en silence : tout ecart est liste ici.
+> Derniere verification : 2026-07-18, E2E complet avec les VRAIES lectures Supabase (cle service_role active). Resultats en bas de page.
 
 | Ecran maquette | Route | Etat | Detail |
 |---|---|---|---|
@@ -24,10 +25,24 @@
 ## Transverse
 
 - ✅ Design system §02 : polices Bricolage/Hanken/Spline Mono (next/font), tokens creme/canard/vert/terracotta, `--accent` reglable (#D81020 par defaut), boutons pilule, badges mono, cartes 16-18px, stepper (composant pret pour la Vague 2).
-- ✅ Mobile d'abord : nav plein ecran, empilement, cibles 42px+ ; chaque route verifiee a 390 px ET 1440 px (E2E, 20 rendus).
+- ✅ Mobile d'abord : nav plein ecran, empilement, cibles 42px+ ; chaque route verifiee a 390 px ET 1440 px (E2E, 20 rendus). Le menu mobile plein ecran a du etre sorti du `<header>` (piege backdrop-filter, cf. ARCHITECTURE.md).
 - ✅ Etats vides partout (zero NaN, zero moyenne sur zero) ; lectures desactivees sans cle = message serveur clair + etats vides.
 - ✅ Zero tiret cadratin dans les textes visibles (verifie par E2E sur les 10 routes — la maquette en contenait, reecrits).
 - ✅ Zero photo IA, zero visuel Foodizy, zero asset maquette : placeholders neutres « Photo a venir ».
 - ✅ Cle service_role : serveur uniquement, zero occurrence dans le bundle client (grep = 0).
 - 🟡 « Annonces » : aucune surface dans la maquette → rien a porter (signale ; social_post disponible si besoin).
 - 🟡 Sitemap/robots avances : metadata + OG de base seulement en Vague 1 (a completer au deploiement).
+
+## Verification avec donnees reelles (2026-07-18, cle service_role active)
+
+E2E Playwright (Chrome systeme) : 10 routes x 390 px et 1440 px, 23 captures, assertions de contenu.
+
+- ✅ Carte truck reelle : 3 familles (Bowls, Complementaires, Plats prepares), 15 produits, prix affiches, sans description (colonne absente : comportement attendu).
+- ✅ Carte traiteur reelle : 3 familles (Pieces salees chaudes/froides, Pieces sucrees), 35 produits, badge « 6 personnes minimum · devis sans engagement ».
+- ✅ Vitrine boutique : PAS l'etat vide attendu — le catalogue Atelier contient 50 produits boutique actifs (Charcuterie & aperitif, Libre-service, Plats composes, Plats prepares). Rendu SANS prix, correct. Certains libelles produits sont sans accents (« Carottes rapees ») : donnee du catalogue Atelier, editable par les chefs, pas un defaut du site.
+- ✅ Emplacements truck reels : Mardi (Marche du Bois d'Oingt), Mercredi (Tassin-la-Demi-Lune), Jeudi (La Tour-de-Salvagny), horaire provisoire « 11h30 à 14h ». Badge « Aujourd'hui » CALCULE verifie un samedi : aucun badge, CTA contextuel « Le truck ne sort pas aujourd'hui · prochains rendez-vous ci-dessus ». Accueil : bandeau « De retour mardi : Marche du Bois d'Oingt ».
+- ✅ Zero NaN, zero tiret cadratin, zero erreur console applicative sur les 20 rendus ; menu mobile plein ecran et modale lettre d'info verifies apres correctif EnTete.
+- ✅ Coordonnees reelles : 1923 route de la vallee, 69620 Letra · 06 75 36 23 26 · contact@aleonmange.com · Mar-Ven 9h-13h / 15h-19h, Sam 9h-14h. La pastille accueil « Boutique ouverte · Mardi a vendredi 9h a 19h » reprend la maquette CD a l'identique (simplification de la coupure meridienne voulue par la maquette).
+- ✅ Preuve zero fuite : `service_role` et la VALEUR de la cle absents de `site/.next/static/` (0 fichier), valeur absente de tout `.next/` et de tout fichier suivi par git ; `site/.env.local` ignore.
+- ✅ Builds + lint + tsc verts pour `site/` ET l'Atelier (isolation maintenue).
+- 🟡 Favicon absente (`/favicon.ico` et `/icon.svg` en 404, une erreur console par premiere visite) : choix d'asset a valider (alm-mark.png ?), a traiter avant deploiement.

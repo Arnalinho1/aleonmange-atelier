@@ -1,6 +1,6 @@
 # Site public ALM — Architecture (Vague 1)
 
-> Mise a jour : 2026-07-18 (Vague 1 : pages publiques en lecture, local, zero deploiement).
+> Mise a jour : 2026-07-18 (Vague 1 verifiee avec les vraies lectures Supabase ; local, zero deploiement).
 > Handoff de reference : `docs/handoff-site/` (relais, INTEGRATION.md V2, maquettes desktop/mobile autonomes, plan d'integration). Artefacts compiles, jamais edites.
 
 ## Monorepo
@@ -43,6 +43,22 @@
 - Une precommande B2C nait TOUJOURS `statut_paiement = 'regle'` avec reglement au retrait ; le `'du'` est reserve au canal traiteur B2B. Le critere est le CANAL.
 - Cote client, le statut affiche est TOUJOURS « En attente de confirmation par l'atelier », jamais « validee ».
 - Espace client / fidelite : INTERDITS avant la refonte RLS (policies actuelles `authenticated using(true)`). Le bouton « Mon compte » de la maquette est volontairement absent du site V1.
+
+## Pieges connus
+
+### Menu mobile plein ecran ecrase par le backdrop-filter du header
+- **Symptome** : overlay `fixed inset-0` transparent, liens du menu illisibles par-dessus le contenu de la page (les styles calcules restent pourtant corrects : fond opaque, z-50).
+- **Cause racine** : un `backdrop-filter` (classe `backdrop-blur` du `<header>`) fait de l'element le BLOC CONTENEUR de tout descendant `position: fixed` : l'overlay se dimensionne sur la boite du header (68px), le contenu deborde sans fond.
+- **Fix** : l'overlay du menu est rendu HORS du `<header>` (fragment React dans EnTete.tsx, monte au niveau body via le layout).
+- **Regle** : jamais de `fixed inset-0` a l'interieur d'un element portant `backdrop-filter`, `transform` ou `filter`. Verifier les overlays au PIXEL (capture), pas seulement au DOM : les styles calcules ne revelent pas ce piege.
+
+### Cle service_role collee sur la ligne suivante dans .env.local
+- **Symptome** : lectures Supabase desactivees (etats vides + avertissement serveur) alors que la cle semble presente dans le fichier.
+- **Cause racine** : valeur collee sur la ligne SOUS `SUPABASE_SERVICE_ROLE_KEY=` : dotenv lit une valeur vide et ignore la ligne orpheline.
+- **Fix / Regle** : la valeur doit etre sur la MEME ligne que le nom. Au demarrage, verifier l'absence de l'avertissement « Lectures Supabase DESACTIVEES » dans les logs serveur.
+
+### E2E local : playwright-core sans navigateurs telecharges
+- La racine du repo fournit `playwright-core` (pas de runner, pas de download auto) ; le cache `~/Library/Caches/ms-playwright` peut ne pas correspondre a la version. Lancer avec `chromium.launch({ channel: "chrome" })` pour utiliser le Chrome systeme, zero telechargement.
 
 ## Decisions business ouvertes (ne jamais trancher seul)
 

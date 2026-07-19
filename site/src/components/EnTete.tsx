@@ -37,7 +37,8 @@ export function EnTete() {
   }, [menuOuvert]);
 
   return (
-    <header className="sticky top-0 z-40 bg-page/95 backdrop-blur border-b border-bord">
+    <>
+      <header className="sticky top-0 z-40 bg-page/95 backdrop-blur border-b border-bord">
       <div className="mx-auto max-w-[1280px] flex items-center gap-4 px-4 md:px-8 h-[68px]">
         <Link href="/" className="flex items-center gap-2.5 shrink-0" aria-label="A Léon Mange, accueil">
           <span className="grid place-items-center w-10 h-10 rounded-full overflow-hidden bg-surface-2 ring-1 ring-bord-2">
@@ -85,8 +86,10 @@ export function EnTete() {
           </button>
         </div>
       </div>
+      </header>
 
-      {/* Menu mobile plein ecran */}
+      {/* Menu mobile plein ecran — HORS du <header> : son backdrop-blur en
+          ferait le bloc conteneur du fixed inset-0 (overlay ecrase a 68px) */}
       {menuOuvert && (
         <div className="fixed inset-0 z-50 bg-page flex flex-col lg:hidden">
           <div className="flex items-center justify-between px-4 h-[68px] border-b border-bord">
@@ -131,6 +134,6 @@ export function EnTete() {
           </div>
         </div>
       )}
-    </header>
+    </>
   );
 }
