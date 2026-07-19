@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BadgeMono, Carte, PhotoAvenir, SurTitre } from "@/components/ui";
+import { BadgeMono, Carte, Photo, SurTitre } from "@/components/ui";
 import { COORDONNEES } from "@/lib/contenu";
 import { carteDuCanal } from "@/lib/data/carte";
 import { horairesBoutique } from "@/lib/data/horaires";
@@ -20,6 +20,9 @@ export const metadata = {
  */
 export default async function Boutique() {
   const [familles, horaires] = await Promise.all([carteDuCanal("boutique"), horairesBoutique()]);
+  // Recettes signatures = produits du catalogue portant une image (0033). Pilote par la
+  // donnee : aucune galerie en dur ; fallback etat vide propre si aucune image posee.
+  const signatures = familles.flatMap((f) => f.articles).filter((a) => a.image);
 
   return (
     <>
@@ -45,16 +48,37 @@ export default async function Boutique() {
         </div>
       </section>
 
-      {/* Recettes signatures — contenu reel a venir (etat vide propre) */}
+      {/* Recettes signatures — pilotees par le catalogue (produits avec image, 0033) */}
       <section className="mx-auto max-w-[1280px] px-4 md:px-8 pt-12">
         <SurTitre>Nos recettes signatures</SurTitre>
-        <Carte className="mt-4 p-8 text-center">
-          <p className="font-display font-bold text-[17px] text-canard">Les signatures arrivent ici</p>
-          <p className="text-[13.5px] text-texte-2 mt-2 max-w-[440px] mx-auto leading-relaxed">
-            Les recettes emblématiques de la maison, avec leurs photos, seront présentées ici
-            dès que la carte réelle sera en place.
-          </p>
-        </Carte>
+        {signatures.length === 0 ? (
+          <Carte className="mt-4 p-8 text-center">
+            <p className="font-display font-bold text-[17px] text-canard">Les signatures arrivent ici</p>
+            <p className="text-[13.5px] text-texte-2 mt-2 max-w-[440px] mx-auto leading-relaxed">
+              Les recettes emblématiques de la maison, avec leurs photos, seront présentées ici
+              dès que la carte réelle sera en place.
+            </p>
+          </Carte>
+        ) : (
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 mt-4">
+            {signatures.map((a) => (
+              <Carte key={a.id} className="overflow-hidden flex flex-col">
+                <Photo
+                  src={a.image!}
+                  alt={a.nom}
+                  ratio="4/3"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                />
+                <div className="p-4">
+                  <p className="font-display font-extrabold text-[16px] text-canard">{a.nom}</p>
+                  {a.description && (
+                    <p className="text-[13px] text-texte-2 mt-1 leading-snug">{a.description}</p>
+                  )}
+                </div>
+              </Carte>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Infos pratiques + carte vitrine */}
@@ -84,7 +108,13 @@ export default async function Boutique() {
               ))}
             </ul>
           </Carte>
-          <PhotoAvenir ratio="4/3" libelle="Photo à venir · le comptoir" className="rounded-carte-lg" />
+          <Photo
+            src="/images/boutique-devanture.webp"
+            alt="La devanture de la boutique A Léon Mange à Létra"
+            ratio="4/3"
+            sizes="(max-width: 1024px) 100vw, 34vw"
+            className="rounded-carte-lg"
+          />
         </div>
 
         <Carte className="p-6 md:p-8">

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BadgeMono, Carte, PhotoAvenir, SurTitre } from "@/components/ui";
+import { BadgeMono, Carte, Photo, PhotoAvenir, SurTitre } from "@/components/ui";
 import { COORDONNEES } from "@/lib/contenu";
 import { emplacementsTruck } from "@/lib/data/emplacements";
 
@@ -53,7 +53,14 @@ export default async function Accueil() {
               Boutique ouverte · Mardi à vendredi 9h à 19h · Samedi 9h à 14h
             </p>
           </div>
-          <PhotoAvenir ratio="4/3" libelle="Photo à venir · la maison" className="rounded-carte-lg" />
+          <Photo
+            src="/images/truck-vignes.webp"
+            alt="Le food truck A Léon Mange dans les vignes du Beaujolais"
+            ratio="4/3"
+            priority
+            sizes="(max-width: 768px) 100vw, 45vw"
+            className="rounded-carte-lg"
+          />
         </div>
       </section>
 
@@ -66,7 +73,12 @@ export default async function Accueil() {
 
         <div className="grid gap-5 md:grid-cols-3 mt-8">
           <Carte className="overflow-hidden flex flex-col">
-            <PhotoAvenir ratio="16/10" libelle="Photo à venir · la boutique" />
+            <Photo
+              src="/images/boutique-planche.webp"
+              alt="Bowl, bocal et planche de charcuterie et fromage de la boutique"
+              ratio="16/10"
+              sizes="(max-width: 768px) 100vw, 33vw"
+            />
             <div className="p-5 flex-1 flex flex-col">
               <BadgeMono ton="accent">Le plus simple</BadgeMono>
               <h3 className="font-display font-extrabold text-[20px] text-canard mt-3">La Boutique</h3>
@@ -81,7 +93,12 @@ export default async function Accueil() {
           </Carte>
 
           <Carte className="overflow-hidden flex flex-col">
-            <PhotoAvenir ratio="16/10" libelle="Photo à venir · le traiteur" />
+            <Photo
+              src="/images/traiteur-buffet.webp"
+              alt="Buffet traiteur champêtre dressé en extérieur"
+              ratio="16/10"
+              sizes="(max-width: 768px) 100vw, 33vw"
+            />
             <div className="p-5 flex-1 flex flex-col">
               <BadgeMono>Événements</BadgeMono>
               <h3 className="font-display font-extrabold text-[20px] text-canard mt-3">Le Traiteur</h3>
@@ -96,7 +113,12 @@ export default async function Accueil() {
           </Carte>
 
           <Carte className="overflow-hidden flex flex-col">
-            <PhotoAvenir ratio="16/10" libelle="Photo à venir · le food truck" />
+            <Photo
+              src="/images/truck-service.webp"
+              alt="Le food truck A Léon Mange installé en service"
+              ratio="16/10"
+              sizes="(max-width: 768px) 100vw, 33vw"
+            />
             <div className="p-5 flex-1 flex flex-col">
               {duJour ? (
                 <BadgeMono ton="accent">Aujourd&apos;hui · {duJour.nom}</BadgeMono>

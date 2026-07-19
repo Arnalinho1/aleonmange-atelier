@@ -17,7 +17,7 @@ export const COORDONNEES = {
   email: "contact@aleonmange.com",
   instagram: "https://www.instagram.com/aleonmange/",
   facebook: "https://www.facebook.com/aleonmange",
-  plan: "https://www.google.com/maps/search/?api=1&query=1923+route+de+la+vall%C3%A9e+69620+L%C3%A9tra",
+  plan: "https://www.google.com/maps/dir/?api=1&destination=1923+route+de+la+vall%C3%A9e+69620+L%C3%A9tra",
 } as const;
 
 /** Horaires reels de la boutique (§06) — table editable a venir. */

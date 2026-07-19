@@ -15,6 +15,7 @@ export type ArticleCarte = {
   description: string | null; // 0020 — affichee sous le nom si renseignee
   prix: number | null; // €/piece (unite) ou €/kg (poids)
   auPoids: boolean;
+  image: string | null; // 0033 — visuel produit (recettes signatures), null = pas d'image
 };
 
 export type FamilleCarte = {
@@ -31,6 +32,7 @@ type LigneProduit = {
   prix_unitaire: number | null;
   prix_kg: number | null;
   description: string | null;
+  image_url: string | null;
 };
 
 type LigneFamille = {
@@ -53,7 +55,7 @@ export async function carteDuCanal(canal: "truck" | "traiteur" | "boutique"): Pr
   const [produits, familles] = await Promise.all([
     supabase
       .from("produit")
-      .select("id, nom, categorie, mode, prix_unitaire, prix_kg, description")
+      .select("id, nom, categorie, mode, prix_unitaire, prix_kg, description, image_url")
       .eq("canal", canal)
       .eq("actif", true)
       .eq("visible_site", true)
@@ -82,6 +84,7 @@ export async function carteDuCanal(canal: "truck" | "traiteur" | "boutique"): Pr
       description: p.description?.trim() || null,
       prix: p.mode === "poids" ? p.prix_kg : p.prix_unitaire,
       auPoids: p.mode === "poids",
+      image: p.image_url?.trim() || null,
     });
     groupes.set(famille, arr);
   }
