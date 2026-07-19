@@ -8,7 +8,26 @@
 - `site/` a la racine = application Next.js AUTONOME (Next 16.2.10, React 19, Tailwind v4, TypeScript). Son propre `package.json` + lockfile (le repo n'a pas de workspaces) : `cd site && npm install`.
 - Port dev : **3002** (3000 = Foodizy, 3001 = Atelier).
 - Isolation de l'Atelier (verifiee, builds independants verts) : `tsconfig.json` racine exclut `site` ; `eslint.config.mjs` racine ignore `site/**` ; `site/next.config.ts` fixe `turbopack.root` (sinon Turbopack remonte au lockfile racine et compile le proxy de l'Atelier).
-- Deploiement (hors Vague 1) : projet Vercel DISTINCT, Root Directory `site/`, production sur main. Prevoir un « Ignored Build Step » sur le projet Atelier pour qu'un push touchant seulement `site/` ne le rebuilde pas (et inversement).
+- Deploiement : voir « Deploiement (etat live) » en fin de document.
+
+## Deploiement (etat live depuis le 2026-07-19)
+
+- **Projet `aleonmange-site`** (team arnalinho1s-projects) : Root Directory `site/`, production sur `main`. Reglages CRITIQUES : « Include source files outside of the Root Directory » DECOCHE (sandbox = site/ seul, cf. piege ci-dessous) · skip natif « pas de changement dans le Root Directory » · Deployment Protection desactivee (site public). URLs : `aleonmange-site-arnalinho1s-projects.vercel.app` (+ alias legacy `aleonmange-atelier-7x86.vercel.app`, nom de creation du projet) ; domaine definitif `aleonmange.app` a poser (decision prise, plan au STOP 3 du deploiement).
+- **Projet `aleonmange-atelier`** : inchange (Root `.`, prod sur `main`, `aleonmange-atelier.vercel.app`), plus un Ignored Build Step custom : `git diff --quiet HEAD^ HEAD -- . ':(exclude)site' ':(exclude)docs'` (un push purement site/docs ne le rebuilde pas — prouve 4 fois).
+- Les 3 variables du site (SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SITE_LECTEUR_JWT) vivent dans le dashboard du projet site (Production + Preview), collees par Arnaud, jamais en clair dans le repo ni la session.
+
+### Rollback, etage par etage
+
+1. **Contenu** : les chefs corrigent dans l'Atelier, ISR 5 min — aucun deploiement.
+2. **Deploiement site ou Atelier** : Vercel → projet → Deployments → deploiement precedent → « Instant Rollback » (ou `vercel rollback <url>`). Les deploiements de prod precedents restent listes et re-promouvables.
+3. **Code** : revert git sur une branche + merge sur main apres feu vert. ATTENTION : un revert de toute la vague retire `site/` → casse la prod du site ; preferer l'Instant Rollback Vercel + fix forward.
+4. **Base** : chaque migration 0019-0023 porte son rollback en pied de fichier (ordre inverse : 0023 → 0019).
+
+### Pieges Vercel (vecus au deploiement du 2026-07-19)
+
+- **Ignored Build Step et push fast-forward multi-commits** : Vercel compare `HEAD^..HEAD` (DERNIER commit du push seulement). Le merge ff de la vague (17 commits, dernier = site-only) a fait annuler le build de prod ATELIER alors que la vague touchait `src/` — rattrape par `vercel deploy --prod` depuis la racine. REGLE pour les prochaines vagues : merger en `git merge --no-ff` (le diff du commit de merge couvre TOUTE la plage) ou verifier que le dernier commit du push reflete le total.
+- **`vercel redeploy` reutilise le contexte FIGE du deploiement d'origine** : un changement de reglage projet (sandbox, root...) n'est pris qu'avec un deploiement FRAIS (push git ou `vercel deploy`).
+- **Sandbox monorepo** : avec « Include source files outside of the Root Directory » COCHE, la plateforme injecte `outputFileTracingRoot` a la racine du repo, qui PREVAUT sur `turbopack.root` (piege du proxy Atelier rejoue au build distant) ; l'aligner sur `site/` casse la finalisation (`lstat /vercel/path0/.next`). Le decochage est la seule configuration coherente pour ce monorepo sans workspaces.
 
 ## Acces aux donnees (regle de securite)
 
