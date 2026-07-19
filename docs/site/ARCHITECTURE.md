@@ -16,6 +16,7 @@
 - **Projet `aleonmange-atelier`** : Root `.`, prod sur `main`, DOMAINE **`atelier.aleonmange.app`** (l'ancienne `aleonmange-atelier.vercel.app` reste servie en transition), plus un Ignored Build Step custom : `git diff --quiet HEAD^ HEAD -- . ':(exclude)site' ':(exclude)docs'` (un push purement site/docs ne le rebuilde pas — prouve 4 fois). Supabase Auth : Site URL = `https://atelier.aleonmange.app`, redirect URLs = nouveau domaine + ancienne adresse vercel.app (transition sans coupure) ; l'ancienne pourra etre retiree une fois les chefs bascules.
 - Certificat TLS wildcard `*.aleonmange.app` verifie sur les trois hotes (2026-07-19).
 - Les 3 variables du site (SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SITE_LECTEUR_JWT) vivent dans le dashboard du projet site (Production + Preview), collees par Arnaud, jamais en clair dans le repo ni la session.
+- **Go-live Vagues 2+3 (2026-07-19)** : merge `--no-ff` `a48b497` (la regle apprise en V1, cf. Pieges Vercel) → les DEUX projets rebuildes legitimement (le diff du commit de merge couvre toute la plage). Test de bout en bout EN PRODUCTION OK (2 commandes web → confirmation chef avec depliage bowl conforme recette → remise → CA facture + encaisse), donnees d'essai nettoyees. Variables posees : projet SITE (`SUPABASE_SITE_ECRIVAIN_JWT`, `RESEND_API_KEY`, `RESEND_DEST_TEST`), projet ATELIER (`RESEND_API_KEY`, `RESEND_DEST_TEST`), racine `.env.local` (emails chef). Emails en mode dev — domaine Resend `aleonmange.app` a verifier (DNS zone Vercel) pour passer `RESEND_PROD=1`.
 
 ### Rollback, etage par etage
 
@@ -82,20 +83,20 @@ FINITION du 2026-07-18 (apres les migrations) : UI Atelier livree — Catalogue 
 - Cote client, le statut affiche est TOUJOURS « En attente de confirmation par l'atelier », jamais « validee ».
 - Espace client / fidelite : INTERDITS avant la refonte RLS (policies actuelles `authenticated using(true)`). Le bouton « Mon compte » de la maquette est volontairement absent du site V1.
 
-## Vague 2 — les trois ecritures (branche `site-vague-2`, migrations 0024-0030 appliquees, NON mergee)
+## Vague 2 — les trois ecritures (migrations 0024-0030, EN PRODUCTION sur `main` depuis le 2026-07-19)
 
 Le site alimente le pipeline de vente EXISTANT (jamais un systeme parallele). Detail conformite : `docs/site/CONFORMITE_VAGUE_2.md`.
 
 - **Mecanisme d'ecriture** : role Postgres `site_ecrivain` (0030), NOLOGIN, membre d'`authenticator`, JWT frappe (`SUPABASE_JWT_ROLE=site_ecrivain node site/scripts/frappe-jwt.mjs`), variable `SUPABASE_SITE_ECRIVAIN_JWT`. Le role a **AUCUN droit table** : seulement `EXECUTE` sur 4 fonctions `SECURITY DEFINER` (`web_creer_precommande`, `web_creer_devis`, `web_inscrire_newsletter`, `web_confirmer_newsletter`, `search_path` fige, `public` revoke). Un JWT compromis ne peut qu'appeler ces 4 fonctions. Client d'ecriture : `site/src/lib/supabase/ecrivain.ts` (meme duo apikey anon + Bearer que la lecture ; n'appelle QUE `.rpc()`). La `service_role` n'est PAS revenue.
 - **Prix** : recalcule EN SQL dans `web_creer_precommande` depuis `produit` (actif ET visible_site ET meme canal). Le prix client n'existe pas dans le contrat (`produit_id` + `qte|poids_g`). Ecriture atomique (une RPC = une transaction).
-- **create-or-match** dans la RPC : email prioritaire (normalise lower/trim), telephone secours (E.164, meme regexp que 0015), contre les index uniques du socle client ; `unique_violation` geree (re-select). JAMAIS de doublon, jamais de recherche floue.
+- **create-or-match** dans la RPC : email prioritaire (normalise lower/trim), telephone secours (E.164, meme regexp que 0015), contre les index uniques du socle client ; `unique_violation` geree (re-select). JAMAIS de doublon, jamais de recherche floue. **Comportement constate au go-live (a arbitrer Vague 4)** : un match par TELEPHONE (secours) sur un client existant qui porte un NOUVEL email/nom garde l'identite d'origine — le nouvel email/nom saisi est IGNORE, la confirmation part a l'ancienne adresse. Conforme a la spec (email prioritaire, pas d'ecrasement) ; en prod reelle (`RESEND_PROD=1`), decider si on actualise email/nom sur match tel. Cf. CLAUDE.md backlog Vague 4.
 - **Etat pipeline** : `vente` nait `source_vente='web'`, `fulfillment='web_a_confirmer'`, `statut_paiement='regle'` (B2C, jamais `'du'`), `origine='spontane'`, `moyen_paiement='especes'` (placeholder corrige au retrait), `due_at`=creneau/marche, `occurred_at`=due_at (provisoire). AUCUN `reglement`, AUCUN `mouvement_stock`, AUCUN `vente_ligne_composant` a l'insertion (depliage bowl differe a la confirmation Vague 3).
 - **Fuite fermee** : `v_commande_ouverte` (0029) exclut `web_a_confirmer` -> une commande non confirmee ne reserve aucune matiere et n'entre dans aucun agregat (RESERVE B8, charge prod, KPI orders, badge sidebar) ; absente aussi de `v_vente_remise` et `v_encaissement`.
 - **Creneaux** : `creneau_retrait` (config seedee pas=30/delai=120/horizon=7) ; `site/src/lib/data/creneaux.ts` genere les creneaux = horaires d'ouverture INTERSECTES `[now+delai, now+horizon]` ; cutoff truck veille 23h59 Europe/Paris. Le backstop delai SQL LIT `delai_min_minutes` (jamais une constante — principe config-source).
 - **Emails** : Resend best-effort (l'ecriture prime, jamais bloquant) ; expediteur `contact@aleonmange.app` (constante configurable) + `Reply-To: contact@aleonmange.com` temporaire ; mode dev par defaut (domaine `.app` a verifier chez Resend — enregistrements DNS a poser dans la zone Vercel, etape a part).
 - **Decision differee Vague 3** : `productivite.ts` filtre `source_vente != 'import'` -> a l'arbitrage, decider si `'web'` (confirme) est exclu des heures de service comme `'import'`. Sans effet cette vague (web jamais dans `v_vente_remise` tant que non remis).
 
-## Vague 3 — confirmation chef (branche `site-vague-2`, migrations 0031-0032, NON mergee)
+## Vague 3 — confirmation chef (migrations 0031-0032, EN PRODUCTION sur `main` depuis le 2026-07-19, go-live teste E2E)
 
 Le chef confirme ou refuse les commandes web depuis l'Atelier. Detail : `docs/site/CONFORMITE_VAGUE_3.md`.
 

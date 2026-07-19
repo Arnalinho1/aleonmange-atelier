@@ -1,7 +1,7 @@
 # Conformité Vague 3 (confirmation chef + go-live) · 2026-07-19
 
-> Légende : ✅ présent et vérifié · 🟡 vérifiable seulement côté chef (Atelier authentifié) · 🔴 oubli.
-> État : branche `site-vague-2` (Vagues 2+3 = une unité de go-live), migrations 0031-0032 APPLIQUÉES, code committé. NON mergée — go-live sur feu vert explicite.
+> Légende : ✅ présent et vérifié · 🔴 oubli.
+> État : **MERGÉE dans `main` (`a48b497`), EN PRODUCTION depuis le 2026-07-19, testée de bout en bout EN PRODUCTION** (voir « Test go-live » plus bas). Migrations 0031-0032 appliquées.
 
 ## Le cycle de vie (cœur de la vague)
 
@@ -31,13 +31,21 @@
 - ✅ Confirmation (effets DB, identiques à `confirmerCommandeWeb`) : `a_produire`, entre dans `v_commande_ouverte`, 6 composants = recette, tous conformes (`quantite_g = quantité/rendement × qte`), event journalisé.
 - ✅ Refus (marqueur) : `fulfillment` inchangé, absent de `v_commande_ouverte`/CA facturé/CA encaissé, badge l'exclut (`refuse_le IS NULL`), présent en historique refusées.
 - ✅ Build + typecheck + lint verts des DEUX applications (Atelier : extraction, actions, UI ; site : inchangé).
-- 🟡 Côté CHEF (Atelier authentifié, hors de portée autonome — saisie de mot de passe interdite) : clic réel Confirmer/Refuser via les server actions, écrans /orders et /settings à 390/1440, émails partant de l'action. À exercer par Arnaud au test go-live (étape 3) ou en checkpoint pré-go-live.
+
+## Test go-live EN PRODUCTION (2026-07-19, actions chef réelles)
+
+Côté CHEF (Atelier authentifié), exécuté par Arnaud — la partie hors de portée autonome (saisie de mot de passe interdite) est ainsi PROUVÉE en production :
+
+- ✅ **2 commandes truck réelles** passées sur aleonmange.app (11,50 € et 31,30 € = 2 bowls + 3 produits) → chacune crée sa `vente` `web_a_confirmer` (RPC) + sa notification (trigger) + pastille sidebar + section « à confirmer ».
+- ✅ **CONFIRMATION chef** : `web_a_confirmer → a_produire`, **dépliage bowl exécuté en production** (les bowls dépliés en `vente_ligne_composant`, tous conformes à la recette), entrée dans `v_commande_ouverte`, `fulfillment_event` journalisé. Preuve réelle de `confirmerCommandeWeb` + `composerLignesComposantBowl` en prod.
+- ✅ **REMISE chef** : moyen espèces, `reglement` créé = montant total, `encaisse_le` posé, `statut_paiement='regle'`, entrée en **CA facturé (`v_vente_remise`) ET encaissé (`v_encaissement`)**, sortie de `v_commande_ouverte`. Cycle complet web → CA vérifié en base.
+- 🔵 Observé (à arbitrer Vague 4) : la 2ᵉ commande, saisie sous un nouvel email/nom mais AVEC un téléphone déjà utilisé, a été rattachée par le create-or-match au client existant (match téléphone secours) — le nouvel email est ignoré, la confirmation partirait à l'ancienne adresse. Conforme à la spec ; cf. CLAUDE.md backlog Vague 4 et ARCHITECTURE.md § create-or-match.
 
 ## Migrations Vague 3 (0031-0032, faible risque, mode auto avec discipline complète)
 
 - 0031 `vente += refuse_le, motif_refus` (additif). Dry-run + rollback + vérif post-exec.
 - 0032 trigger DÉFENSIF `notifier_commande_web` (after insert web → notification, exception avalée). Dry-run avec preuve (vente web d'essai → 1 notification, rollback) + vérif post-exec.
 
-## Données d'essai (à nettoyer, validation Arnaud)
+## Données d'essai — NETTOYÉES (2026-07-19)
 
-2 ventes web (dont 1 confirmée = **actuellement dans la file de production `a_produire`**) + 2 clients + 2 notifications + 6 composants (pattern `%exemple-alm%` / `categorie='commande'`). Cleanup prêt (ventes en cascade → clients → notifications).
+Après validation d'Arnaud, les données de test go-live ont été SUPPRIMÉES : 2 ventes web (cascade → `vente_ligne` / `vente_ligne_composant` / `reglement` / `fulfillment_event`), 1 client de test (`essai.golive@exemple-alm.fr` ; `arnalinho+test1prod` n'a jamais existé — absorbé par le match téléphone), 2 notifications `categorie='commande'`. **Comptages vérifiés à ZÉRO** : 0 vente web, 0 client test (par email ET par téléphone), 0 notification `commande`, 0 orphelin (règlement / ligne sans vente parente). Base de production propre.
