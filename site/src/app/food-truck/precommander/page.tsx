@@ -2,6 +2,7 @@ import { SurTitre } from "@/components/ui";
 import { PanierPrecommande } from "@/components/PanierPrecommande";
 import { carteDuCanal } from "@/lib/data/carte";
 import { emplacementsTruck } from "@/lib/data/emplacements";
+import { prochainRetraitTruck } from "@/lib/data/creneaux";
 
 export const metadata = {
   title: "Precommande food truck",
@@ -12,7 +13,15 @@ export const metadata = {
 export default async function Precommander({ searchParams }: { searchParams: Promise<{ emplacement?: string }> }) {
   const { emplacement } = await searchParams;
   const [familles, emplacements] = await Promise.all([carteDuCanal("truck"), emplacementsTruck()]);
-  const choix = emplacements.map((e) => ({ code: e.code, nom: e.nom, jour: e.jour }));
+  // Date de retrait COMPLETE (jour + date) par emplacement : MEME source que le due_at
+  // pose a la commande (prochainRetraitTruck, cote /api/commande) -> affichage coherent
+  // avec le calcul Europe/Paris, sans divergence.
+  const choix = emplacements.map((e) => ({
+    code: e.code,
+    nom: e.nom,
+    jour: e.jour,
+    dateLabel: e.jourSemaine != null ? (prochainRetraitTruck(e.jourSemaine)?.label ?? null) : null,
+  }));
   const initial = choix.some((c) => c.code === emplacement) ? (emplacement as string) : "";
 
   return (
