@@ -57,13 +57,16 @@ export function ChampSelect({
 export function BoutonSubmit({
   children,
   enAttente,
+  className,
   ...props
 }: { children: ReactNode; enAttente?: boolean } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
+  // className passee (ex. "w-full") FUSIONNEE, jamais substituee : sinon le spread
+  // {...props} ecraserait le style pilule/accent du design system (CTA en texte nu).
   return (
     <button
       type="submit"
       disabled={enAttente || props.disabled}
-      className="inline-flex items-center justify-center h-[48px] px-7 rounded-pille bg-[var(--accent)] text-white font-display font-bold text-[15px] transition-opacity hover:opacity-90 disabled:opacity-50"
+      className={`inline-flex items-center justify-center h-[48px] px-7 rounded-pille bg-[var(--accent)] text-white font-display font-bold text-[15px] transition-opacity hover:opacity-90 disabled:opacity-50${className ? ` ${className}` : ""}`}
       {...props}
     >
       {enAttente ? "Envoi..." : children}

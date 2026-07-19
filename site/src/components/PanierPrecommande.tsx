@@ -13,7 +13,7 @@ function fmtEuro(n: number): string {
 
 const POIDS_OPTIONS = [250, 500, 1000]; // g, pour les articles au poids
 
-type EmplacementChoix = { code: string; nom: string; jour: string };
+type EmplacementChoix = { code: string; nom: string; jour: string; dateLabel?: string | null };
 
 export function PanierPrecommande({
   canal,
@@ -60,6 +60,7 @@ export function PanierPrecommande({
   const contactOk = nom.trim().length > 0 && /.+@.+\..+/.test(email);
   const retraitOk = canal === "boutique" ? creneau.length > 0 : emplacement.length > 0;
   const peutEnvoyer = !panierVide && contactOk && retraitOk && !enAttente;
+  const emplacementChoisi = useMemo(() => emplacements.find((e) => e.code === emplacement), [emplacements, emplacement]);
 
   async function envoyer() {
     setErreur(null);
@@ -188,9 +189,12 @@ export function PanierPrecommande({
             <ChampSelect label="Emplacement du marche" value={emplacement} onChange={(e) => setEmplacement(e.target.value)}>
               <option value="">Choisir un emplacement</option>
               {emplacements.map((e) => (
-                <option key={e.code} value={e.code}>{e.nom} ({e.jour})</option>
+                <option key={e.code} value={e.code}>{e.nom} ({e.dateLabel ?? e.jour})</option>
               ))}
             </ChampSelect>
+          )}
+          {canal === "truck" && emplacementChoisi?.dateLabel && (
+            <p className="text-[12.5px] text-texte-2">Retrait le <strong className="text-canard">{emplacementChoisi.dateLabel}</strong>, a regler sur place.</p>
           )}
           {canal === "boutique" && creneaux.length === 0 && (
             <p className="text-[12px] text-texte-3">Aucun creneau disponible pour le moment.</p>
