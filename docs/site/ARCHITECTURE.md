@@ -82,7 +82,29 @@ FINITION du 2026-07-18 (apres les migrations) : UI Atelier livree — Catalogue 
 - Cote client, le statut affiche est TOUJOURS « En attente de confirmation par l'atelier », jamais « validee ».
 - Espace client / fidelite : INTERDITS avant la refonte RLS (policies actuelles `authenticated using(true)`). Le bouton « Mon compte » de la maquette est volontairement absent du site V1.
 
+## Vague 2 — les trois ecritures (branche `site-vague-2`, migrations 0024-0030 appliquees, NON mergee)
+
+Le site alimente le pipeline de vente EXISTANT (jamais un systeme parallele). Detail conformite : `docs/site/CONFORMITE_VAGUE_2.md`.
+
+- **Mecanisme d'ecriture** : role Postgres `site_ecrivain` (0030), NOLOGIN, membre d'`authenticator`, JWT frappe (`SUPABASE_JWT_ROLE=site_ecrivain node site/scripts/frappe-jwt.mjs`), variable `SUPABASE_SITE_ECRIVAIN_JWT`. Le role a **AUCUN droit table** : seulement `EXECUTE` sur 4 fonctions `SECURITY DEFINER` (`web_creer_precommande`, `web_creer_devis`, `web_inscrire_newsletter`, `web_confirmer_newsletter`, `search_path` fige, `public` revoke). Un JWT compromis ne peut qu'appeler ces 4 fonctions. Client d'ecriture : `site/src/lib/supabase/ecrivain.ts` (meme duo apikey anon + Bearer que la lecture ; n'appelle QUE `.rpc()`). La `service_role` n'est PAS revenue.
+- **Prix** : recalcule EN SQL dans `web_creer_precommande` depuis `produit` (actif ET visible_site ET meme canal). Le prix client n'existe pas dans le contrat (`produit_id` + `qte|poids_g`). Ecriture atomique (une RPC = une transaction).
+- **create-or-match** dans la RPC : email prioritaire (normalise lower/trim), telephone secours (E.164, meme regexp que 0015), contre les index uniques du socle client ; `unique_violation` geree (re-select). JAMAIS de doublon, jamais de recherche floue.
+- **Etat pipeline** : `vente` nait `source_vente='web'`, `fulfillment='web_a_confirmer'`, `statut_paiement='regle'` (B2C, jamais `'du'`), `origine='spontane'`, `moyen_paiement='especes'` (placeholder corrige au retrait), `due_at`=creneau/marche, `occurred_at`=due_at (provisoire). AUCUN `reglement`, AUCUN `mouvement_stock`, AUCUN `vente_ligne_composant` a l'insertion (depliage bowl differe a la confirmation Vague 3).
+- **Fuite fermee** : `v_commande_ouverte` (0029) exclut `web_a_confirmer` -> une commande non confirmee ne reserve aucune matiere et n'entre dans aucun agregat (RESERVE B8, charge prod, KPI orders, badge sidebar) ; absente aussi de `v_vente_remise` et `v_encaissement`.
+- **Creneaux** : `creneau_retrait` (config seedee pas=30/delai=120/horizon=7) ; `site/src/lib/data/creneaux.ts` genere les creneaux = horaires d'ouverture INTERSECTES `[now+delai, now+horizon]` ; cutoff truck veille 23h59 Europe/Paris. Le backstop delai SQL LIT `delai_min_minutes` (jamais une constante — principe config-source).
+- **Emails** : Resend best-effort (l'ecriture prime, jamais bloquant) ; expediteur `contact@aleonmange.app` (constante configurable) + `Reply-To: contact@aleonmange.com` temporaire ; mode dev par defaut (domaine `.app` a verifier chez Resend — enregistrements DNS a poser dans la zone Vercel, etape a part).
+- **Decision differee Vague 3** : `productivite.ts` filtre `source_vente != 'import'` -> a l'arbitrage, decider si `'web'` (confirme) est exclu des heures de service comme `'import'`. Sans effet cette vague (web jamais dans `v_vente_remise` tant que non remis).
+
 ## Pieges connus
+
+### Enum ADD VALUE : dry-run partiel, dependance de commit
+- **Symptome** : impossible de dry-runner une migration qui UTILISE une nouvelle valeur d'enum (vue, contrainte) dans la meme transaction annulee.
+- **Cause racine** : `ALTER TYPE ... ADD VALUE` est acceptee en transaction (PG12+) mais la valeur n'est UTILISABLE qu'apres commit ; et une valeur d'enum ne se DROP pas (rollback = valeur inerte, ou recreation lourde du type).
+- **Regle** : les enums (0027/0028) se dry-runnent en DDL seul ; la vue dependante (0029) et les fonctions qui castent la valeur (0030, via `check_function_bodies=off` au dry-run) se verifient APRES le commit des enums. Ordonner : enum -> commit -> vue/fonctions.
+
+### Management API Supabase : User-Agent Python bloque (403)
+- **Symptome** : `urllib.request` vers `api.supabase.com/.../database/query` renvoie 403 (curl passe).
+- **Fix** : ajouter un en-tete `User-Agent` (ex. `curl/8.4`) a la requete urllib, sinon le WAF bloque l'agent Python par defaut.
 
 ### Menu mobile plein ecran ecrase par le backdrop-filter du header
 - **Symptome** : overlay `fixed inset-0` transparent, liens du menu illisibles par-dessus le contenu de la page (les styles calcules restent pourtant corrects : fond opaque, z-50).
