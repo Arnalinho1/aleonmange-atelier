@@ -63,4 +63,14 @@ E2E Playwright (Chrome systeme) : 10 routes x 390 px et 1440 px, 23 captures, as
 
 Verification : E2E complet AUCUNE ANOMALIE (10 routes x 390/1440 px, 23 captures, menu mobile, modale, zero cadratin, zero NaN, zero erreur console) ; horaires seedes affiches iso sur toutes les surfaces ; preuve zero fuite re-passee (service_role, site_lecteur, valeurs JWT et anon : 0 partout) ; builds + lint + tsc verts des deux applications.
 
-Limites de cette verification (extension Chrome non connectee, ecriture directe en base refusee par le garde-fou de session) : les nouveaux ecrans Atelier n'ont pas ete verifies visuellement a 390/1440 px (builds verts seulement) et le jeu d'essai (description, emplacement enrichi, famille ordonnee) n'a pas ete saisi — a rejouer via l'UI par Arnaud ou en session avec l'extension connectee.
+## Circuit chef → site exerce de BOUT EN BOUT (2026-07-18, saisie par Arnaud via la nouvelle UI)
+
+Jeu d'essai saisi par Arnaud dans les nouveaux ecrans Atelier (verifies par lui a largeur mobile ET desktop pendant la saisie), effets verifies cote site avec captures :
+
+- ✅ Description produit (Croque-monsieur, Catalogue) → affichee sous le nom sur /food-truck.
+- ✅ Masquage (Tzatziki, Catalogue) → absent de la vitrine /boutique. Decouverte a la restauration : le produit etait passe `visible_site=false` ET `actif=false` (bouton « Retirer du canal » clique en plus du decochage) — l'absence testee couvrait donc les deux filtres ; `actif=false` retire AUSSI le produit de la Saisie de vente Atelier, restaure.
+- ✅ Emplacement enrichi (Marche du Bois d'Oingt, Reglages) → « Place de la Libération · Le Bois-d'Oingt » et horaire surcharge « 11h30 à 13h45 » sur la carte ; les deux autres emplacements restent au fallback « 11h30 à 14h ».
+- ✅ Famille SANS categorie (« Paniers Frais », canal boutique, note + ordre 4 — cas de NON-rapprochement voulu) → badge « Sans catégorie » cote Atelier, et AUCUN effet cote site : ni la famille ni sa note n'apparaissent, tri alphabetique des 4 vraies familles intact, rien ne casse.
+- ✅ Horaires boutique (samedi 9h-15h, Reglages) → repercute sur les TROIS surfaces (page Boutique, Contact, pied de page), groupes intacts (« Mardi à vendredi », « Dimanche et lundi » Ferme).
+
+Nettoyage : samedi remis a 14h00 et Tzatziki reactive + revisible (verifie a l'ecran) ; conserves comme contenu reel : description Croque-monsieur, emplacement enrichi, famille « Paniers Frais ». Saisie non declaree decouverte pendant la verification : produit « La Salade d'Arnaud » (truck, 14,99 €, is_bowl sans fiche liee) — visible sur le site ET dans le pipeline de vente, laisse en l'etat, arbitrage Arnaud en attente.
