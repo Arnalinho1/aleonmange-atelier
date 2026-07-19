@@ -59,7 +59,7 @@ E2E Playwright (Chrome systeme) : 10 routes x 390 px et 1440 px, 23 captures, as
 | Site : ordre/notes de familles | ✅ | famille_carte (reglees d'abord — ordre puis nom —, autres en alphabetique) ; note sous le titre de famille |
 | Site : precisions d'emplacement | ✅ | Ville · lieu sur les cartes truck, horaire par emplacement (fallback « 11h30 à 14h »), bandeau accueil du jour a l'horaire de l'emplacement |
 | Site : horaires boutique en base | ✅ | Lus de horaire_boutique sur Boutique, Contact et pied de page (prop du layout serveur) ; iso-affichage verifie avec le seed ; table vide = fallback contenu.ts ; revalidate 300 au layout |
-| Favicon | 🟡 EN ATTENTE | Declinaisons generees depuis l'asset officiel (favicon.ico 16/32/48, icon.png, apple-icon 180 sur fond creme #EDE7DA) et verifiees servies (200, plus de 404 console). NON COMMITEES : a 16 px lunettes et sourire deviennent une bande claire (silhouette + beret restent identifiables) — captures soumises a Arnaud avant de figer, comme demande |
+| Favicon | ✅ | Declinaisons depuis l'asset officiel (favicon.ico 16/32/48, icon.png, apple-icon 180 sur fond creme #EDE7DA, source en public/leon-favicon.png), servies en 200, plus de 404 console. VALIDEE telle quelle par Arnaud le 2026-07-18 (a 16 px lunettes/sourire deviennent une bande claire, silhouette rouge + beret restent distinctifs — variante simplifiee = polish CD ulterieur, non bloquant) |
 
 Verification : E2E complet AUCUNE ANOMALIE (10 routes x 390/1440 px, 23 captures, menu mobile, modale, zero cadratin, zero NaN, zero erreur console) ; horaires seedes affiches iso sur toutes les surfaces ; preuve zero fuite re-passee (service_role, site_lecteur, valeurs JWT et anon : 0 partout) ; builds + lint + tsc verts des deux applications.
 
