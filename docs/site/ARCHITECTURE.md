@@ -95,6 +95,20 @@ Le site alimente le pipeline de vente EXISTANT (jamais un systeme parallele). De
 - **Emails** : Resend best-effort (l'ecriture prime, jamais bloquant) ; expediteur `contact@aleonmange.app` (constante configurable) + `Reply-To: contact@aleonmange.com` temporaire ; mode dev par defaut (domaine `.app` a verifier chez Resend — enregistrements DNS a poser dans la zone Vercel, etape a part).
 - **Decision differee Vague 3** : `productivite.ts` filtre `source_vente != 'import'` -> a l'arbitrage, decider si `'web'` (confirme) est exclu des heures de service comme `'import'`. Sans effet cette vague (web jamais dans `v_vente_remise` tant que non remis).
 
+## Vague 3 — confirmation chef (branche `site-vague-2`, migrations 0031-0032, NON mergee)
+
+Le chef confirme ou refuse les commandes web depuis l'Atelier. Detail : `docs/site/CONFORMITE_VAGUE_3.md`.
+
+- **REGLE PERMANENTE (refus)** : une commande web refusee RESTE `fulfillment='web_a_confirmer'` (Option B, 0031 : colonnes `refuse_le` + `motif_refus`, aucun enum, aucune vue). Donc **tout lecteur de `web_a_confirmer` DOIT filtrer `refuse_le`** : `IS NULL` = file a confirmer (badge, section /orders), `IS NOT NULL` = historique refusees. Un lecteur qui oublie ce filtre ferait reapparaitre une commande refusee dans la file. Une refusee est absente de tout agregat par construction (web_a_confirmer deja exclu par 0029).
+- **Confirmation** (`confirmerCommandeWeb`, `orders/actions.ts`) : `web_a_confirmer -> a_produire` (garde concurrence) -> entre dans `v_commande_ouverte` (RESERVE/charge/KPI). C'est LE moment du DEPLIAGE BOWL : `vente_ligne_composant` crees depuis la fiche recette via `composerLignesComposantBowl` (`stock.ts`, source UNIQUE extraite de `createVente` — sortie byte-identique). `fulfillment_event` journalise. Email best-effort.
+- **Refus** (`refuserCommandeWeb`) : `refuse_le` + `motif_refus` (code + detail interne), fulfillment INCHANGE, aucun event, aucun credit. Email doux (phrase mappee au code, jamais le detail).
+- **Remise B2C** : `avancerFulfillment(venteId, moyenReel?)` — au retrait, le chef choisit le moyen de paiement REEL (le web nait `'especes'` placeholder) ; `moyen_paiement` + `reglement` corriges. Le reste du flux de remise est inchange (verifie : apres confirmation, une commande web B2C est dans le meme etat qu'une precommande C&C manuelle).
+- **Notification a l'arrivee** (0032) : trigger DEFENSIF `notifier_commande_web` (after insert on vente when source_vente='web' -> notification `categorie='commande'`, `ecran='orders'`), exception avalee (ne bloque jamais une vente). Categorie `'commande'` ajoutee a l'ecran Notifs.
+- **Email Atelier** : module PROPRE `src/lib/email.ts` (isolation : le module du site n'est pas importable ; `resend` ajoute aux deps racine). Env a poser (racine + Vercel Atelier) : `RESEND_API_KEY`, `RESEND_DEST_TEST`, `RESEND_PROD`. Mode dev par defaut.
+- **Ecritures chef** : directes en `authenticated` (RLS `for all to authenticated`), PAS de `site_ecrivain` (ce role ne sert qu'au site public). Le pilotage UI cote chef requiert l'auth Atelier (verifie par Arnaud, pas en autonomie).
+- **Productivite** : `'web'` compte comme `'manuel'` (aucun changement — decision Vague 3 tranchee).
+- **Editeur `creneau_retrait`** : Reglages Atelier (delai/pas/horizon/plage), met a jour la ligne active.
+
 ## Pieges connus
 
 ### Enum ADD VALUE : dry-run partiel, dependance de commit
