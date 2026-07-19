@@ -204,6 +204,10 @@ export type Vente = {
   statut_paiement: StatutPaiement;
   /** Échéance de PAIEMENT (traiteur B2B : remise + 30 j) — DISTINCTE de due_at (0017). */
   echeance_paiement: string | null;
+  /** Refus chef d'une commande web (0031). NULL = non refusée. Le fulfillment reste web_a_confirmer ; tout lecteur de web_a_confirmer filtre refuse_le. */
+  refuse_le: string | null;
+  /** Motif du refus (code + détail interne éventuel, 0031). L'email client n'expose qu'une phrase douce. */
+  motif_refus: string | null;
   created_at: string;
 };
 
