@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { BadgeMono, Carte, PhotoAvenir, SurTitre } from "@/components/ui";
-import { COORDONNEES, HORAIRE_SERVICE_TRUCK } from "@/lib/contenu";
+import { COORDONNEES } from "@/lib/contenu";
 import { emplacementsTruck } from "@/lib/data/emplacements";
 
 /** ISR : fraicheur des lectures (emplacement du jour, carte pilotee par l'Atelier). */
@@ -106,7 +106,7 @@ export default async function Accueil() {
               <h3 className="font-display font-extrabold text-[20px] text-canard mt-3">Le Food truck</h3>
               <p className="text-[13.5px] leading-relaxed text-texte-2 mt-2 flex-1">
                 {duJour
-                  ? `Aujourd'hui : ${duJour.nom}, ${HORAIRE_SERVICE_TRUCK}. Précommande possible.`
+                  ? `Aujourd'hui : ${duJour.nom}, ${duJour.horaire}. Précommande possible.`
                   : prochain
                     ? `De retour ${prochain.jour.toLowerCase()} : ${prochain.nom}. Sur les marchés du Beaujolais.`
                     : "Sur les marchés du Beaujolais. Les emplacements de la semaine arrivent ici."}

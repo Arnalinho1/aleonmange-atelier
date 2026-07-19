@@ -2,10 +2,15 @@
 
 import Link from "next/link";
 import { COORDONNEES, HORAIRES_BOUTIQUE } from "@/lib/contenu";
+import type { LigneHoraire } from "@/lib/data/horaires";
 import { ouvrirLettre } from "./EnTete";
 
-/** Pied de page : coordonnees REELLES (§06), horaires, reseaux, mentions. */
-export function PiedDePage() {
+/**
+ * Pied de page : coordonnees REELLES (§06), horaires, reseaux, mentions.
+ * Composant client (bouton lettre d'info) : les horaires pilotes par
+ * l'Atelier (0023) arrivent en prop du layout serveur.
+ */
+export function PiedDePage({ horaires = HORAIRES_BOUTIQUE as readonly LigneHoraire[] }: { horaires?: readonly LigneHoraire[] }) {
   return (
     <footer className="mt-16 bg-canard text-surface-2">
       <div className="mx-auto max-w-[1280px] px-4 md:px-8 py-12 grid gap-10 md:grid-cols-[1.3fr_1fr_1fr_1fr]">
@@ -42,7 +47,7 @@ export function PiedDePage() {
         <div>
           <p className="font-mono text-[10.5px] uppercase tracking-[.14em] text-or">Horaires boutique</p>
           <ul className="mt-3 space-y-1.5 text-[13.5px] text-surface-2/85">
-            {HORAIRES_BOUTIQUE.map((h) => (
+            {horaires.map((h) => (
               <li key={h.jours}>
                 <span className="font-semibold text-surface-2">{h.jours}</span>
                 <br />

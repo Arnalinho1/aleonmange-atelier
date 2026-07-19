@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { BadgeMono, Carte, PhotoAvenir, SurTitre } from "@/components/ui";
-import { COORDONNEES, HORAIRES_BOUTIQUE } from "@/lib/contenu";
+import { COORDONNEES } from "@/lib/contenu";
 import { carteDuCanal } from "@/lib/data/carte";
+import { horairesBoutique } from "@/lib/data/horaires";
 
 /** ISR : fraicheur des lectures (emplacement du jour, carte pilotee par l'Atelier). */
 export const revalidate = 300;
@@ -18,7 +19,7 @@ export const metadata = {
  * lue du catalogue Atelier, pilotee par les chefs), CTA click & collect.
  */
 export default async function Boutique() {
-  const familles = await carteDuCanal("boutique");
+  const [familles, horaires] = await Promise.all([carteDuCanal("boutique"), horairesBoutique()]);
 
   return (
     <>
@@ -75,7 +76,7 @@ export default async function Boutique() {
           <Carte className="p-6">
             <SurTitre>Horaires</SurTitre>
             <ul className="mt-3 space-y-2.5">
-              {HORAIRES_BOUTIQUE.map((h) => (
+              {horaires.map((h) => (
                 <li key={h.jours} className="flex items-baseline justify-between gap-4 text-[14px]">
                   <span className="font-semibold text-canard">{h.jours}</span>
                   <span className="text-texte-2 text-right">{h.heures}</span>
@@ -112,10 +113,14 @@ export default async function Boutique() {
                   <p className="font-display font-bold text-[16px] text-canard border-b-[1.5px] border-bord-2 pb-2">
                     {f.nom}
                   </p>
+                  {f.note && <p className="mt-1.5 text-[12px] text-texte-3">{f.note}</p>}
                   <ul className="mt-2.5 space-y-1.5">
                     {f.articles.map((a) => (
                       <li key={a.id} className="text-[13.5px] text-texte-2">
                         {a.nom}
+                        {a.description && (
+                          <span className="block text-[12px] leading-snug text-texte-3">{a.description}</span>
+                        )}
                       </li>
                     ))}
                   </ul>

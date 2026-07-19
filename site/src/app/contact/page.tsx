@@ -1,5 +1,9 @@
 import { BadgeMono, Carte, SurTitre } from "@/components/ui";
-import { COORDONNEES, HORAIRES_BOUTIQUE } from "@/lib/contenu";
+import { COORDONNEES } from "@/lib/contenu";
+import { horairesBoutique } from "@/lib/data/horaires";
+
+/** ISR : les horaires affiches sont pilotes par l'Atelier (0023). */
+export const revalidate = 300;
 
 export const metadata = {
   title: "Contact · A Léon Mange à Létra",
@@ -12,7 +16,8 @@ export const metadata = {
  * Le formulaire « Un message ? » est une ECRITURE (envoi d'email) → Vague 2 ;
  * en attendant, telephone et email cliquables font le travail.
  */
-export default function Contact() {
+export default async function Contact() {
+  const horaires = await horairesBoutique();
   return (
     <section className="mx-auto max-w-[1280px] px-4 md:px-8 py-12 md:py-16">
       <SurTitre>Contact</SurTitre>
@@ -37,7 +42,7 @@ export default function Contact() {
             Plan d&apos;accès
           </a>
           <ul className="mt-5 space-y-2 border-t border-bord pt-4">
-            {HORAIRES_BOUTIQUE.map((h) => (
+            {horaires.map((h) => (
               <li key={h.jours} className="flex items-baseline justify-between gap-4 text-[13.5px]">
                 <span className="font-semibold text-canard">{h.jours}</span>
                 <span className="text-texte-2 text-right">{h.heures}</span>

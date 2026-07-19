@@ -69,6 +69,11 @@ export default async function FoodTruck() {
                   <span className="font-mono text-[11px] text-texte-3">{e.horaire}</span>
                 </div>
                 <h2 className="font-display font-extrabold text-[19px] text-canard mt-3">{e.nom}</h2>
+                {(e.lieu || e.ville) && (
+                  <p className="text-[12.5px] text-texte-3 mt-0.5">
+                    {[e.lieu, e.ville].filter(Boolean).join(" · ")}
+                  </p>
+                )}
                 <p className="text-[13px] text-texte-2 mt-1 flex-1">
                   {e.jour ? `Chaque ${e.jour.toLowerCase()}` : "Jour à confirmer"} · {e.horaire}
                 </p>
@@ -114,10 +119,16 @@ export default async function FoodTruck() {
                   <p className="font-display font-bold text-[16px] text-canard border-b-[1.5px] border-bord-2 pb-2">
                     {f.nom}
                   </p>
+                  {f.note && <p className="mt-1.5 text-[12px] text-texte-3">{f.note}</p>}
                   <ul className="mt-2.5 space-y-2">
                     {f.articles.map((a) => (
                       <li key={a.id} className="flex items-baseline justify-between gap-4">
-                        <span className="text-[14px] text-canard">{a.nom}</span>
+                        <span className="text-[14px] text-canard">
+                          {a.nom}
+                          {a.description && (
+                            <span className="block text-[12px] leading-snug text-texte-3">{a.description}</span>
+                          )}
+                        </span>
                         <span className="font-display font-extrabold text-[14px] text-[var(--accent)] whitespace-nowrap">
                           {fmtPrix(a)}
                         </span>

@@ -107,10 +107,16 @@ export default async function Traiteur() {
                   <p className="font-display font-bold text-[16px] text-canard border-b-[1.5px] border-bord-2 pb-2">
                     {f.nom}
                   </p>
+                  {f.note && <p className="mt-1.5 text-[12px] text-texte-3">{f.note}</p>}
                   <ul className="mt-2.5 space-y-2">
                     {f.articles.map((a) => (
                       <li key={a.id} className="flex items-baseline justify-between gap-4">
-                        <span className="text-[13.5px] text-canard">{a.nom}</span>
+                        <span className="text-[13.5px] text-canard">
+                          {a.nom}
+                          {a.description && (
+                            <span className="block text-[12px] leading-snug text-texte-3 font-normal">{a.description}</span>
+                          )}
+                        </span>
                         <span className="font-display font-extrabold text-[13.5px] text-[var(--accent)] whitespace-nowrap">
                           {fmtPrix(a)}
                         </span>
