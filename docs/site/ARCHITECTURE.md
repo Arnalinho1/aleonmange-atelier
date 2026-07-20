@@ -123,9 +123,9 @@ Amendement de regle (decision Arnaud) : « pas d'image IA » visait les FAUSSES 
 - **Ecartes** : logo sur fond noir (detourage sale — demander a CD un vectoriel fond transparent), image « plan d'acces » (figee, mail @yahoo d'artefact) — a la place, le lien « Voir le plan d'acces » (pied de page + Contact + boutique) ouvre Google Maps ITINERAIRE sur l'adresse reelle (`COORDONNEES.plan`).
 - **En attente** : bowl + tartines (signatures truck), blanquette + paella (aucun produit correspondant au catalogue) — a associer plus tard ; upload d'images produit par les chefs depuis l'Atelier (Vague 4).
 
-## Vague 4 — refonte RLS + espace client (backend EN PRODUCTION, 2026-07-19)
+## Vague 4 — refonte RLS + espace client (EN PRODUCTION, merge `0223acd`, 2026-07-20)
 
-LE document de reference du modele de securite RLS. Backend prouve, committe sur `site-vague-4` (migrations **0034-0040**, chacune prouvee par requetes sous role). Le write-path client (0039), le correctif securite du trigger (0040), et l'infra auth site (@supabase/ssr) sont LIVRES et buildes ; reste la **Phase B** (4 ecrans maquette + fiche client Atelier + E2E). Conformite : `CONFORMITE_VAGUE_4.md`.
+LE document de reference du modele de securite RLS. **EN PRODUCTION sur `main` (merge `--no-ff` `0223acd`, 2026-07-20 ; les 2 projets Vercel rebuildes ; test prod E2E Arnaud OK).** Migrations **0034-0040** (chacune prouvee par requetes sous role, appliquees en prod). Write-path client (0039), correctif securite trigger (0040), infra auth site (@supabase/ssr), 4 ecrans espace client + fiche client Atelier (Phase B) : LIVRES. Conformite : `CONFORMITE_VAGUE_4.md`.
 
 ### Identite : chef vs client (fail-closed)
 - **Chef = un JWT portant le claim `app_role=equipe`.** Pose a l'emission du jeton par un **Custom Access Token Hook** (`public.custom_access_token_hook`, SECURITY DEFINER, ACTIVE dans la config Auth), dont la SOURCE DE VERITE est la table `profil` (l'equipe) : `exists profil where id = user_id`. Un utilisateur sans profil -> event inchange -> **pas de claim**.
@@ -159,7 +159,7 @@ Le backend 0036/0037 donne au client la LECTURE de ses donnees (policies SELECT)
 - **`web_maj_profil_client(nom, telephone, opt_in)`** : maj self-scope (`auth.uid()`) du profil (nom, telephone E.164) + opt-in fidelite DATE (non retroactif : date posee a la bascule false->true, conservee ensuite). N'ecrit JAMAIS l'email (identite = compte auth). Prouve : opt-in date correct, passages 0 juste apres opt-in vs 5 si date reculee.
 - **Jamais de `service_role` cote site, jamais de policy UPDATE `client` relachee** : le rattachement et l'edition passent par ces RPC (definer, self-scope), pas par un acces table direct. Le split en 2 fonctions (rattachement PUR sans input vs maj profil) maximise l'auditabilite.
 
-### Infra auth site (Etage 2a) — LIVREE + buildee ; E2E a valider au socle
+### Infra auth site (Etage 2a) — EN PRODUCTION (E2E prod valide le 2026-07-20)
 - `@supabase/ssr` cote site, **server-only** (RSC + Server Actions + Route Handler + proxy) : reutilise `SUPABASE_URL` + `SUPABASE_ANON_KEY` (deja presentes), **aucun nouveau secret, jamais NEXT_PUBLIC**. La cle anon = ticket de passerelle ; le role effectif est le jeton du client (cookies). `site/src/lib/supabase/session.ts` (client de session) + `middleware.ts` (rafraichissement + garde).
 - `site/src/proxy.ts` (Next 16 : ex-middleware) cadre STRICTEMENT `/compte` (matcher) : rafraichit la session (`getUser()`, **jamais `getSession()`** cote serveur) et garde `/compte` -> la vitrine publique (Vagues 1-3) n'est jamais interceptee. Defense en profondeur : chaque RPC self-scope `auth.uid()` (ne depend pas de la seule garde proxy).
 - Parcours : `/compte/connexion` (Server Actions inscription `kind='client'` / connexion / deconnexion) ; `/compte/auth/callback` (confirmation e-mail : gere PKCE `?code=` ET `verifyOtp ?token_hash=`) -> session -> rattachement 0039 (+ opt-in si coche) ; `/compte` (RSC, self-heal rattachement idempotent). Ecrans SOCLE sobres (la maquette CD d-login/d-compte = Phase B). Statut client verrouille : commande web non confirmee = « En attente de confirmation par l'atelier ».
