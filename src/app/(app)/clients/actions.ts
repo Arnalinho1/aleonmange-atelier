@@ -55,6 +55,27 @@ export async function updateClientFiche(
   return { ok: true };
 }
 
+/**
+ * Applique une récompense fidélité (geste chef au point de vente, Vague 4).
+ * Insère un fidelite_redemption (le compteur reste DÉRIVÉ : disponibles =
+ * floor(passages/seuil) - rachats). operateur_id = le chef courant. RLS :
+ * réservé à l'équipe (est_chef). Récompense NON monétaire.
+ */
+export async function appliquerRecompense(clientId: string): Promise<ClientFormState> {
+  if (!clientId) return { error: "Client introuvable." };
+  const supabase = await createSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Session expirée, reconnectez-vous." };
+  const { error } = await supabase
+    .from("fidelite_redemption")
+    .insert({ client_id: clientId, operateur_id: user.id });
+  if (error) return { error: error.message };
+  revalidatePath("/clients");
+  return { ok: true };
+}
+
 /** Soft delete : les ventes passées gardent leur client_id. Jamais de DELETE. */
 export async function toggleClientActif(id: string, actif: boolean): Promise<ClientFormState> {
   if (!id) return { error: "Fiche introuvable." };

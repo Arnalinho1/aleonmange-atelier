@@ -7,9 +7,8 @@ import { usePathname } from "next/navigation";
 
 /**
  * En-tete du site : nav horizontale (desktop) + menu PLEIN ECRAN (mobile,
- * reference maquette mobile). « Mon compte » de la maquette est
- * volontairement ABSENT en Vague 1 : l'espace client authentifie attend la
- * refonte RLS — ne rien promettre d'authentifie (relais §5).
+ * reference maquette mobile). « Mon compte » (entree espace client, Vague 4)
+ * pointe /compte : le proxy redirige vers /compte/connexion si non connecte.
  */
 
 const LIENS = [
@@ -40,14 +39,15 @@ export function EnTete() {
     <>
       <header className="sticky top-0 z-40 bg-page/95 backdrop-blur border-b border-bord">
       <div className="mx-auto max-w-[1280px] flex items-center gap-4 px-4 md:px-8 h-[68px]">
-        <Link href="/" className="flex items-center gap-2.5 shrink-0" aria-label="A Léon Mange, accueil">
-          <span className="grid place-items-center w-10 h-10 rounded-full overflow-hidden bg-surface-2 ring-1 ring-bord-2">
-            <Image src="/alm-mark.png" alt="" width={40} height={40} className="object-cover" />
-          </span>
-          <span className="leading-tight">
-            <span className="block font-display font-extrabold text-[17px] text-canard">A Léon Mange</span>
-            <span className="block font-mono text-[9px] uppercase tracking-[.18em] text-terracotta">Beaujolais</span>
-          </span>
+        <Link href="/" className="flex items-center shrink-0" aria-label="A Léon Mange, accueil">
+          <Image
+            src="/logo-alm.webp"
+            alt="A Léon Mange"
+            width={131}
+            height={58}
+            priority
+            className="h-[52px] md:h-[58px] w-auto"
+          />
         </Link>
 
         <nav className="hidden lg:flex items-center gap-6 mx-auto" aria-label="Navigation principale">
@@ -66,6 +66,16 @@ export function EnTete() {
         </nav>
 
         <div className="ml-auto lg:ml-0 flex items-center gap-2.5">
+          <Link
+            href="/compte"
+            className="hidden sm:inline-flex items-center gap-1.5 h-[42px] px-[15px] rounded-pille border border-bord-2 bg-surface text-canard font-display font-bold text-[13.5px] transition-colors hover:border-bord-4"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
+            </svg>
+            Mon compte
+          </Link>
           <button
             type="button"
             onClick={ouvrirLettre}
@@ -93,7 +103,7 @@ export function EnTete() {
       {menuOuvert && (
         <div className="fixed inset-0 z-50 bg-page flex flex-col lg:hidden">
           <div className="flex items-center justify-between px-4 h-[68px] border-b border-bord">
-            <span className="font-display font-extrabold text-[17px] text-canard">A Léon Mange</span>
+            <Image src="/logo-alm.webp" alt="A Léon Mange" width={108} height={48} className="h-[48px] w-auto" />
             <button
               type="button"
               onClick={() => setMenuOuvert(false)}
@@ -120,7 +130,18 @@ export function EnTete() {
               );
             })}
           </nav>
-          <div className="px-6 pb-10">
+          <div className="px-6 pb-10 flex flex-col gap-2.5">
+            <Link
+              href="/compte"
+              onClick={() => setMenuOuvert(false)}
+              className="w-full inline-flex items-center justify-center gap-2 h-[52px] rounded-pille border border-bord-2 bg-surface text-canard font-display font-bold text-[15px]"
+            >
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
+              </svg>
+              Mon compte
+            </Link>
             <button
               type="button"
               onClick={() => {
