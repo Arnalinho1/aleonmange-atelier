@@ -27,6 +27,14 @@ La prod est **fidele a l'INTENTION** de la maquette (memes ecrans, memes section
 | 6 | Traiteur | **Etape « La facturation » au libelle sobre** (« Apres la prestation »), sans conditions de reglement. | DEJA documente comme decision ouverte (ARCHITECTURE.md) : afficher ou non les conditions J+30 au prospect. |
 | 7 | Mentions legales | **Textes juridiques reformules** + mention « Responsable de publication » disparue + « consentement newsletter revocable » retire du bloc RGPD. | A valider avec le contenu juridique reel (deja balise placeholder). |
 
+## Arbitrages Arnaud (2026-07-20, go-live Vague 4)
+
+Decisions prises sur les 7 points a trancher. **Aucun n'est bloquant pour le merge de la Vague 4.**
+
+- **Points 1 a 6 : garde tel quel**, consignes au backlog (evolutions post-ouverture, pas de correctif avant merge).
+  - Point 5 (formulaire Contact = mailto) : le mailto est **assume en V1** et pointe desormais vers **aleonmange@yahoo.com** (adresse reelle du camion), comme tous les emails affiches du site.
+- **Point 7 (mentions legales) : backlog pre-ouverture, NON bloquant** pour le merge. A reprendre avec le contenu juridique reel (raison sociale, SIRET, responsable de publication, clause RGPD revocable) avant l'ouverture.
+
 ## Points RESOLUS dans cette session (Mission 2, meme branche)
 
 - **Logo** : la maquette utilise une image logo (~50px) ; la prod avait une pastille ronde + wordmark tape, car le logo du handoff etait ecarte (fond noir, detourage sale — ARCHITECTURE.md/CLAUDE.md). **Mission 2 pose le vrai logo `Logo ALeonMange Site.png`** (header + pied de page). Ecart logo -> resolu.
