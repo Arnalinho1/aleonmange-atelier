@@ -41,12 +41,12 @@ export function EnTete() {
       <div className="mx-auto max-w-[1280px] flex items-center gap-4 px-4 md:px-8 h-[68px]">
         <Link href="/" className="flex items-center shrink-0" aria-label="A Léon Mange, accueil">
           <Image
-            src="/logo-aleonmange.webp"
+            src="/logo-alm.webp"
             alt="A Léon Mange"
-            width={118}
-            height={55}
+            width={131}
+            height={58}
             priority
-            className="h-[46px] w-auto"
+            className="h-[52px] md:h-[58px] w-auto"
           />
         </Link>
 
@@ -103,7 +103,7 @@ export function EnTete() {
       {menuOuvert && (
         <div className="fixed inset-0 z-50 bg-page flex flex-col lg:hidden">
           <div className="flex items-center justify-between px-4 h-[68px] border-b border-bord">
-            <Image src="/logo-aleonmange.webp" alt="A Léon Mange" width={110} height={51} className="h-[42px] w-auto" />
+            <Image src="/logo-alm.webp" alt="A Léon Mange" width={108} height={48} className="h-[48px] w-auto" />
             <button
               type="button"
               onClick={() => setMenuOuvert(false)}
