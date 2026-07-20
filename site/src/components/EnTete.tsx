@@ -7,9 +7,8 @@ import { usePathname } from "next/navigation";
 
 /**
  * En-tete du site : nav horizontale (desktop) + menu PLEIN ECRAN (mobile,
- * reference maquette mobile). « Mon compte » de la maquette est
- * volontairement ABSENT en Vague 1 : l'espace client authentifie attend la
- * refonte RLS — ne rien promettre d'authentifie (relais §5).
+ * reference maquette mobile). « Mon compte » (entree espace client, Vague 4)
+ * pointe /compte : le proxy redirige vers /compte/connexion si non connecte.
  */
 
 const LIENS = [
@@ -66,6 +65,16 @@ export function EnTete() {
         </nav>
 
         <div className="ml-auto lg:ml-0 flex items-center gap-2.5">
+          <Link
+            href="/compte"
+            className="hidden sm:inline-flex items-center gap-1.5 h-[42px] px-[15px] rounded-pille border border-bord-2 bg-surface text-canard font-display font-bold text-[13.5px] transition-colors hover:border-bord-4"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
+            </svg>
+            Mon compte
+          </Link>
           <button
             type="button"
             onClick={ouvrirLettre}
@@ -120,7 +129,18 @@ export function EnTete() {
               );
             })}
           </nav>
-          <div className="px-6 pb-10">
+          <div className="px-6 pb-10 flex flex-col gap-2.5">
+            <Link
+              href="/compte"
+              onClick={() => setMenuOuvert(false)}
+              className="w-full inline-flex items-center justify-center gap-2 h-[52px] rounded-pille border border-bord-2 bg-surface text-canard font-display font-bold text-[15px]"
+            >
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
+              </svg>
+              Mon compte
+            </Link>
             <button
               type="button"
               onClick={() => {
