@@ -28,8 +28,8 @@ export default async function Boutique() {
     <>
       {/* Hero bande */}
       <section className="relative bg-canard text-surface-2">
-        <div className="mx-auto max-w-[1280px] px-4 md:px-8 py-14 md:py-16 max-w-none">
-          <div className="mx-auto max-w-[1280px]">
+        <div className="mx-auto max-w-[1280px] px-4 md:px-8 py-14 md:py-16 grid gap-8 md:grid-cols-[1.05fr_1fr] items-center">
+          <div>
             <SurTitre>La Boutique</SurTitre>
             <h1 className="font-display font-extrabold text-[clamp(30px,5vw,46px)] leading-[1.05] tracking-[-.02em] mt-3">
               Passez quand vous voulez
@@ -45,6 +45,14 @@ export default async function Boutique() {
               Commander en click &amp; collect
             </Link>
           </div>
+          <Photo
+            src="/images/boutique-facade.webp"
+            alt="La façade verte de la boutique A Léon Mange à Létra"
+            ratio="4/3"
+            sizes="(max-width: 768px) 100vw, 45vw"
+            className="rounded-carte-lg"
+            priority
+          />
         </div>
       </section>
 
@@ -109,9 +117,9 @@ export default async function Boutique() {
             </ul>
           </Carte>
           <Photo
-            src="/images/boutique-devanture.webp"
-            alt="La devanture de la boutique A Léon Mange à Létra"
-            ratio="4/3"
+            src="/images/boutique-interieur.webp"
+            alt="L'intérieur de la boutique A Léon Mange : comptoir et étagères de producteurs"
+            ratio="16/9"
             sizes="(max-width: 1024px) 100vw, 34vw"
             className="rounded-carte-lg"
           />
