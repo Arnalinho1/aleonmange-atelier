@@ -292,7 +292,7 @@ export function FinanceBoard({
           {parPlat.length === 0 ? (
             <p style={{ fontSize: 13, color: "#6b7469", padding: 16 }}>Pas de données sur la période.</p>
           ) : (
-            <div>
+            <div className="fz-tscroll"><div style={{ minWidth: 600 }}>
               <div
                 className="font-mono uppercase"
                 style={{ display: "grid", gridTemplateColumns: "1.8fr .6fr .8fr .8fr .8fr .6fr", gap: 8, padding: "8px 16px", fontSize: 10, letterSpacing: ".08em", color: "#a79b84", borderBottom: "1px solid #efe7d6" }}
@@ -323,7 +323,7 @@ export function FinanceBoard({
                   </div>
                 );
               })}
-            </div>
+            </div></div>
           )}
         </Card>
 

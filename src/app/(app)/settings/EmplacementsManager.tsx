@@ -66,7 +66,7 @@ export function EmplacementsManager({ emplacements }: { emplacements: Emplacemen
           sous="La vente porte une FK vers cette table — on désactive, on ne supprime jamais."
           compteur={`${actifs.length} actif${actifs.length > 1 ? "s" : ""}`}
         />
-        <div>
+        <div className="fz-tscroll"><div style={{ minWidth: 520 }}>
           <div
             className="font-mono uppercase"
             style={{ display: "grid", gridTemplateColumns: "1.7fr .8fr .8fr .6fr .5fr", gap: 8, padding: "8px 16px", fontSize: 10, letterSpacing: ".08em", color: "#a79b84", borderBottom: "1px solid #efe7d6" }}
@@ -126,7 +126,7 @@ export function EmplacementsManager({ emplacements }: { emplacements: Emplacemen
               </div>
             </div>
           ))}
-        </div>
+        </div></div>
       </Card>
 
       {error && drawer === null && (
@@ -138,7 +138,7 @@ export function EmplacementsManager({ emplacements }: { emplacements: Emplacemen
       {drawer !== null && (
         <div className="fixed inset-0 flex justify-end" style={{ background: "rgba(15,24,19,.5)", zIndex: 70 }} onClick={() => setDrawer(null)}>
           <div
-            className="fz-scroll h-full overflow-y-auto"
+            className="fz-scroll h-full overflow-y-auto fz-drawer-full"
             style={{ width: "min(420px,92vw)", background: "#fbf8f1", boxShadow: "-20px 0 60px rgba(0,0,0,.25)" }}
             onClick={(ev) => ev.stopPropagation()}
           >

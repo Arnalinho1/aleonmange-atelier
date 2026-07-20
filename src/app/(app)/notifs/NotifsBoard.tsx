@@ -185,6 +185,7 @@ export function NotifsBoard({
           <Card style={{ overflow: "hidden" }}>
             <SectionHeader titre="Par type d'alerte" sous="Vos préférences personnelles — persistées." />
             <div style={{ padding: "10px 16px" }}>
+              <div className="fz-tscroll"><div style={{ minWidth: 360 }}>
               <div
                 className="font-mono uppercase"
                 style={{ display: "grid", gridTemplateColumns: "1fr 74px 74px", gap: 8, fontSize: 10, letterSpacing: ".08em", color: "#a79b84", paddingBottom: 7, borderBottom: "1px solid #efe7d6" }}
@@ -210,6 +211,7 @@ export function NotifsBoard({
                   </div>
                 );
               })}
+              </div></div>
               <p style={{ fontSize: 11.5, color: "#9a927f", marginTop: 10 }}>
                 L&apos;envoi d&apos;e-mails suivra la mise en place des règles d&apos;alerte.
               </p>

@@ -174,6 +174,7 @@ export function SalesBoard({
               <p style={{ fontSize: 13, color: "#6b7469", padding: 16 }}>Aucune ligne sur ce filtre.</p>
             ) : (
               <div style={{ padding: "8px 16px 14px" }}>
+                <div className="fz-tscroll"><div style={{ minWidth: 560 }}>
                 <div
                   className="font-mono uppercase"
                   style={{ display: "grid", gridTemplateColumns: "1.9fr repeat(3,.72fr) .6fr", gap: 6, padding: "6px 0", fontSize: 10, letterSpacing: ".08em", color: "#a79b84", borderBottom: "1px solid #efe7d6" }}
@@ -212,6 +213,7 @@ export function SalesBoard({
                     <span className="font-display" style={{ fontSize: 14, fontWeight: 800, color: "#0e3947", textAlign: "right" }}>{mrow.total}</span>
                   </div>
                 ))}
+                </div></div>
               </div>
             )}
           </Card>
@@ -223,6 +225,7 @@ export function SalesBoard({
                 <p className="font-display" style={{ fontSize: 15, fontWeight: 700, color: "#0e3947" }}>Saisonnalité — 7 jours</p>
                 <Badge tone="calcule">Calculé · occurred_at</Badge>
               </div>
+              <div className="fz-tscroll"><div style={{ minWidth: 520 }}>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)", gap: 8, alignItems: "end", height: 150 }}>
                 {septJours.map((j) => (
                   <button
@@ -253,6 +256,7 @@ export function SalesBoard({
                   </span>
                 ))}
               </div>
+              </div></div>
               <p style={{ fontSize: 11, color: "#9a927f", marginTop: 10 }}>
                 Cliquez un jour pour filtrer les KPI et la matrice.
               </p>

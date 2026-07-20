@@ -108,6 +108,7 @@ export function ClientsManager({
           compteur={`${actifs.length} client${actifs.length > 1 ? "s" : ""}`}
         />
         <div>
+          <div className="fz-tscroll"><div style={{ minWidth: 760 }}>
           <div
             className="font-mono uppercase"
             style={{ display: "grid", gridTemplateColumns: "1.8fr .7fr 1.2fr .5fr .8fr .8fr .6fr .6fr", gap: 8, padding: "8px 16px", fontSize: 10, letterSpacing: ".08em", color: "#a79b84", borderBottom: "1px solid #efe7d6" }}
@@ -189,6 +190,7 @@ export function ClientsManager({
               </div>
             );
           })}
+          </div></div>
         </div>
       </Card>
       )}
@@ -202,7 +204,7 @@ export function ClientsManager({
       {drawer !== null && (
         <div className="fixed inset-0 flex justify-end" style={{ background: "rgba(15,24,19,.5)", zIndex: 70 }} onClick={() => setDrawer(null)}>
           <div
-            className="fz-scroll h-full overflow-y-auto"
+            className="fz-scroll h-full overflow-y-auto fz-drawer-full"
             style={{ width: "min(440px,92vw)", background: "#fbf8f1", boxShadow: "-20px 0 60px rgba(0,0,0,.25)" }}
             onClick={(ev) => ev.stopPropagation()}
           >
