@@ -13,6 +13,17 @@ export async function signIn(_prev: AuthState, formData: FormData): Promise<Auth
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) return { error: erreurFr(error.message) };
+
+  // Autorisation : l'Atelier est RESERVE a l'equipe. Un compte sans claim
+  // app_role=equipe (ex : compte client du site public) est rejete IMMEDIATEMENT
+  // (deconnexion + message clair), avant tout acces au shell de l'Atelier.
+  const { data: claimsData } = await supabase.auth.getClaims();
+  const appRole = (claimsData?.claims as Record<string, unknown> | undefined)?.app_role;
+  if (appRole !== "equipe") {
+    await supabase.auth.signOut();
+    return { error: "Acces reserve a l'equipe A Leon Mange. Les comptes client se gerent sur le site public." };
+  }
+
   // Écran d'accueil = préférence PERSONNELLE (user_preference) — une source,
   // plusieurs lecteurs (handoff Profil & Stock §01).
   const {
