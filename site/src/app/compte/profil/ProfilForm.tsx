@@ -132,8 +132,8 @@ export function ProfilForm({
         {supprOuvert && (
           <p className="mt-2.5 text-[12px] text-texte-2 leading-[1.5] rounded-lg bg-surface-2 border border-bord-2 p-3">
             Pour supprimer définitivement votre compte et vos données, écrivez-nous à{" "}
-            <a href="mailto:contact@aleonmange.app" className="text-terracotta font-semibold underline">
-              contact@aleonmange.app
+            <a href="mailto:aleonmange@yahoo.com" className="text-terracotta font-semibold underline">
+              aleonmange@yahoo.com
             </a>
             . La suppression en libre-service arrivera prochainement.
           </p>
