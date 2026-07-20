@@ -94,7 +94,7 @@ export function NewRecipeDrawer({ composants }: { composants: Composant[] }) {
       {open && (
         <div className="fixed inset-0 flex justify-end" style={{ background: "rgba(15,24,19,.5)", zIndex: 70 }} onClick={() => setOpen(false)}>
           <div
-            className="fz-scroll h-full overflow-y-auto"
+            className="fz-scroll h-full overflow-y-auto fz-drawer-full"
             style={{ width: "min(460px,92vw)", background: "#fbf8f1", boxShadow: "-20px 0 60px rgba(0,0,0,.25)" }}
             onClick={(e) => e.stopPropagation()}
           >

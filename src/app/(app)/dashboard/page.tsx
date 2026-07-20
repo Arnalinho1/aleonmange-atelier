@@ -323,7 +323,7 @@ export default async function DashboardPage() {
 
           <Card style={{ overflow: "hidden" }}>
             <SectionHeader titre="Alertes vitales" action={<Link href="/notifs" style={{ fontSize: 12, fontWeight: 600, color: "#1493be" }}>Notifications →</Link>} />
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8, padding: 16 }}>
+            <div className="fz-stack" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8, padding: 16 }}>
               <Compteur label="Critiques" valeur={alertes.critique} couleur="#c0442e" />
               <Compteur label="Alertes" valeur={alertes.alerte} couleur="#a9761e" />
               <Compteur label="Infos" valeur={alertes.info} couleur="#1493be" />

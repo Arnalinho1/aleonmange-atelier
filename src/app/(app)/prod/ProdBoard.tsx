@@ -176,6 +176,7 @@ export function ProdBoard({
           </p>
         ) : (
           <>
+            <div className="fz-tscroll"><div style={{ minWidth: 460 }}>
             <div
               className="font-mono uppercase"
               style={{ display: "grid", gridTemplateColumns: "1.6fr .8fr .7fr .7fr", gap: 8, fontSize: 9.5, letterSpacing: ".08em", color: "#5c8593", paddingBottom: 7, borderBottom: "1px solid rgba(255,255,255,.1)" }}
@@ -212,6 +213,7 @@ export function ProdBoard({
                 </span>
               </div>
             ))}
+            </div></div>
             {plan.libresPortions > 0 && (
               <p className="font-mono" style={{ fontSize: 10.5, color: "#8fcfe2", marginTop: 10 }}>
                 + {plan.libresPortions} bowl{plan.libresPortions > 1 ? "s" : ""} libre{plan.libresPortions > 1 ? "s" : ""} (7 j) — composition variable, voir besoins matières.
@@ -330,7 +332,7 @@ export function ProdBoard({
 
       {open && (
         <div className="fixed inset-0 flex justify-end" style={{ background: "rgba(15,24,19,.5)", zIndex: 70 }} onClick={() => setOpen(false)}>
-          <div className="fz-scroll h-full overflow-y-auto" style={{ width: "min(420px,92vw)", background: "#fbf8f1", boxShadow: "-20px 0 60px rgba(0,0,0,.25)" }} onClick={(e) => e.stopPropagation()}>
+          <div className="fz-scroll h-full overflow-y-auto fz-drawer-full" style={{ width: "min(420px,92vw)", background: "#fbf8f1", boxShadow: "-20px 0 60px rgba(0,0,0,.25)" }} onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between" style={{ background: "#0e3947", padding: "18px 20px" }}>
               <div>
                 <p className="font-mono uppercase" style={{ fontSize: 10, letterSpacing: ".14em", color: "#8fcfe2" }}>Production</p>

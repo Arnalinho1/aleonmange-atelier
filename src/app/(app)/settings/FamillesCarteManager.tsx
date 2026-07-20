@@ -94,6 +94,7 @@ export function FamillesCarteManager({
                   </span>
                 )}
               </div>
+              <div className="fz-tscroll"><div style={{ minWidth: 520 }}>
               {duCanal.map((f) => {
                 const matche = (categoriesParCanal[c] ?? []).includes(f.nom);
                 return (
@@ -103,7 +104,11 @@ export function FamillesCarteManager({
                   >
                     <div className="flex items-center gap-2" style={{ minWidth: 0 }}>
                       <span style={{ fontSize: 14, fontWeight: 600, color: "#0e3947", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{f.nom}</span>
-                      {!matche && f.actif && <Badge tone="alerte">Sans catégorie</Badge>}
+                      {!matche && f.actif && (
+                        <span title="Aucun produit du catalogue n'a cette catégorie : cette famille reste vide sur la carte publique.">
+                          <Badge tone="alerte">Aucun produit</Badge>
+                        </span>
+                      )}
                     </div>
                     <span style={{ fontSize: 12.5, color: "#6b7469", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{f.note ?? "—"}</span>
                     <span className="font-mono" style={{ fontSize: 12.5, color: "#6b7469", textAlign: "right" }}>{f.ordre}</span>
@@ -125,6 +130,7 @@ export function FamillesCarteManager({
                   </div>
                 );
               })}
+              </div></div>
             </div>
           );
         })}
@@ -145,7 +151,7 @@ export function FamillesCarteManager({
       {drawer !== null && (
         <div className="fixed inset-0 flex justify-end" style={{ background: "rgba(15,24,19,.5)", zIndex: 70 }} onClick={() => setDrawer(null)}>
           <div
-            className="fz-scroll h-full overflow-y-auto"
+            className="fz-scroll h-full overflow-y-auto fz-drawer-full"
             style={{ width: "min(420px,92vw)", background: "#fbf8f1", boxShadow: "-20px 0 60px rgba(0,0,0,.25)" }}
             onClick={(ev) => ev.stopPropagation()}
           >

@@ -201,9 +201,9 @@ export function StockBoard({ lignes }: { lignes: StockComposant[] }) {
             {/* Tableau composants */}
             <Card style={{ overflow: "hidden" }}>
               <SectionHeader titre="Inventaire par composant" sous="Physique = Σ mouvements · Réservé = commandes ouvertes · Disponible = physique − réservé (porte le statut)." />
-              <div>
+              <div className="fz-cardtable">
                 <div
-                  className="font-mono uppercase"
+                  className="font-mono uppercase fz-thead"
                   style={{ display: "grid", gridTemplateColumns: "1.5fr .6fr .6fr .65fr .55fr .75fr", gap: 8, padding: "8px 16px", fontSize: 10, letterSpacing: ".08em", color: "#a79b84", borderBottom: "1px solid #efe7d6" }}
                 >
                   <span>Composant</span>
@@ -225,8 +225,8 @@ export function StockBoard({ lignes }: { lignes: StockComposant[] }) {
                         : { tone: "succes", label: "OK" };
                   return (
                     <div key={l.composant.id} style={{ borderBottom: "1px solid #efe7d6" }}>
-                      <div style={{ display: "grid", gridTemplateColumns: "1.5fr .6fr .6fr .65fr .55fr .75fr", gap: 8, padding: "10px 16px", alignItems: "center" }}>
-                        <button onClick={() => setOuvert(deplie ? null : l.composant.id)} className="flex items-center gap-2" style={{ textAlign: "left" }}>
+                      <div className="fz-row" style={{ display: "grid", gridTemplateColumns: "1.5fr .6fr .6fr .65fr .55fr .75fr", gap: 8, padding: "10px 16px", alignItems: "center" }}>
+                        <button onClick={() => setOuvert(deplie ? null : l.composant.id)} className="flex items-center gap-2 fz-cell-head" style={{ textAlign: "left" }}>
                           {deplie ? <ChevronDown size={14} style={{ color: "#9a927f" }} /> : <ChevronRight size={14} style={{ color: "#9a927f" }} />}
                           <Dot color={CATEGORIE_COLOR[l.composant.categorie]} size={7} />
                           <span style={{ minWidth: 0 }}>
@@ -243,17 +243,17 @@ export function StockBoard({ lignes }: { lignes: StockComposant[] }) {
                             </span>
                           </span>
                         </button>
-                        <span className="font-mono" style={{ fontSize: 12.5, color: "#6b7469", textAlign: "right" }}>
+                        <span className="font-mono fz-cell" data-label="Physique" style={{ fontSize: 12.5, color: "#6b7469", textAlign: "right" }}>
                           {fmtKg(l.stock)} {uniteAbr(l.composant.unite)}
                         </span>
-                        <span className="font-mono" title="Engagé par les commandes ouvertes (précommandes non remises)" style={{ fontSize: 12.5, color: l.reserve == null ? "#b07a2e" : l.reserve > 0 ? "#8a7f6a" : "#c0b69e", textAlign: "right" }}>
+                        <span className="font-mono fz-cell" data-label="Réservé" title="Engagé par les commandes ouvertes (précommandes non remises)" style={{ fontSize: 12.5, color: l.reserve == null ? "#b07a2e" : l.reserve > 0 ? "#8a7f6a" : "#c0b69e", textAlign: "right" }}>
                           {l.reserve == null ? "?" : l.reserve > 0 ? `−${fmtKg(l.reserve)}` : "—"}
                         </span>
-                        <span className="font-mono" style={{ fontSize: 13, fontWeight: 700, color: "#0e3947", textAlign: "right" }}>
+                        <span className="font-mono fz-cell" data-label="Disponible" style={{ fontSize: 13, fontWeight: 700, color: "#0e3947", textAlign: "right" }}>
                           {fmtKg(l.disponible)} {uniteAbr(l.composant.unite)}
                         </span>
-                        <span><Badge tone={statut.tone}>{statut.label}</Badge></span>
-                        <span className="flex items-center justify-end gap-2">
+                        <span className="fz-cell" data-label="Statut"><Badge tone={statut.tone}>{statut.label}</Badge></span>
+                        <span className="flex items-center justify-end gap-2 fz-cell" data-label="Inventaire">
                           <button
                             onClick={() => { setError(undefined); setDrawer({ mode: "ajuster", ligne: l }); }}
                             style={{ fontSize: 12, fontWeight: 600, color: "#1493be" }}
@@ -351,7 +351,7 @@ export function StockBoard({ lignes }: { lignes: StockComposant[] }) {
 
           <Card style={{ overflow: "hidden" }}>
             <div
-              className="font-mono uppercase flex items-center gap-3"
+              className="font-mono uppercase flex items-center gap-3 fz-thead"
               style={{ padding: "10px 20px", fontSize: 10, letterSpacing: ".07em", color: "#a79b84", borderBottom: "1px solid #efe7d6" }}
             >
               <span style={{ flex: "0 0 22px" }} />
@@ -378,7 +378,7 @@ export function StockBoard({ lignes }: { lignes: StockComposant[] }) {
                 const id = r.ligne.composant.id;
                 const abr = uniteAbr(r.ligne.composant.unite);
                 return (
-                  <div key={id} className="flex items-center gap-3" style={{ padding: "12px 20px", borderBottom: "1px solid #efe7d6", opacity: r.commande ? 0.52 : 1 }}>
+                  <div key={id} className="flex items-center gap-3 fz-row" style={{ padding: "12px 20px", borderBottom: "1px solid #efe7d6", opacity: r.commande ? 0.52 : 1 }}>
                     <button
                       onClick={() => sauver(id, { commande: !r.commande })}
                       title={r.commande ? "Retirer des commandes" : "Marquer comme commandé"}
@@ -392,7 +392,7 @@ export function StockBoard({ lignes }: { lignes: StockComposant[] }) {
                     >
                       <Check size={13} strokeWidth={3.2} />
                     </button>
-                    <span className="flex items-center gap-2.5" style={{ flex: 1, minWidth: 0 }}>
+                    <span className="flex items-center gap-2.5 fz-cell-head" style={{ flex: 1, minWidth: 0 }}>
                       <Dot color={CATEGORIE_COLOR[r.ligne.composant.categorie]} size={7} />
                       <span style={{ minWidth: 0 }}>
                         <span style={{ display: "block", fontSize: 13.5, fontWeight: 600, color: "#0e3947", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
@@ -403,16 +403,16 @@ export function StockBoard({ lignes }: { lignes: StockComposant[] }) {
                         </span>
                       </span>
                     </span>
-                    <span style={{ flex: "0 0 110px" }}>
+                    <span className="fz-cell" data-label="Dispo / seuil" style={{ flex: "0 0 110px" }}>
                       <span className="font-mono" style={{ display: "block", fontSize: 12, color: "#0e3947" }}>
                         {fmtKg(r.ligne.disponible)} / {fmtKg(r.seuilEff)} {abr}
                       </span>
                       <Badge tone={r.rupture ? "critique" : "alerte"}>{r.rupture ? "Rupture" : "Sous seuil"}</Badge>
                     </span>
-                    <span className="font-mono" style={{ flex: "0 0 84px", textAlign: "center", fontSize: 13, fontWeight: 700, color: "#b00d1a" }}>
+                    <span className="font-mono fz-cell" data-label="Manque" style={{ flex: "0 0 84px", textAlign: "center", fontSize: 13, fontWeight: 700, color: "#b00d1a" }}>
                       −{fmtKg(r.manque)} {abr}
                     </span>
-                    <span style={{ flex: "0 0 96px" }}>
+                    <span className="fz-cell" data-label="Quantité" style={{ flex: "0 0 96px" }}>
                       <input
                         value={qtes[id] ?? (r.ligne.reappro?.qte_retenue != null ? String(r.ligne.reappro.qte_retenue).replace(".", ",") : "")}
                         onChange={(e) => setQtes({ ...qtes, [id]: e.target.value })}
@@ -435,7 +435,7 @@ export function StockBoard({ lignes }: { lignes: StockComposant[] }) {
                         sugg. {fmtKg(r.suggere)} {abr}{r.override ? " · ajusté" : ""}
                       </span>
                     </span>
-                    <span style={{ flex: "0 0 140px" }}>
+                    <span className="fz-cell" data-label="Fournisseur" style={{ flex: "0 0 140px" }}>
                       <input
                         value={fournisseurs[id] ?? (r.ligne.reappro?.fournisseur ?? "")}
                         onChange={(e) => setFournisseurs({ ...fournisseurs, [id]: e.target.value })}
@@ -451,7 +451,7 @@ export function StockBoard({ lignes }: { lignes: StockComposant[] }) {
                         }}
                       />
                     </span>
-                    <span className="font-mono" style={{ flex: "0 0 88px", textAlign: "right", fontSize: 13, fontWeight: 700, color: "#0e3947" }}>
+                    <span className="font-mono fz-cell" data-label="Coût est." style={{ flex: "0 0 88px", textAlign: "right", fontSize: 13, fontWeight: 700, color: "#0e3947" }}>
                       {r.cout != null ? fmtEuro(r.cout) : "—"}
                     </span>
                   </div>
@@ -466,7 +466,7 @@ export function StockBoard({ lignes }: { lignes: StockComposant[] }) {
       {drawer && (
         <div className="fixed inset-0 flex justify-end" style={{ background: "rgba(15,24,19,.5)", zIndex: 70 }} onClick={() => setDrawer(null)}>
           <div
-            className="fz-scroll h-full overflow-y-auto"
+            className="fz-scroll h-full overflow-y-auto fz-drawer-full"
             style={{ width: "min(420px,92vw)", background: "#fbf8f1", boxShadow: "-20px 0 60px rgba(0,0,0,.25)" }}
             onClick={(e) => e.stopPropagation()}
           >

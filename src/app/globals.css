@@ -126,3 +126,123 @@ body {
     grid-template-columns: 1fr !important;
   }
 }
+
+/* ============================================================================
+   RESPONSIVE MOBILE (refonte atelier-mobile)
+   Le styling de l'app est inline (impossible d'y mettre des @media) : le
+   responsive passe donc par ces classes + @media. `!important` bat l'inline.
+   ========================================================================== */
+
+/* --- Shell : sidebar off-canvas + hamburger + overlay sous 1024px --- */
+.app-burger {
+  display: none;
+}
+.app-overlay {
+  display: none;
+}
+@media (max-width: 1023px) {
+  .app-sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    z-index: 60 !important;
+    width: min(84vw, 300px) !important;
+    flex: 0 0 auto !important;
+    transform: translateX(-100%);
+    transition: transform 0.24s ease;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.35);
+  }
+  .app-sidebar.is-open {
+    transform: none;
+  }
+  .app-burger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .app-topsearch {
+    display: none !important;
+  }
+  .app-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(14, 57, 71, 0.44);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.24s ease;
+  }
+  .app-overlay.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* --- Contenu (telephone) sous 768px --- */
+@media (max-width: 767px) {
+  /* Faux-tableaux denses : scroll horizontal (colonnes preservees via min-width interne) */
+  .fz-tscroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  /* Grilles / formulaires multi-colonnes -> 1 colonne */
+  .fz-stack {
+    grid-template-columns: 1fr !important;
+  }
+  /* Drawers plein ecran */
+  .fz-drawer-full {
+    width: 100vw !important;
+    max-width: 100vw !important;
+  }
+  /* Recap/colonne sticky -> non-sticky au telephone (evite de manger la hauteur) */
+  .fz-unsticky {
+    position: static !important;
+  }
+  /* Faux-tableaux -> cartes empilees (catalogue & stocks).
+     Classes autonomes : fz-thead (masque l'en-tete), fz-row (ligne = carte),
+     fz-cell (cellule = label:valeur via data-label), fz-cell-head (titre de carte). */
+  .fz-cardtable {
+    display: block !important;
+  }
+  .fz-thead {
+    display: none !important;
+  }
+  .fz-row {
+    display: block !important;
+    border: 1px solid var(--color-bord-3);
+    border-radius: 12px;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    background: var(--color-creme-3);
+  }
+  .fz-cell {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    padding: 4px 0;
+    text-align: right !important;
+    min-width: 0;
+  }
+  .fz-cell::before {
+    content: attr(data-label);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-muted);
+    text-align: left;
+    white-space: nowrap;
+    flex: 0 0 auto;
+  }
+  /* Cellule d'en-tete de carte (nom / titre) : pleine largeur, sans label */
+  .fz-cell-head {
+    padding-bottom: 6px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid var(--color-bord-3);
+  }
+  .fz-cell-head::before {
+    content: none;
+  }
+}

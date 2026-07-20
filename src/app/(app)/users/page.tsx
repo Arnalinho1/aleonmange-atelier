@@ -104,6 +104,7 @@ export default async function UsersPage() {
           <Card style={{ overflow: "hidden" }}>
             <SectionHeader titre="Accès par rôle" sous="Bootstrap — le modèle fin par écran reste à préciser." />
             <div style={{ padding: "12px 16px" }}>
+              <div className="fz-tscroll"><div style={{ minWidth: 360 }}>
               <div
                 className="font-mono uppercase"
                 style={{ display: "grid", gridTemplateColumns: "1.5fr repeat(3,42px)", gap: 4, fontSize: 9.5, letterSpacing: ".07em", color: "#a79b84", paddingBottom: 7, borderBottom: "1px solid #efe7d6" }}
@@ -126,6 +127,7 @@ export default async function UsersPage() {
                   ))}
                 </div>
               ))}
+              </div></div>
               <div className="flex items-center gap-2" style={{ marginTop: 10 }}>
                 <Badge tone="demo">Bootstrap</Badge>
                 <span style={{ fontSize: 11.5, color: "#9a927f" }}>Indicatif — non appliqué par la base (point ouvert #3).</span>

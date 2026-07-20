@@ -478,6 +478,7 @@ export function ProductivityBoard({
               <p style={{ margin: "5px 0 16px", fontSize: 13, color: "#8a7f6a" }}>
                 Chaque commande traiteur traverse le cycle complet ; le comptoir et le truck naissent « remis ».
               </p>
+              <div className="fz-tscroll"><div style={{ minWidth: 480 }}>
               <div className="font-mono uppercase" style={{ display: "grid", gridTemplateColumns: "1.9fr .8fr 1fr .8fr", gap: 8, padding: "0 6px 9px", fontSize: 10, letterSpacing: ".05em", color: "#a79b84" }}>
                 <span>Commande</span>
                 <span style={{ textAlign: "right" }}>Portions</span>
@@ -504,6 +505,7 @@ export function ProductivityBoard({
                   );
                 })}
               </div>
+              </div></div>
             </section>
           )}
 

@@ -279,6 +279,7 @@ export function ImportWizard({
             action={<Badge tone="demo">Mode déduit · à confirmer</Badge>}
           />
           <div>
+            <div className="fz-tscroll"><div style={{ minWidth: 660 }}>
             <div
               className="font-mono uppercase"
               style={{ display: "grid", gridTemplateColumns: "1.4fr 1.3fr .7fr .7fr .7fr 1.5fr", gap: 8, padding: "8px 16px", fontSize: 10, letterSpacing: ".08em", color: "#a79b84", borderBottom: "1px solid #efe7d6" }}
@@ -315,6 +316,7 @@ export function ImportWizard({
                 </span>
               </div>
             ))}
+            </div></div>
           </div>
           <div className="flex items-center gap-3 flex-wrap" style={{ padding: 16 }}>
             <p className="font-mono" style={{ flex: 1, fontSize: 10.5, color: "#8a7f6a" }}>

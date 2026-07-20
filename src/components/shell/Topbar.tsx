@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, Plus, Search } from "lucide-react";
+import { Bell, Menu, Plus, Search } from "lucide-react";
 
-/** Topbar sticky floue (MOCKUP_DIGEST §1). */
-export function Topbar({ hasUnread = false }: { hasUnread?: boolean }) {
+/** Topbar sticky floue (MOCKUP_DIGEST §1). Hamburger visible sous 1024px (mobile). */
+export function Topbar({ hasUnread = false, onMenuOpen }: { hasUnread?: boolean; onMenuOpen?: () => void }) {
   return (
     <header
       className="sticky top-0 flex items-center gap-4"
@@ -17,8 +17,18 @@ export function Topbar({ hasUnread = false }: { hasUnread?: boolean }) {
         padding: "14px clamp(18px,3vw,34px)",
       }}
     >
+      <button
+        type="button"
+        onClick={onMenuOpen}
+        aria-label="Ouvrir le menu"
+        className="app-burger shrink-0"
+        style={{ width: 40, height: 40, background: "#f6f1e7", border: "1px solid #dfd4bf", borderRadius: 11, color: "#0e3947" }}
+      >
+        <Menu size={20} />
+      </button>
+
       <div
-        className="flex items-center gap-2"
+        className="app-topsearch flex items-center gap-2"
         style={{ flex: 1, maxWidth: 420, background: "#f6f1e7", border: "1px solid #dfd4bf", borderRadius: 11, padding: "9px 13px" }}
       >
         <Search size={16} color="#9a927f" />
