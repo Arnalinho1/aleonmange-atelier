@@ -143,6 +143,16 @@ LE document de reference du modele de securite RLS. **EN PRODUCTION sur `main` (
 - **Correctif (3 couches, code Atelier seul, HOTFIXE sur main `1ba235a` en `--no-ff` scope hotfix)** : (1) `updateSession` lit `getClaims()` et exige `app_role='equipe'`, sinon `signOut()` + efface les cookies `sb-*` + `/login` ; (2) `signIn` rejette immediatement un non-equipe (message clair) ; (3) `(app)/layout` redirige un compte sans profil (defense en profondeur). Prouve : owner passe, comptes client rejetes.
 - **REGLE** : toute app qui partage cette instance Auth AUTORISE sur le claim/profil, pas seulement « authentifie ». Le hotfix a rebuilde l'Atelier ; le site a saute (Ignored Build Step).
 
+#### Provisioning d'un membre d'equipe (manuel ; /users = backlog)
+Pas de recrutement prevu (seuls les deux chefs). L'ecran d'invitation `/users` est REPORTE ; on provisionne par le SEUL chemin legitime (0040 fail-closed) :
+1. **Invitation Supabase** : Dashboard > Authentication > Users > « Add user » > « Send invitation » (email). La ligne `auth.users` est creee -> `handle_new_user` s'execute -> `premier=false` (l'owner existe) -> **AUCUN profil**. Le compte peut s'authentifier mais la garde Fix C le rejette (« Acces reserve a l'equipe ») et la RLS renvoie 0 ligne : acces ZERO tant que l'etape 2 n'est pas faite (fail-closed, voulu).
+2. **Insertion `profil`** (par un proprietaire, via management API / SQL cible) : `insert into profil (id, nom, role) values (<uid>, <nom>, <role>)`. Au PROCHAIN jeton, le hook stampe `app_role=equipe` -> `est_chef()` -> acces.
+3. Le membre se (re)connecte sur `atelier.aleonmange.app` : le claim arrive au premier jeton.
+
+**PIEGE `site_url`** : depuis Fix B, l'Auth Site URL = `https://aleonmange.app` (pour que les confirmations CLIENT ne partent plus vers l'Atelier). Consequence : **toute invitation EQUIPE atterrit desormais cote SITE** (aleonmange.app), pas l'Atelier. Le membre invite doit ensuite aller manuellement sur `atelier.aleonmange.app` pour se connecter. A prevoir si on recable un vrai flux d'invitation equipe : un redirect explicite vers l'Atelier.
+
+**Etat (2026-07-20)** : compte d'equipe **PARTAGE** `aleonmange@yahoo.com` (uid `4aaef25d`), nom d'affichage « Audrey et Victorien », role `owner` (choix des chefs pour la simplicite ; comptes individuels possibles plus tard). NB : cet email est AUSSI le contact public affiche du site ; aucune fiche client auto-creee (l'invitation a atterri sur la racine du site, pas `/compte`).
+
 ### Policies (0035, 0036) — RESTREINT ou MAINTIENT, jamais n'elargit
 - **Tables internes** : les 55 policies `authenticated using(true)` sont passees en `using(est_chef())` (+ 5 scoped durcies en `est_chef() and auth.uid()=...`). Chef (claim) = acces INCHANGE ; client (sans claim) = RIEN. Prouve : chef == baseline sur 28 tables, client/bidon = 0 partout.
 - **Client** : policies ADDITIVES (permissives, OR avec les policies equipe) — le client lit SES ventes / lignes / reglements / son client (`= mon_client_id()`) et gere ses `client_preference`. Prouve : un client voit 9 ventes (0 des autres), 1 client, 0 table interne.
