@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
-import { Sidebar } from "@/components/shell/Sidebar";
-import { Topbar } from "@/components/shell/Topbar";
+import { AppShell } from "@/components/shell/AppShell";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { ROLE_LABEL } from "@/lib/nav";
@@ -50,14 +49,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar badges={badges} profil={profil} />
-      <div className="flex-1 flex flex-col min-w-0">
-        <Topbar hasUnread={hasUnread} />
-        <main className="flex-1 overflow-y-auto" style={{ padding: "clamp(20px,3vw,34px)" }}>
-          <div style={{ maxWidth: 1240, margin: "0 auto" }}>{children}</div>
-        </main>
-      </div>
-    </div>
+    <AppShell badges={badges} profil={profil} hasUnread={hasUnread}>
+      {children}
+    </AppShell>
   );
 }

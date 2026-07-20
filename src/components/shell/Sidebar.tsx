@@ -14,15 +14,19 @@ import { signOut } from "@/app/login/actions";
 export function Sidebar({
   badges,
   profil,
+  open,
+  onNavigate,
 }: {
   badges?: Partial<Record<"notifs" | "orders", number>>;
   profil?: { nom: string; role: string };
+  open?: boolean;
+  onNavigate?: () => void;
 }) {
   const pathname = usePathname();
 
   return (
     <aside
-      className="fz-scroll shrink-0 sticky top-0 flex flex-col"
+      className={`fz-scroll app-sidebar shrink-0 sticky top-0 flex flex-col${open ? " is-open" : ""}`}
       style={{ flex: "0 0 250px", width: 250, height: "100vh", background: "#0e3947", color: "#bfdce7", overflowY: "auto" }}
     >
       {/* En-tête logo */}
@@ -58,6 +62,7 @@ export function Sidebar({
                 <Link
                   key={item.id}
                   href={item.href}
+                  onClick={onNavigate}
                   className="flex items-center gap-[11px] w-full transition-all"
                   style={{
                     padding: "9px 12px",
@@ -90,6 +95,7 @@ export function Sidebar({
         <Link
           href="/profil"
           title="Mon profil"
+          onClick={onNavigate}
           className="flex items-center gap-[10px] rounded-lg transition-colors hover:bg-white/10"
           style={{ minWidth: 0, flex: 1, padding: "3px 4px", margin: "-3px -4px" }}
         >

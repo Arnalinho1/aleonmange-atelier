@@ -126,3 +126,55 @@ body {
     grid-template-columns: 1fr !important;
   }
 }
+
+/* ============================================================================
+   RESPONSIVE MOBILE (refonte atelier-mobile)
+   Le styling de l'app est inline (impossible d'y mettre des @media) : le
+   responsive passe donc par ces classes + @media. `!important` bat l'inline.
+   ========================================================================== */
+
+/* --- Shell : sidebar off-canvas + hamburger + overlay sous 1024px --- */
+.app-burger {
+  display: none;
+}
+.app-overlay {
+  display: none;
+}
+@media (max-width: 1023px) {
+  .app-sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    z-index: 60 !important;
+    width: min(84vw, 300px) !important;
+    flex: 0 0 auto !important;
+    transform: translateX(-100%);
+    transition: transform 0.24s ease;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.35);
+  }
+  .app-sidebar.is-open {
+    transform: none;
+  }
+  .app-burger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .app-topsearch {
+    display: none !important;
+  }
+  .app-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(14, 57, 71, 0.44);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.24s ease;
+  }
+  .app-overlay.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
