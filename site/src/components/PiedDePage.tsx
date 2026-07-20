@@ -16,7 +16,9 @@ export function PiedDePage({ horaires = HORAIRES_BOUTIQUE as readonly LigneHorai
     <footer className="mt-16 bg-canard text-surface-2">
       <div className="mx-auto max-w-[1280px] px-4 md:px-8 py-12 grid gap-10 md:grid-cols-[1.3fr_1fr_1fr_1fr]">
         <div>
-          <Image src="/logo-alm.webp" alt="A Léon Mange" width={135} height={60} className="h-[60px] w-auto" />
+          <span className="inline-flex bg-surface-2 rounded-pille px-7 py-4 shadow-[0_2px_12px_rgba(0,0,0,0.18)]">
+            <Image src="/logo-alm.webp" alt="A Léon Mange" width={135} height={60} className="h-[60px] w-auto" />
+          </span>
           <p className="font-mono text-[10px] uppercase tracking-[.18em] text-or mt-3">
             Boutique · Food truck · Traiteur
           </p>
