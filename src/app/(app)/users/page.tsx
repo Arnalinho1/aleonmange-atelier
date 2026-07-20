@@ -11,14 +11,14 @@ import { UserPlus, Check, Minus } from "lucide-react";
 export const metadata = { title: "Utilisateurs & rôles — Atelier ALM" };
 
 /**
- * Utilisateurs & rôles (MOCKUP §3.17). Liste réelle depuis `profil` — jamais
- * 0 utilisateur (le 1er inscrit devient owner via trigger handle_new_user).
+ * Utilisateurs & rôles (MOCKUP §3.17). Liste réelle depuis `profil`. Provisioning
+ * FAIL-CLOSED (0040) : une inscription publique n'obtient AUCUN profil ; un membre
+ * d'équipe est ajouté explicitement par un propriétaire (invitation Supabase puis
+ * insertion dans `profil`). Le 1er compte devient owner (bootstrap).
  *
- * POINT OUVERT #3 (non tranché ici) : le modèle fin de permissions par écran.
- * La matrice affichée est le bootstrap owner/chef/équipe, marquée comme telle.
- * L'invitation par e-mail et l'édition de rôle exigent soit l'API admin
- * (service_role), soit une politique RLS dédiée (aujourd'hui : chacun ne peut
- * modifier que son propre profil) — bouton présent mais inactif, assumé.
+ * BACKLOG : l'écran d'invitation par e-mail et l'édition de rôle (API admin
+ * service_role ou policy RLS dédiée) ; bouton présent mais inactif, assumé.
+ * POINT OUVERT #3 : le modèle fin de permissions par écran (matrice indicative).
  */
 export default async function UsersPage() {
   const m = SCREEN_META.users;
@@ -45,7 +45,7 @@ export default async function UsersPage() {
         action={
           <button
             disabled
-            title="Nécessite le modèle de rôles/permissions (point ouvert) — voir la note ci-dessous"
+            title="Provisioning manuel aujourd'hui (invitation Supabase + insertion profil) ; écran d'invitation au backlog"
             className="flex items-center gap-2 font-display"
             style={{ background: "#1493be", color: "#f6f1e7", fontWeight: 700, fontSize: 14, padding: "9px 15px", borderRadius: 100, opacity: 0.45, cursor: "not-allowed" }}
           >
@@ -93,9 +93,10 @@ export default async function UsersPage() {
             ))}
           </div>
           <p style={{ fontSize: 12.5, color: "#6b7469", padding: "12px 16px" }}>
-            Un nouveau membre crée son compte depuis l&apos;écran de connexion (« Créer un compte ») et
-            rejoint automatiquement comme Équipe. L&apos;invitation par e-mail et l&apos;édition des rôles
-            arrivent avec le modèle de permissions — <strong>point ouvert, à trancher</strong>.
+            Un membre d&apos;équipe est ajouté par un propriétaire (invitation Supabase, puis insertion
+            dans la table profil) : une inscription publique ne rejoint <strong>jamais</strong> l&apos;équipe
+            automatiquement (trigger fail-closed). L&apos;écran d&apos;invitation par e-mail et l&apos;édition des rôles
+            restent à venir : <strong>backlog</strong>.
           </p>
         </Card>
 
