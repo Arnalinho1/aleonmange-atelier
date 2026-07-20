@@ -13,6 +13,17 @@ export async function signIn(_prev: AuthState, formData: FormData): Promise<Auth
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) return { error: erreurFr(error.message) };
+
+  // Autorisation : l'Atelier est RESERVE a l'equipe. Un compte sans claim
+  // app_role=equipe (ex : compte client du site public) est rejete IMMEDIATEMENT
+  // (deconnexion + message clair), avant tout acces au shell de l'Atelier.
+  const { data: claimsData } = await supabase.auth.getClaims();
+  const appRole = (claimsData?.claims as Record<string, unknown> | undefined)?.app_role;
+  if (appRole !== "equipe") {
+    await supabase.auth.signOut();
+    return { error: "Acces reserve a l'equipe A Leon Mange. Les comptes client se gerent sur le site public." };
+  }
+
   // Écran d'accueil = préférence PERSONNELLE (user_preference) — une source,
   // plusieurs lecteurs (handoff Profil & Stock §01).
   const {
@@ -30,26 +41,13 @@ export async function signIn(_prev: AuthState, formData: FormData): Promise<Auth
   redirect(`/${accueil}`);
 }
 
-/**
- * ⚠ Les inscriptions publiques sont DÉSACTIVÉES côté Supabase (arbitrage
- * sécurité du 12 juil. 2026) : cet appel renvoie signup_disabled. Conservé
- * comme base du futur écran d'invitation (point ouvert §7.3).
- */
-export async function signUp(_prev: AuthState, formData: FormData): Promise<AuthState> {
-  if (!isSupabaseConfigured()) return { error: "Connexion base non configurée." };
-  const email = String(formData.get("email") ?? "");
-  const password = String(formData.get("password") ?? "");
-  const nom = String(formData.get("nom") ?? "");
-  const supabase = await createClient();
-  const { error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: { data: { nom } },
-  });
-  if (error) return { error: erreurFr(error.message) };
-  // Selon la config du projet, une confirmation e-mail peut être requise.
-  redirect("/dashboard");
-}
+// Pas d'inscription sur l'Atelier : les inscriptions Supabase sont ouvertes
+// globalement (espace client du site public, Vague 4), mais un compte SANS
+// profil n'a AUCUN accès (fail-closed via le hook app_role / est_chef()) :
+// se créer un compte ici ne donnerait rien. Un membre d'équipe se provisionne
+// par la table profil (futur écran d'invitation /users), jamais par une
+// auto-inscription. L'ancienne action signUp (sans kind='client') aurait
+// provisionné un chef : supprimée.
 
 export async function signOut() {
   const supabase = await createClient();

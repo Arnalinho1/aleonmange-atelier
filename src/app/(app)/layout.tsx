@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/shell/Sidebar";
 import { Topbar } from "@/components/shell/Topbar";
 import { createClient } from "@/lib/supabase/server";
@@ -26,7 +27,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         .select("nom, role")
         .eq("id", user.id)
         .maybeSingle();
-      if (p) profil = { nom: p.nom, role: `${ROLE_LABEL[p.role] ?? ""} · A Léon Mange` };
+      // Defense en profondeur : un compte authentifie SANS profil (donc non
+      // equipe, ex : compte client du site) ne doit jamais voir l'Atelier. Le
+      // proxy le rejette deja ; ce garde-fou tient si jamais il etait contourne.
+      if (!p) redirect("/login");
+      profil = { nom: p.nom, role: `${ROLE_LABEL[p.role] ?? ""} · A Léon Mange` };
 
       const [{ count: unread }, { count: openOrders }, { count: webPending }] = await Promise.all([
         supabase.from("notification").select("id", { count: "exact", head: true }).eq("lu", false),
