@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BadgeMono, Carte, Photo, PhotoAvenir, SurTitre } from "@/components/ui";
+import { BadgeMono, Carte, Photo, SurTitre } from "@/components/ui";
 import { COORDONNEES } from "@/lib/contenu";
 import { emplacementsTruck } from "@/lib/data/emplacements";
 
@@ -144,7 +144,13 @@ export default async function Accueil() {
       {/* Notre maison */}
       <section className="mx-auto max-w-[1280px] px-4 md:px-8 pb-14">
         <Carte className="overflow-hidden grid md:grid-cols-[1fr_1.2fr]">
-          <PhotoAvenir ratio="4/3" libelle="Photo à venir · Audrey et Victorien" className="h-full" />
+          <Photo
+            src="/images/chefs-truck.webp"
+            alt="Audrey et Victorien devant le food truck A Léon Mange, dans les vignes du Beaujolais"
+            ratio="4/3"
+            sizes="(max-width: 768px) 100vw, 45vw"
+            className="h-full"
+          />
           <div className="p-6 md:p-10 flex flex-col justify-center">
             <SurTitre>Notre maison</SurTitre>
             <h2 className="font-display font-extrabold text-[clamp(22px,3vw,28px)] text-canard mt-2">

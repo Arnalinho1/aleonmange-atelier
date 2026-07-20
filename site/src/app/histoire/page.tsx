@@ -1,4 +1,4 @@
-import { Carte, Photo, PhotoAvenir, SurTitre } from "@/components/ui";
+import { Carte, Photo, SurTitre } from "@/components/ui";
 import { CHEFS, COORDONNEES } from "@/lib/contenu";
 
 export const metadata = {
@@ -35,7 +35,13 @@ export default function Histoire() {
       </section>
 
       <section className="mx-auto max-w-[1280px] px-4 md:px-8 grid gap-5 md:grid-cols-2">
-        <PhotoAvenir ratio="4/3" libelle="Photo à venir · Audrey et Victorien" className="rounded-carte-lg" />
+        <Photo
+          src="/images/chefs-truck.webp"
+          alt="Audrey et Victorien devant le food truck A Léon Mange"
+          ratio="4/3"
+          sizes="(max-width: 768px) 100vw, 45vw"
+          className="rounded-carte-lg"
+        />
         <Photo
           src="/images/laboratoire.webp"
           alt="Le laboratoire d'A Léon Mange, mise en place du jour"
