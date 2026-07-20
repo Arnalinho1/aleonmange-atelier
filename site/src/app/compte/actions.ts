@@ -44,7 +44,7 @@ export async function sInscrire(_prev: EtatAuth, formData: FormData): Promise<Et
         nom: [prenom, nom].filter(Boolean).join(" "),
         fidelite_opt_in: optInFidelite,
       },
-      emailRedirectTo: `${await origineDemande()}/compte/auth/callback?next=/compte`,
+      emailRedirectTo: `${await origineDemande()}/compte/auth/callback`,
     },
   });
   if (error) return { erreur: messageFr(error.message) };
