@@ -178,3 +178,71 @@ body {
     pointer-events: auto;
   }
 }
+
+/* --- Contenu (telephone) sous 768px --- */
+@media (max-width: 767px) {
+  /* Faux-tableaux denses : scroll horizontal (colonnes preservees via min-width interne) */
+  .fz-tscroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  /* Grilles / formulaires multi-colonnes -> 1 colonne */
+  .fz-stack {
+    grid-template-columns: 1fr !important;
+  }
+  /* Drawers plein ecran */
+  .fz-drawer-full {
+    width: 100vw !important;
+    max-width: 100vw !important;
+  }
+  /* Recap/colonne sticky -> non-sticky au telephone (evite de manger la hauteur) */
+  .fz-unsticky {
+    position: static !important;
+  }
+  /* Faux-tableaux -> cartes empilees (catalogue & stocks).
+     Classes autonomes : fz-thead (masque l'en-tete), fz-row (ligne = carte),
+     fz-cell (cellule = label:valeur via data-label), fz-cell-head (titre de carte). */
+  .fz-cardtable {
+    display: block !important;
+  }
+  .fz-thead {
+    display: none !important;
+  }
+  .fz-row {
+    display: block !important;
+    border: 1px solid var(--color-bord-3);
+    border-radius: 12px;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    background: var(--color-creme-3);
+  }
+  .fz-cell {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    padding: 4px 0;
+    text-align: right !important;
+    min-width: 0;
+  }
+  .fz-cell::before {
+    content: attr(data-label);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-muted);
+    text-align: left;
+    white-space: nowrap;
+    flex: 0 0 auto;
+  }
+  /* Cellule d'en-tete de carte (nom / titre) : pleine largeur, sans label */
+  .fz-cell-head {
+    padding-bottom: 6px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid var(--color-bord-3);
+  }
+  .fz-cell-head::before {
+    content: none;
+  }
+}

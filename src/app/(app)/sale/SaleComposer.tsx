@@ -511,7 +511,7 @@ export function SaleComposer({
         </div>
 
         {/* ── Colonne récap (sticky) */}
-        <div style={{ position: "sticky", top: 16 }} className="flex flex-col gap-3">
+        <div style={{ position: "sticky", top: 16 }} className="flex flex-col gap-3 fz-unsticky">
           <div style={{ background: "#0e3947", borderRadius: 16, padding: 18 }}>
             <div className="flex items-center gap-2" style={{ marginBottom: 10 }}>
               <Dot color={CANAL_COLOR[canal]} />

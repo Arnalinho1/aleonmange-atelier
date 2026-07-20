@@ -98,9 +98,9 @@ export function CatalogManager({
                 titre={CANAL_LABEL[c]}
                 compteur={`${parCanal[c].filter((p) => p.actif).length} produit${parCanal[c].filter((p) => p.actif).length > 1 ? "s" : ""}`}
               />
-              <div>
+              <div className="fz-cardtable">
                 <div
-                  className="font-mono uppercase"
+                  className="font-mono uppercase fz-thead"
                   style={{ display: "grid", gridTemplateColumns: "1.7fr .8fr .55fr .6fr .55fr .6fr .6fr .4fr", gap: 8, padding: "8px 16px", fontSize: 10, letterSpacing: ".08em", color: "#a79b84", borderBottom: "1px solid #efe7d6" }}
                 >
                   <span>Produit</span>
@@ -117,31 +117,32 @@ export function CatalogManager({
                   return (
                     <div
                       key={p.id}
+                      className="fz-row"
                       style={{ display: "grid", gridTemplateColumns: "1.7fr .8fr .55fr .6fr .55fr .6fr .6fr .4fr", gap: 8, padding: "11px 16px", alignItems: "center", borderBottom: "1px solid #efe7d6", opacity: p.actif ? 1 : 0.55 }}
                     >
-                      <div className="flex items-center gap-2" style={{ minWidth: 0 }}>
+                      <div className="flex items-center gap-2 fz-cell-head" style={{ minWidth: 0 }}>
                         <Dot color={CANAL_COLOR[c]} />
                         <span style={{ fontSize: 14, fontWeight: 600, color: "#0e3947", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.nom}</span>
                         {p.is_bowl && <Badge tone="info">Bowl</Badge>}
                         {!p.visible_site && <Badge tone="neutre">Masqué du site</Badge>}
                       </div>
-                      <span style={{ fontSize: 12.5, color: "#6b7469" }}>{p.categorie ?? "—"}</span>
-                      <span className="font-mono" style={{ fontSize: 12, color: "#6b7469" }}>
+                      <span className="fz-cell" data-label="Catégorie" style={{ fontSize: 12.5, color: "#6b7469" }}>{p.categorie ?? "(aucune)"}</span>
+                      <span className="font-mono fz-cell" data-label="Mode" style={{ fontSize: 12, color: "#6b7469" }}>
                         {p.mode === "unite" ? "unité" : "poids"}
                       </span>
-                      <span className="font-mono" style={{ fontSize: 13.5, fontWeight: 600, color: "#0e3947", textAlign: "right" }}>
+                      <span className="font-mono fz-cell" data-label="Prix" style={{ fontSize: 13.5, fontWeight: 600, color: "#0e3947", textAlign: "right" }}>
                         {p.mode === "unite" ? `${fmt(p.prix_unitaire)} €` : `${fmt(p.prix_kg)} €/kg`}
                       </span>
-                      <span className="font-mono" style={{ fontSize: 12.5, color: "#6b7469", textAlign: "right" }}>
+                      <span className="font-mono fz-cell" data-label="Coût" style={{ fontSize: 12.5, color: "#6b7469", textAlign: "right" }}>
                         {k?.cout != null ? `${fmt(k.cout)} €` : "—"}
                       </span>
-                      <span className="font-mono" style={{ fontSize: 12.5, fontWeight: 600, color: "#1493be", textAlign: "right" }}>
+                      <span className="font-mono fz-cell" data-label="Marge" style={{ fontSize: 12.5, fontWeight: 600, color: "#1493be", textAlign: "right" }}>
                         {k?.marge != null ? `${fmt(k.marge)} €` : "—"}
                       </span>
-                      <span>
+                      <span className="fz-cell" data-label="Statut">
                         <Badge tone={p.actif ? "succes" : "neutre"}>{p.actif ? "Actif" : "Retiré"}</Badge>
                       </span>
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="flex items-center justify-end gap-2 fz-cell" data-label="Éditer">
                         <button onClick={() => openDrawer(p)} title="Éditer le produit" style={{ color: "#1493be", padding: 4 }}>
                           <Pencil size={15} />
                         </button>
@@ -164,7 +165,7 @@ export function CatalogManager({
       {drawer !== null && (
         <div className="fixed inset-0 flex justify-end" style={{ background: "rgba(15,24,19,.5)", zIndex: 70 }} onClick={() => setDrawer(null)}>
           <div
-            className="fz-scroll h-full overflow-y-auto"
+            className="fz-scroll h-full overflow-y-auto fz-drawer-full"
             style={{ width: "min(440px,92vw)", background: "#fbf8f1", boxShadow: "-20px 0 60px rgba(0,0,0,.25)" }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -324,14 +325,25 @@ export function CatalogManager({
               </div>
 
               {edition && (
-                <button
-                  type="button"
-                  onClick={() => { onToggle(edition); setDrawer(null); }}
-                  disabled={pending}
-                  style={{ fontSize: 13, fontWeight: 600, color: edition.actif ? "#c0442e" : "#1f8a5b", padding: "6px 0" }}
-                >
-                  {edition.actif ? "Retirer du canal (désactiver)" : "Réactiver le produit"}
-                </button>
+                <div style={{ marginTop: 8, paddingTop: 14, borderTop: "1px solid #e4dac6" }}>
+                  <button
+                    type="button"
+                    onClick={() => { onToggle(edition); setDrawer(null); }}
+                    disabled={pending}
+                    className="w-full text-center"
+                    style={{
+                      fontSize: 13,
+                      fontWeight: 600,
+                      color: edition.actif ? "#a2542e" : "#1f8a5b",
+                      background: edition.actif ? "#f6e9e1" : "#e9f3ec",
+                      border: `1px solid ${edition.actif ? "#ead2c4" : "#c9e3d3"}`,
+                      borderRadius: 11,
+                      padding: "11px 12px",
+                    }}
+                  >
+                    {edition.actif ? "Retirer du canal (désactiver)" : "Réactiver le produit"}
+                  </button>
+                </div>
               )}
             </form>
           </div>
