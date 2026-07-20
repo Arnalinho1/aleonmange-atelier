@@ -7,21 +7,47 @@ import { Badge, Dot } from "@/components/ui/Badge";
 import { Card, SectionHeader } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import type { Client } from "@/lib/supabase/database.types";
-import { createClientFiche, updateClientFiche, toggleClientActif } from "./actions";
+import { createClientFiche, updateClientFiche, toggleClientActif, appliquerRecompense } from "./actions";
 
 /** Agrégats transactionnels par client (dérivés de v_vente_remise — source unique). */
 export type ClientStats = Record<string, { commandes: number; ca: number; derniere: string | null }>;
+
+/** Fidélité par client (dérivée de v_fidelite_client — compteur JAMAIS stocké). */
+export type FideliteMap = Record<string, { passages: number; cycle: number; disponibles: number }>;
 
 /**
  * Fiches clients : créer / éditer / désactiver (soft delete — les ventes
  * passées gardent leur client_id). Le comptoir anonyme n'apparaît pas ici.
  */
-export function ClientsManager({ clients, stats }: { clients: Client[]; stats: ClientStats }) {
+export function ClientsManager({
+  clients,
+  stats,
+  fidelite,
+  seuil,
+  reward,
+}: {
+  clients: Client[];
+  stats: ClientStats;
+  fidelite: FideliteMap;
+  seuil: number;
+  reward: string;
+}) {
   const router = useRouter();
   const [drawer, setDrawer] = useState<"new" | Client | null>(null);
   const [type, setType] = useState<"particulier" | "pro">("particulier");
   const [error, setError] = useState<string | undefined>();
   const [pending, startTransition] = useTransition();
+
+  function onRecompense(id: string) {
+    startTransition(async () => {
+      const res = await appliquerRecompense(id);
+      if (res?.error) setError(res.error);
+      else {
+        setError(undefined);
+        router.refresh();
+      }
+    });
+  }
 
   function openDrawer(target: "new" | Client) {
     setError(undefined);
@@ -113,7 +139,18 @@ export function ClientsManager({ clients, stats }: { clients: Client[]; stats: C
                 <div className="flex items-center gap-2" style={{ minWidth: 0 }}>
                   <Dot color={c.type === "pro" ? "#e9a23b" : "#3fa8ce"} />
                   <div style={{ minWidth: 0 }}>
-                    <p style={{ fontSize: 14, fontWeight: 600, color: "#0e3947", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.nom}</p>
+                    <div className="flex items-center gap-1.5" style={{ minWidth: 0 }}>
+                      <p style={{ fontSize: 14, fontWeight: 600, color: "#0e3947", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.nom}</p>
+                      {fidelite[c.id]?.disponibles > 0 && (
+                        <span
+                          title="Récompense fidélité à remettre"
+                          className="font-mono"
+                          style={{ flexShrink: 0, fontSize: 9.5, fontWeight: 700, color: "#8a5a24", background: "#f4ebd9", border: "1px solid #ead9b6", borderRadius: 100, padding: "1px 7px", whiteSpace: "nowrap" }}
+                        >
+                          ★ Récompense
+                        </span>
+                      )}
+                    </div>
                     {c.code_postal && (
                       <p className="font-mono" style={{ fontSize: 10.5, color: "#a79b84" }}>{c.code_postal}</p>
                     )}
@@ -182,6 +219,16 @@ export function ClientsManager({ clients, stats }: { clients: Client[]; stats: C
                 <X size={20} />
               </button>
             </div>
+
+            {edition && (
+              <FideliteDrawer
+                fid={fidelite[edition.id]}
+                seuil={seuil}
+                reward={reward}
+                pending={pending}
+                onRecompense={() => onRecompense(edition.id)}
+              />
+            )}
 
             <form action={onSubmit} className="flex flex-col gap-4" style={{ padding: 20 }}>
               {edition && <input type="hidden" name="id" value={edition.id} />}
@@ -266,6 +313,63 @@ function Label({ children }: { children: React.ReactNode }) {
     <span className="font-mono uppercase" style={{ fontSize: 10, letterSpacing: ".1em", color: "#9a927f" }}>
       {children}
     </span>
+  );
+}
+
+function FideliteDrawer({
+  fid,
+  seuil,
+  reward,
+  pending,
+  onRecompense,
+}: {
+  fid: { passages: number; cycle: number; disponibles: number } | undefined;
+  seuil: number;
+  reward: string;
+  pending: boolean;
+  onRecompense: () => void;
+}) {
+  return (
+    <div style={{ margin: "16px 20px 0", background: "#fbf8f1", border: "1px solid #e4dac6", borderRadius: 12, padding: 14 }}>
+      <p className="font-mono uppercase" style={{ fontSize: 10, letterSpacing: ".1em", color: "#b0704c", marginBottom: 8 }}>
+        Fidélité
+      </p>
+      {!fid ? (
+        <p style={{ fontSize: 12.5, color: "#6b7469" }}>Programme fidélité non activé par ce client.</p>
+      ) : (
+        <>
+          <p style={{ fontSize: 13, color: "#0e3947" }}>
+            <strong style={{ fontWeight: 700 }}>{fid.passages}</strong> passage{fid.passages > 1 ? "s" : ""}
+            {seuil > 0 && (
+              <span style={{ color: "#6b7469" }}>
+                {" "}· {fid.cycle}/{seuil} sur la carte en cours
+              </span>
+            )}
+          </p>
+          {fid.disponibles > 0 ? (
+            <>
+              <p style={{ fontSize: 12.5, color: "#8a5a24", marginTop: 5 }}>
+                {fid.disponibles} récompense{fid.disponibles > 1 ? "s" : ""} disponible{fid.disponibles > 1 ? "s" : ""} : {reward}
+              </p>
+              <button
+                type="button"
+                onClick={onRecompense}
+                disabled={pending}
+                className="font-display"
+                style={{ marginTop: 10, background: "#d81020", color: "#fff", fontWeight: 700, fontSize: 13, padding: "9px 14px", borderRadius: 10, opacity: pending ? 0.6 : 1 }}
+              >
+                {pending ? "…" : "Appliquer une récompense"}
+              </button>
+              <p style={{ fontSize: 11, color: "#9a927f", marginTop: 7 }}>
+                Récompense non monétaire, remise au retrait. Le compteur reste dérivé.
+              </p>
+            </>
+          ) : (
+            <p style={{ fontSize: 12.5, color: "#6b7469", marginTop: 5 }}>Aucune récompense disponible pour l&apos;instant.</p>
+          )}
+        </>
+      )}
+    </div>
   );
 }
 

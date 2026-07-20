@@ -166,8 +166,37 @@ export type Client = {
   adresse: string | null;
   /** SIRET (clients pro, facturation B2B) — optionnel (0015). */
   siret: string | null;
+  /** Compte Supabase Auth rattaché (espace client, 0036) — NULL = pas de compte, UNIQUE. */
+  auth_user_id: string | null;
+  /** Opt-in fidélité RGPD (0037) — les passages comptent à partir de fidelite_opt_in_le. */
+  fidelite_opt_in: boolean;
+  fidelite_opt_in_le: string | null;
   actif: boolean;
   created_at: string;
+};
+
+/** Paramètres fidélité (0037) — singleton, seuil + récompense configurables. */
+export type ParametreFidelite = {
+  id: boolean;
+  seuil: number;
+  recompense: string;
+  actif: boolean;
+  updated_le: string;
+};
+
+/** Rachat de récompense (0037) — trace ; le compteur reste DÉRIVÉ. */
+export type FideliteRedemption = {
+  id: string;
+  client_id: string;
+  cree_le: string;
+  operateur_id: string | null;
+};
+
+/** Vue dérivée (0037) : compteur fidélité, JAMAIS stocké. */
+export type VFideliteClient = {
+  client_id: string;
+  passages: number;
+  recompenses_utilisees: number;
 };
 
 export type Profil = {
@@ -438,11 +467,15 @@ export type Database = {
       import_batch: TableDef<ImportBatch, MakeInsert<ImportBatch, never>>;
       insight: TableDef<Insight, MakeInsert<Insight, "urgence" | "constat">>;
       notification: TableDef<Notification, MakeInsert<Notification, "categorie" | "titre">>;
+      parametre_fidelite: TableDef<ParametreFidelite, MakeInsert<ParametreFidelite, never>>;
+      fidelite_redemption: TableDef<FideliteRedemption, MakeInsert<FideliteRedemption, "client_id">>;
     };
     Views: {
       /** CA FACTURÉ — ventes remises, imputées à occurred_at (= livre_le). Colonnes 0016-0017 exposées en fin (0018). */
       v_vente_remise: { Row: Omit<Vente, "fulfillment" | "created_at">; Relationships: [] };
       v_commande_ouverte: { Row: Vente; Relationships: [] };
+      /** Compteur fidélité DÉRIVÉ (0037) — passages remis boutique+truck depuis l'opt-in. */
+      v_fidelite_client: { Row: VFideliteClient; Relationships: [] };
       /** CA ENCAISSÉ — un événement de trésorerie par règlement, imputé à encaisse_le (0018). */
       v_encaissement: {
         Row: Omit<Reglement, "created_at"> & Pick<Vente, "canal" | "emplacement_id" | "client_id" | "mode_vente" | "source_vente">;
