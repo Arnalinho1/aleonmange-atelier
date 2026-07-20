@@ -27,28 +27,49 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
-  // getUser peut échouer si le réseau vers Supabase est indisponible (ex: egress
-  // pas encore ouvert) — on ne fait pas planter l'app, on traite comme non connecté.
-  let user = null;
+  // Rafraichit la session ET lit le claim d'autorisation. getClaims() est la
+  // methode recommandee cote serveur (refresh + claims verifies). Le claim
+  // app_role=equipe est pose par le hook depuis la table profil (0034/0040) :
+  // c'est la MEME source de verite que est_chef() cote base. Peut echouer si le
+  // reseau Supabase est indisponible -> traite comme non connecte (pas de crash).
+  let claims: Record<string, unknown> | null = null;
   try {
-    const res = await supabase.auth.getUser();
-    user = res.data.user;
+    const res = await supabase.auth.getClaims();
+    claims = (res.data?.claims as Record<string, unknown> | undefined) ?? null;
   } catch {
-    user = null;
+    claims = null;
   }
+  const connecte = Boolean(claims);
+  const estEquipe = claims?.app_role === "equipe";
 
   const path = request.nextUrl.pathname;
   const isAuthRoute = path.startsWith("/login") || path.startsWith("/auth");
 
-  // Non connecté hors des routes d'auth → redirection vers /login.
-  if (!user && !isAuthRoute) {
+  // Non connecte hors des routes d'auth -> /login.
+  if (!connecte && !isAuthRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
-  // Déjà connecté sur /login → renvoyer au tableau de bord.
-  if (user && isAuthRoute) {
+  // Connecte MAIS pas equipe (ex : compte client du site public) -> deconnexion
+  // + retour login. L'Atelier est RESERVE a l'equipe : un compte sans claim
+  // app_role=equipe est REJETE au niveau applicatif (pas seulement prive de
+  // donnees par la RLS). On revoque la session et on efface les cookies auth.
+  if (connecte && !estEquipe && !isAuthRoute) {
+    await supabase.auth.signOut();
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    url.search = "";
+    const redir = NextResponse.redirect(url);
+    request.cookies.getAll().forEach((c) => {
+      if (c.name.startsWith("sb-")) redir.cookies.delete(c.name);
+    });
+    return redir;
+  }
+
+  // Deja equipe sur /login -> tableau de bord.
+  if (estEquipe && isAuthRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
