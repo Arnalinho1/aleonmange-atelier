@@ -14,7 +14,7 @@ export const COORDONNEES = {
   region: "Beaujolais",
   telephone: "06 75 36 23 26",
   telephoneLien: "+33675362326",
-  email: "contact@aleonmange.com",
+  email: "aleonmange@yahoo.com",
   instagram: "https://www.instagram.com/aleonmange/",
   facebook: "https://www.facebook.com/aleonmange",
   plan: "https://www.google.com/maps/dir/?api=1&destination=1923+route+de+la+vall%C3%A9e+69620+L%C3%A9tra",
