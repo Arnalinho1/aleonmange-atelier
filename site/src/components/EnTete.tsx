@@ -39,14 +39,15 @@ export function EnTete() {
     <>
       <header className="sticky top-0 z-40 bg-page/95 backdrop-blur border-b border-bord">
       <div className="mx-auto max-w-[1280px] flex items-center gap-4 px-4 md:px-8 h-[68px]">
-        <Link href="/" className="flex items-center gap-2.5 shrink-0" aria-label="A Léon Mange, accueil">
-          <span className="grid place-items-center w-10 h-10 rounded-full overflow-hidden bg-surface-2 ring-1 ring-bord-2">
-            <Image src="/alm-mark.png" alt="" width={40} height={40} className="object-cover" />
-          </span>
-          <span className="leading-tight">
-            <span className="block font-display font-extrabold text-[17px] text-canard">A Léon Mange</span>
-            <span className="block font-mono text-[9px] uppercase tracking-[.18em] text-terracotta">Beaujolais</span>
-          </span>
+        <Link href="/" className="flex items-center shrink-0" aria-label="A Léon Mange, accueil">
+          <Image
+            src="/logo-aleonmange.webp"
+            alt="A Léon Mange"
+            width={118}
+            height={55}
+            priority
+            className="h-[46px] w-auto"
+          />
         </Link>
 
         <nav className="hidden lg:flex items-center gap-6 mx-auto" aria-label="Navigation principale">
@@ -102,7 +103,7 @@ export function EnTete() {
       {menuOuvert && (
         <div className="fixed inset-0 z-50 bg-page flex flex-col lg:hidden">
           <div className="flex items-center justify-between px-4 h-[68px] border-b border-bord">
-            <span className="font-display font-extrabold text-[17px] text-canard">A Léon Mange</span>
+            <Image src="/logo-aleonmange.webp" alt="A Léon Mange" width={110} height={51} className="h-[42px] w-auto" />
             <button
               type="button"
               onClick={() => setMenuOuvert(false)}
