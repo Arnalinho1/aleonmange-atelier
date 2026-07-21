@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { authentifier, type EtatAuth } from "../actions";
+import { trackEvent } from "@/lib/analytics";
 
 type Mode = "creation" | "connexion";
 
@@ -16,6 +17,15 @@ export function FormulaireConnexion() {
   const [mode, setMode] = useState<Mode>("creation");
   const [etat, formAction, enCours] = useActionState<EtatAuth, FormData>(authentifier, undefined);
   const creation = mode === "creation";
+  const compteTracke = useRef(false);
+  // Server Action sans redirect : etat.info truthy = inscription reussie (unique
+  // au signup ; connexion redirige). Garde useRef : le formulaire n'est pas demonte.
+  useEffect(() => {
+    if (etat?.info && !compteTracke.current) {
+      compteTracke.current = true;
+      trackEvent("compte_cree");
+    }
+  }, [etat?.info]);
 
   return (
     <div className="mt-6">

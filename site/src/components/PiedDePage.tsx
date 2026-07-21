@@ -95,6 +95,14 @@ export function PiedDePage({ horaires = HORAIRES_BOUTIQUE as readonly LigneHorai
             <Link href="/mentions-legales" className="text-texte-2 hover:underline underline-offset-4">
               Mentions légales
             </Link>
+            <span className="mx-3 text-[#cfc3a9]">·</span>
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new CustomEvent("alm:cookies"))}
+              className="text-texte-2 hover:underline underline-offset-4"
+            >
+              Gérer les cookies
+            </button>
           </div>
           <div className="font-mono text-[9.5px] tracking-[.1em] text-[#a9a088]">BEAUJOLAIS · FAIT MAISON</div>
         </div>

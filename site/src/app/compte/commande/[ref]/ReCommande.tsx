@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { trackEvent } from "@/lib/analytics";
 
 export type LigneReco = { produit_id: string; qte?: number; poids_g?: number };
 
@@ -55,6 +56,10 @@ export function ReCommande({
       setEnAttente(false);
     }
   }
+
+  useEffect(() => {
+    if (ok) trackEvent("recommande_1_geste", { canal });
+  }, [ok, canal]);
 
   if (ok) {
     return (

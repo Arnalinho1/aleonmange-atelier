@@ -36,8 +36,9 @@ const SECTIONS = [
     placeholder: false,
   },
   {
-    titre: "Cookies",
-    corps: "Le site utilise le strict nécessaire au fonctionnement. Aucun traceur publicitaire tiers.",
+    titre: "Cookies et mesure d'audience",
+    corps:
+      "Le site ne dépose aucun cookie de suivi tant que vous n'y consentez pas. Avec votre accord, nous utilisons Google Analytics (mesure d'audience et de conversions) ; vous pouvez refuser sans perdre l'accès au site. Votre choix est conservé 13 mois au maximum, puis la bannière de consentement réapparaît ; vous pouvez le modifier à tout moment via « Gérer les cookies » en bas de chaque page. La mesure d'usage technique du site (Vercel Analytics) reste anonyme et sans cookie.",
     placeholder: false,
   },
 ];

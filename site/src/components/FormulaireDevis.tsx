@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Carte, BadgeMono, SurTitre } from "@/components/ui";
 import { Champ, ChampZone, BoutonSubmit } from "@/components/forms";
+import { trackEvent } from "@/lib/analytics";
 
 /** Demande de devis traiteur (d-devis). Ecrit dans demande_devis (pas une vente). */
 export function FormulaireDevis() {
@@ -38,6 +39,10 @@ export function FormulaireDevis() {
       setEnAttente(false);
     }
   }
+
+  useEffect(() => {
+    if (envoye) trackEvent("devis_envoye");
+  }, [envoye]);
 
   if (envoye) {
     return (

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { trackEvent } from "@/lib/analytics";
 
 /**
  * Modale « lettre d'information » (d-lettre). Vague 2 : inscription en DOUBLE
@@ -24,6 +25,10 @@ export function LettreInfo() {
     window.addEventListener("alm:lettre", ouvrir);
     return () => window.removeEventListener("alm:lettre", ouvrir);
   }, []);
+
+  useEffect(() => {
+    if (etat === "ok") trackEvent("newsletter_inscription");
+  }, [etat]);
 
   async function envoyer(e: React.FormEvent) {
     e.preventDefault();
