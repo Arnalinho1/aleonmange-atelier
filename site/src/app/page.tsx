@@ -76,7 +76,9 @@ export default async function Accueil() {
         </h2>
 
         <div className="grid gap-5 md:grid-cols-3 mt-8">
-          <Carte className="overflow-hidden flex flex-col">
+          {/* data-tour : cible ch1 de la cérémonie d'inauguration (module commande C&C). */}
+          <div data-tour="commande">
+          <Carte className="overflow-hidden flex flex-col h-full">
             <Photo
               src="/images/boutique-planche.webp"
               alt="Bowl, bocal et planche de charcuterie et fromage de la boutique"
@@ -95,6 +97,7 @@ export default async function Accueil() {
               </Link>
             </div>
           </Carte>
+          </div>
 
           <Carte className="overflow-hidden flex flex-col">
             <Photo
