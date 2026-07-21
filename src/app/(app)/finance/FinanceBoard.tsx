@@ -211,7 +211,8 @@ export function FinanceBoard({
         <p style={{ fontSize: 12.5, color: "#c0442e", background: "rgba(192,68,46,.1)", borderRadius: 8, padding: "8px 10px", marginBottom: 12 }}>{error}</p>
       )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 12, marginBottom: 16 }} className="fz-fin-kpi">
+      {/* data-g : cible du guide d'onboarding (B5) — le CA par canal. */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 12, marginBottom: 16 }} className="fz-fin-kpi" data-g="ana-ca">
         <KpiCard
           label="CA facturé"
           value={`${fmtEuro(ca)} €`}
@@ -286,7 +287,8 @@ export function FinanceBoard({
       </Card>
 
       <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: 16, alignItems: "start" }} className="fz-users-grid">
-        {/* CA & marge par plat */}
+        {/* CA & marge par plat — data-g : cibles du guide d'onboarding (B5, marge). */}
+        <div data-g="ana-marge">
         <Card style={{ overflow: "hidden" }}>
           <SectionHeader titre="CA & marge nette par plat" sous="Coût = fiche technique liée ; « — » si non costé." />
           {parPlat.length === 0 ? (
@@ -310,6 +312,7 @@ export function FinanceBoard({
                 return (
                   <div
                     key={p.libelle}
+                    data-g="ana-marge-row"
                     style={{ display: "grid", gridTemplateColumns: "1.8fr .6fr .8fr .8fr .8fr .6fr", gap: 8, padding: "10px 16px", alignItems: "center", borderBottom: "1px solid #efe7d6" }}
                   >
                     <span style={{ fontSize: 13.5, fontWeight: 600, color: "#0e3947", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.libelle}</span>
@@ -326,6 +329,7 @@ export function FinanceBoard({
             </div></div>
           )}
         </Card>
+        </div>
 
         <div className="flex flex-col gap-4">
           {/* Paramètres de rentabilité — LECTURE SEULE : la saisie vit dans Réglages */}

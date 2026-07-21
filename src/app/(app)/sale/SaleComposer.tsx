@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { Minus, Plus, CheckCircle2 } from "lucide-react";
 import { CANAL_COLOR, CANAL_LABEL, CATEGORIE_COLOR, CATEGORIE_LABEL, PAIEMENT_LABEL } from "@/lib/nav";
@@ -74,6 +74,32 @@ export function SaleComposer({
   const [error, setError] = useState<string | undefined>();
   const [confirmation, setConfirmation] = useState<string | undefined>();
   const [pending, startTransition] = useTransition();
+
+  // Guide d'onboarding (B4) : préremplissage d'une vente de démonstration.
+  // L'événement remplit l'ÉTAT CONTRÔLÉ (canal, panier, emplacement du jour) —
+  // AUCUNE écriture : le chef encaisse lui-même par le parcours normal.
+  useEffect(() => {
+    const onPrefill = (e: Event) => {
+      const d = (e as CustomEvent<{ canal?: Canal; produit?: string; qte?: number }>).detail ?? {};
+      const canalCible: Canal = d.canal ?? "truck";
+      const produit = produits.find((p) => p.canal === canalCible && p.nom === d.produit);
+      if (!produit) return;
+      setCanal(canalCible);
+      setModeVente(canalCible === "traiteur" ? "precommande" : "instantane");
+      setPaiement(PAIEMENT_DEFAUT[canalCible]);
+      setPoidsParProduit({});
+      setBowls([]);
+      setQtyParProduit({ [produit.id]: d.qte ?? 1 });
+      if (canalCible === "truck") {
+        const actifs = emplacements.filter((emp) => emp.actif);
+        const emp = actifs.find((x) => x.jour_semaine === jourSemaineAuj) ?? actifs[0];
+        if (emp) setEmplacementId(emp.id);
+      }
+      setError(undefined);
+    };
+    window.addEventListener("alm:guide:prefill-vente", onPrefill);
+    return () => window.removeEventListener("alm:guide:prefill-vente", onPrefill);
+  }, [produits, emplacements, jourSemaineAuj]);
 
   const prodParId = useMemo(() => new Map(produits.map((p) => [p.id, p])), [produits]);
   const duCanal = produits.filter((p) => p.canal === canal);
@@ -181,6 +207,9 @@ export function SaleComposer({
         setConfirmation(undefined);
       } else {
         setError(undefined);
+        // Guide d'onboarding (B4) : confirme la réussite RÉELLE de la saisie
+        // (émis seulement après un createVente OK — jamais sur simple clic).
+        window.dispatchEvent(new CustomEvent("alm:guide:vente-ok"));
         setConfirmation(
           `Vente enregistrée — ${fmtEuro(total)} € · ${CANAL_LABEL[canal]} · ${
             modeVente === "instantane" ? "remise immédiate" : "envoyée en production"
@@ -206,8 +235,8 @@ export function SaleComposer({
 
   return (
     <>
-      {/* Onglets canal */}
-      <div className="flex gap-2 flex-wrap" style={{ marginBottom: 12 }}>
+      {/* Onglets canal — data-g : cible du guide d'onboarding (B4). */}
+      <div className="flex gap-2 flex-wrap" style={{ marginBottom: 12 }} data-g="saisie-canaux">
         {(["truck", "boutique", "traiteur"] as const).map((c) => (
           <button
             key={c}
@@ -463,6 +492,8 @@ export function SaleComposer({
                 </Card>
               )}
 
+              {/* data-g : cible du guide d'onboarding (B4, fidélité = client rattaché). */}
+              <div data-g="saisie-fidelite">
               <Card style={{ padding: 16 }}>
                 <p className="font-mono uppercase" style={{ fontSize: 9.5, letterSpacing: ".09em", color: "#a79b84", marginBottom: 10 }}>
                   Client {canal === "boutique" && "(optionnel — comptoir anonyme)"}
@@ -506,6 +537,7 @@ export function SaleComposer({
                   <p style={{ fontSize: 11.5, color: "#9a927f", marginTop: 6 }}>Alimente l&apos;attribution social → ventes.</p>
                 </div>
               </Card>
+              </div>
             </>
           )}
         </div>
@@ -581,6 +613,7 @@ export function SaleComposer({
             <button
               onClick={encaisser}
               disabled={pending || panierVide || bowlIncomplet || (canal === "truck" && !emplacementId)}
+              data-g="saisie-encaisser"
               className="font-display transition-opacity hover:opacity-90"
               style={{
                 width: "100%", padding: "13px", borderRadius: 12, background: "#d81020", color: "#f6f1e7",

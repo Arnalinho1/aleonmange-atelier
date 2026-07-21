@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { GuideProvider } from "@/components/guide/GuideContext";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
 
@@ -43,19 +44,21 @@ export function AppShell({
   }, []);
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar badges={badges} profil={profil} open={open} onNavigate={() => setOpen(false)} />
-      <div
-        className={`app-overlay${open ? " is-open" : ""}`}
-        onClick={() => setOpen(false)}
-        aria-hidden
-      />
-      <div className="flex-1 flex flex-col min-w-0">
-        <Topbar hasUnread={hasUnread} onMenuOpen={() => setOpen(true)} />
-        <main className="flex-1 overflow-y-auto" style={{ padding: "clamp(20px,3vw,34px)" }}>
-          <div style={{ maxWidth: 1240, margin: "0 auto" }}>{children}</div>
-        </main>
+    <GuideProvider onDrawer={setOpen}>
+      <div className="flex min-h-screen">
+        <Sidebar badges={badges} profil={profil} open={open} onNavigate={() => setOpen(false)} />
+        <div
+          className={`app-overlay${open ? " is-open" : ""}`}
+          onClick={() => setOpen(false)}
+          aria-hidden
+        />
+        <div className="flex-1 flex flex-col min-w-0">
+          <Topbar hasUnread={hasUnread} onMenuOpen={() => setOpen(true)} />
+          <main className="flex-1 overflow-y-auto" style={{ padding: "clamp(20px,3vw,34px)" }}>
+            <div style={{ maxWidth: 1240, margin: "0 auto" }}>{children}</div>
+          </main>
+        </div>
       </div>
-    </div>
+    </GuideProvider>
   );
 }

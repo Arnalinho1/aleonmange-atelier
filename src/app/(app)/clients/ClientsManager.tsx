@@ -101,6 +101,8 @@ export function ClientsManager({
           message="Les fiches clients (surtout traiteur et click & collect) et leur récurrence apparaîtront ici. Le comptoir anonyme ne crée pas de client. Cliquez sur « Nouveau client » pour créer la première fiche."
         />
       ) : (
+      // data-g : cibles du guide d'onboarding (B6) — la liste et ses lignes.
+      <div data-g="cli-fiche">
       <Card style={{ overflow: "hidden" }}>
         <SectionHeader
           titre="Fiches clients"
@@ -127,6 +129,7 @@ export function ClientsManager({
             return (
               <div
                 key={c.id}
+                data-g="cli-row"
                 style={{
                   display: "grid",
                   gridTemplateColumns: "1.8fr .7fr 1.2fr .5fr .8fr .8fr .6fr .6fr",
@@ -193,6 +196,7 @@ export function ClientsManager({
           </div></div>
         </div>
       </Card>
+      </div>
       )}
 
       {error && drawer === null && (

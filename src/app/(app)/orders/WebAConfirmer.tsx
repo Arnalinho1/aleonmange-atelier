@@ -77,10 +77,11 @@ export function WebAConfirmer({ aConfirmer, refusees }: { aConfirmer: CommandeWe
         {aConfirmer.length === 0 ? (
           <p style={{ padding: "14px 16px", fontSize: 13, color: "#6b7469" }}>Aucune commande web en attente. Tout est traité.</p>
         ) : (
-          aConfirmer.map((c) => (
-            <div key={c.id} style={{ padding: "13px 16px", borderBottom: "1px solid #efe7d6" }}>
+          aConfirmer.map((c, i) => (
+            // Ancres data-g (1re commande en attente) : cibles du guide d'onboarding (B2).
+            <div key={c.id} data-g={i === 0 ? "cmd-fondatrice" : undefined} style={{ padding: "13px 16px", borderBottom: "1px solid #efe7d6" }}>
               <div className="flex items-center justify-between gap-3 flex-wrap">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2" data-g={i === 0 ? "cmd-statut" : undefined}>
                   <Dot color={CANAL_COLOR[c.canal]} />
                   <span style={{ fontSize: 14, fontWeight: 600, color: "#0e3947" }}>{CANAL_LABEL[c.canal]}</span>
                   <Badge tone="neutre">Paiement au retrait</Badge>
@@ -136,6 +137,7 @@ export function WebAConfirmer({ aConfirmer, refusees }: { aConfirmer: CommandeWe
                   <button
                     onClick={() => confirmer(c.id)}
                     disabled={pending}
+                    data-g={i === 0 ? "cmd-confirmer" : undefined}
                     className="flex items-center gap-1.5"
                     style={{ padding: "8px 14px", borderRadius: 9, background: "#1f8a5b", color: "#fff", fontSize: 13, fontWeight: 600, opacity: pending ? 0.5 : 1 }}
                   >

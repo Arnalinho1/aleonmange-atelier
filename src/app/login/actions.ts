@@ -38,7 +38,11 @@ export async function signIn(_prev: AuthState, formData: FormData): Promise<Auth
       .maybeSingle();
     if (pref?.ecran_accueil) accueil = pref.ecran_accueil;
   }
-  redirect(`/${accueil}`);
+  // Deeplink du guide d'onboarding (?guide=1 préservé par /login) : flag
+  // booléen WHITELISTÉ — on ne redirige JAMAIS vers une URL fournie par le
+  // client (zéro open-redirect possible).
+  const guide = formData.get("guide") === "1";
+  redirect(`/${accueil}${guide ? "?guide=1" : ""}`);
 }
 
 // Pas d'inscription sur l'Atelier : les inscriptions Supabase sont ouvertes
