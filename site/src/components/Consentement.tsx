@@ -12,37 +12,61 @@ declare global {
 
 /**
  * Passerelle de consentement CNIL pour GA4.
- * - Le defaut Consent Mode v2 (analytics_storage: denied) est pose
- *   beforeInteractive dans le layout : AUCUNE requete GA avant acceptation.
- * - GA (<GoogleAnalytics>) n'est monte QUE si le choix = accepte -> gtag.js ne
- *   se charge qu'a ce moment. Refus = rien, site pleinement fonctionnel.
- * - Choix memorise 13 mois (analytics.ts) ; re-ouvrable via "Gerer les cookies"
- *   du footer (evenement global "alm:cookies", meme pattern que la lettre d'info).
+ * - Consent Mode v2 : le defaut `analytics_storage=denied` est pose beforeInteractive
+ *   au layout (script inline, AUCUNE requete). GA (<GoogleAnalytics>) n'est monte
+ *   qu'apres accord -> gtag.js ne se charge qu'a « Accepter ».
+ * - ORDRE (le bug corrige) : @next/third-parties emet `gtag('config')` (donc le
+ *   page_view) des le montage. Il faut donc pousser le consent UPDATE granted dans
+ *   window.dataLayer (la MEME file que GA) AVANT ce montage, sinon le page_view part
+ *   en denied et aucune requete /g/collect exploitable ne sort. On le fait donc
+ *   SYNCHRONEMENT (au clic ET au retour d'un visiteur deja consentant), puis on monte GA.
  */
+function majConsentGtag(v: Consent) {
+  if (typeof window === "undefined") return;
+  const w = window as Window & { dataLayer?: unknown[] };
+  w.dataLayer = w.dataLayer || [];
+  // gtag est defini par le script beforeInteractive du layout ; fallback defensif
+  // (meme file dataLayer) au cas ou il n'aurait pas encore tourne.
+  if (typeof w.gtag !== "function") {
+    w.gtag = function gtag() {
+      // eslint-disable-next-line prefer-rest-params
+      (w.dataLayer as unknown[]).push(arguments);
+    };
+  }
+  w.gtag("consent", "update", { analytics_storage: v === "granted" ? "granted" : "denied" });
+}
+
 export function Consentement() {
-  // undefined = pas encore lu (evite le mismatch SSR) ; null = indecis ; sinon choix.
   const [consent, setConsent] = useState<Consent | null | undefined>(undefined);
 
-  useEffect(() => setConsent(lireConsentement()), []);
+  // Chargement : lit le choix memorise. Deja accorde -> update granted AVANT
+  // le montage de GA (visiteur qui revient) : default denied -> update -> config.
+  useEffect(() => {
+    const c = lireConsentement();
+    if (c) majConsentGtag(c);
+    // Lecture localStorage au montage : setState-in-effect assume (impossible au SSR
+    // sans mismatch d'hydratation ; un seul re-render, pas de cascade).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setConsent(c);
+  }, []);
 
+  // « Gerer les cookies » (footer) rouvre la banniere.
   useEffect(() => {
     const rouvrir = () => setConsent(null);
     window.addEventListener("alm:cookies", rouvrir);
     return () => window.removeEventListener("alm:cookies", rouvrir);
   }, []);
 
-  // Consent Mode update (le defaut denied est deja pose au layout).
-  useEffect(() => {
-    if (consent === "granted") window.gtag?.("consent", "update", { analytics_storage: "granted" });
-    else if (consent === "denied") window.gtag?.("consent", "update", { analytics_storage: "denied" });
-  }, [consent]);
+  function choisir(v: Consent) {
+    ecrireConsentement(v);
+    majConsentGtag(v); // pousse l'update dans dataLayer AVANT setState (donc avant config GA)
+    setConsent(v);
+  }
 
   return (
     <>
       {consent === "granted" && GA_ID ? <GoogleAnalytics gaId={GA_ID} /> : null}
-      {consent === null ? (
-        <Banniere onAccept={() => { ecrireConsentement("granted"); setConsent("granted"); }} onRefuse={() => { ecrireConsentement("denied"); setConsent("denied"); }} />
-      ) : null}
+      {consent === null ? <Banniere onAccept={() => choisir("granted")} onRefuse={() => choisir("denied")} /> : null}
     </>
   );
 }
