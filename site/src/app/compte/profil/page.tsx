@@ -7,7 +7,7 @@ import { ProfilForm } from "./ProfilForm";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = { title: "Mon profil" };
+export const metadata: Metadata = { title: "Mon profil", robots: { index: false, follow: false } };
 
 /** Profil, consentements et preferences (maquette CD d-profil). Preferences
  *  STOCKEES mais non exploitees en V1 (aucune personnalisation promise). */

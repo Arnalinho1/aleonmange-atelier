@@ -8,7 +8,7 @@ import { calculFidelite, type VenteClient } from "@/lib/commandes";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = { title: "Mon compte" };
+export const metadata: Metadata = { title: "Mon compte", robots: { index: false, follow: false } };
 
 /** Espace client, tableau de bord (maquette CD d-compte) : carte de fidelite a
  *  tampons + "Mes commandes". Isolation RLS : ne lit QUE les donnees du client. */
@@ -167,7 +167,7 @@ function Tampon({ rempli }: { rempli: boolean }) {
         rempli ? "bg-[var(--accent)] text-white" : "bg-white/10 text-white/30"
       }`}
     >
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+      <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
         <path d="M20 6 9 17l-5-5" />
       </svg>
     </span>

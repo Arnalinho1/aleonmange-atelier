@@ -3,15 +3,17 @@ import { BadgeMono, Carte, Photo, SurTitre } from "@/components/ui";
 import { COORDONNEES } from "@/lib/contenu";
 import { carteDuCanal } from "@/lib/data/carte";
 import { horairesBoutique } from "@/lib/data/horaires";
+import { buildMetadata } from "@/lib/seo";
 
 /** ISR : fraicheur des lectures (emplacement du jour, carte pilotee par l'Atelier). */
 export const revalidate = 300;
 
-export const metadata = {
+export const metadata = buildMetadata({
+  path: "/boutique",
   title: "La Boutique · plats faits maison à Létra",
   description:
     "La boutique A Léon Mange à Létra : plats du jour faits maison, bocaux et épicerie de producteurs du Beaujolais. Sur place ou en click & collect.",
-};
+});
 
 /**
  * La Boutique (d-btq) : hero, recettes signatures (etat vide propre en

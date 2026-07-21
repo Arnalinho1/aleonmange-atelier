@@ -2,15 +2,17 @@ import Link from "next/link";
 import { BadgeMono, Carte, Photo, SurTitre } from "@/components/ui";
 import { carteDuCanal, fmtPrix } from "@/lib/data/carte";
 import { emplacementsTruck } from "@/lib/data/emplacements";
+import { buildMetadata } from "@/lib/seo";
 
 /** ISR : fraicheur des lectures (emplacement du jour, carte pilotee par l'Atelier). */
 export const revalidate = 300;
 
-export const metadata = {
+export const metadata = buildMetadata({
+  path: "/food-truck",
   title: "Le Food truck · les marchés du Beaujolais",
   description:
     "Le food truck A Léon Mange sur les marchés du Beaujolais : emplacements de la semaine, carte du moment, précommande possible.",
-};
+});
 
 /**
  * Le Food truck (d-truck) : emplacements de la semaine (« aujourd'hui »

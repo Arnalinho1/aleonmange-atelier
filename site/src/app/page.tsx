@@ -2,13 +2,17 @@ import Link from "next/link";
 import { BadgeMono, Carte, Photo, SurTitre } from "@/components/ui";
 import { COORDONNEES } from "@/lib/contenu";
 import { emplacementsTruck } from "@/lib/data/emplacements";
+import { buildMetadata } from "@/lib/seo";
 
 /** ISR : fraicheur des lectures (emplacement du jour, carte pilotee par l'Atelier). */
 export const revalidate = 300;
 
-export const metadata = {
-  title: "A Léon Mange · Cuisine maison en Beaujolais : boutique, traiteur et food truck",
-};
+export const metadata = buildMetadata({
+  path: "/",
+  titleAbsolute: "A Léon Mange · plats maison & traiteur en Beaujolais",
+  description:
+    "Cuisine artisanale à Létra (69620) : boutique à emporter, food truck sur les marchés du Beaujolais et traiteur, faits maison par Audrey et Victorien.",
+});
 
 /**
  * Accueil (d-acc) : hero + « Par ou commencer ? » — trois cartes canaux,

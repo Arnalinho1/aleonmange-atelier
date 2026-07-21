@@ -25,6 +25,8 @@ type LigneBrute = {
 
 const NOMS_JOURS = ["", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"];
 const ORDRE_AFFICHAGE = [2, 3, 4, 5, 6, 7, 1]; // mardi → lundi (ouverture de la boutique)
+// Jour 1-7 (lundi-dimanche) → nom schema.org (openingHoursSpecification).
+const JOURS_SCHEMA = ["", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
 /** "09:00:00" → "9h" · "09:30:00" → "9h30". */
 function fmtHeure(t: string): string {
@@ -80,4 +82,40 @@ export async function horairesBoutique(): Promise<LigneHoraire[]> {
           : capitale(`${noms[0]} à ${noms[noms.length - 1]}`);
     return { jours, heures: g.heures };
   });
+}
+
+export type OpeningSpec = {
+  "@type": "OpeningHoursSpecification";
+  dayOfWeek: string;
+  opens: string;
+  closes: string;
+};
+
+/**
+ * openingHoursSpecification schema.org depuis les colonnes time BRUTES de
+ * horaire_boutique (le helper d'affichage ne sort que du texte "9h à 13h").
+ * Une plage = une specification. Jour ferme (plages nulles) = aucune spec.
+ * Non configure / erreur / vide => [] (le JSON-LD OMET alors la propriete,
+ * jamais d'horaire duplique en dur).
+ */
+export async function horairesBoutiqueSpec(): Promise<OpeningSpec[]> {
+  const supabase = clientLecture();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("horaire_boutique")
+    .select("jour, plage1_debut, plage1_fin, plage2_debut, plage2_fin");
+  if (error || !data || data.length === 0) return [];
+
+  const specs: OpeningSpec[] = [];
+  const plage = (day: string, debut: string | null, fin: string | null) => {
+    if (debut && fin) specs.push({ "@type": "OpeningHoursSpecification", dayOfWeek: day, opens: debut.slice(0, 5), closes: fin.slice(0, 5) });
+  };
+  for (const l of data as LigneBrute[]) {
+    const day = JOURS_SCHEMA[l.jour];
+    if (!day) continue;
+    plage(day, l.plage1_debut, l.plage1_fin);
+    plage(day, l.plage2_debut, l.plage2_fin);
+  }
+  return specs;
 }
