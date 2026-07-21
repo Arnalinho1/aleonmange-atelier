@@ -125,7 +125,7 @@ function gabaritEmail(titre: string, corps: string): string {
 /** Precommande (boutique + truck) : demande recue, JAMAIS "validee". */
 export function renduPrecommandeRecue(o: { reference: string; retraitLabel: string }): { subject: string; html: string } {
   return {
-    subject: "Votre demande de precommande a bien ete recue",
+    subject: "Votre demande de précommande a bien été reçue",
     html: gabaritEmail("Demande bien reçue", `
       <p>Merci ! Votre demande de précommande est <strong>en attente de confirmation par l'atelier</strong>. Nous revenons vers vous rapidement.</p>
       <p><strong>Retrait souhaité :</strong> ${o.retraitLabel}<br>
@@ -137,7 +137,7 @@ export function renduPrecommandeRecue(o: { reference: string; retraitLabel: stri
 /** Demande de devis : envoyee, aucun paiement, reponse sous 48h. */
 export function renduDevisRecu(o: { contactNom: string }): { subject: string; html: string } {
   return {
-    subject: "Votre demande de devis a bien ete envoyee",
+    subject: "Votre demande de devis a bien été envoyée",
     html: gabaritEmail("Demande envoyée", `
       <p>Bonjour ${o.contactNom}, votre demande de devis est bien arrivée. <strong>Aucun paiement maintenant</strong> : nous étudions votre projet et vous répondons <strong>sous 48h</strong>.</p>`),
   };

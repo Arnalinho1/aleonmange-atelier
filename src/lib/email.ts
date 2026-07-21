@@ -124,7 +124,7 @@ function gabaritEmail(titre: string, corps: string): string {
 /** Confirmation : commande acceptee, a retirer le [date/creneau], a regler au retrait. */
 export function renduCommandeConfirmee(o: { retraitLabel: string }): { subject: string; html: string } {
   return {
-    subject: "Votre commande est confirmee",
+    subject: "Votre commande est confirmée",
     html: gabaritEmail("Commande confirmée", `
       <p>Bonne nouvelle : votre commande est <strong>confirmée</strong> par l'atelier.</p>
       <p><strong>À retirer :</strong> ${o.retraitLabel}<br>
