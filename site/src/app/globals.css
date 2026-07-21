@@ -14,12 +14,14 @@
   --color-surface: #fbf8f1;     /* carte claire */
   --color-surface-2: #f6f1e7;   /* carte creme */
   --color-voile: #e9e0ce;       /* fonds d'images / bandes */
+  --color-bande: #efe6d2;       /* bande beige header/footer (maquette Histoire) */
 
   /* Encres */
   --color-canard: #0e3947;      /* texte fort, primaire */
   --color-texte-2: #5a6b62;     /* texte secondaire */
   --color-texte-3: #6b7469;
   --color-muet: #7a857c;
+  --color-encre: #3a4a44;       /* corps de texte page Histoire (maquette) */
 
   /* Accent et compagnons */
   --color-vert: #2e6b4a;
