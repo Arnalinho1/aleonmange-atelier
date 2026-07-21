@@ -11,10 +11,16 @@ import { Spotlight, type CibleSpec } from "./Spotlight";
  * (+ fallback bouton, coupe auto 1,1 s) -> chute des pans 1,2 s (pan droit
  * +120 ms) + 90 confettis + fondu 0,9 s à 1,4 s -> feux d'artifice canvas
  * (4 bursts, ~70 particules, gravité +0,05/frame, friction 0,985, extinction
- * 3,6 s) -> visite en 4 chapitres (spotlight commun) -> bandeau horodaté
- * (client, décoratif, disparaît à 10 s ou premier scroll) -> certificat
+ * 3,6 s) -> visite en 4 chapitres (spotlight commun) -> bandeau -> certificat
  * imprimable. Purement front : AUCUN appel réseau, aucune collecte,
  * stateless, rejouable (recharger avec ?inauguration).
+ *
+ * BANDEAU PERMANENT (décision Arnaud, 2026-07-21, remplace le « disparaît à
+ * 10 s ou au scroll » de la maquette) : c'est l'UNIQUE porte vers l'Atelier
+ * (architecture « une seule entrée ») -> il reste affiché et cliquable en
+ * permanence après la visite. Seul l'horodatage DÉCORATIF garde le
+ * comportement maquette (il s'efface à 10 s ou au premier scroll, le bandeau
+ * passe alors en mode discret, compact).
  *
  * Écarts assumés vs maquette (signalés au STOP Lot B) : la barre de chips de
  * démo n'existe pas ; « Revenir au site » depuis le certificat revient au
@@ -34,6 +40,8 @@ type Etat = {
   fading: boolean;
   confetti: boolean;
   banner: boolean;
+  /** Mode discret du bandeau (horodatage effacé, pill compacte) — jamais masqué. */
+  discret: boolean;
   ts: number | null;
   chap: number;
   tourDone: boolean;
@@ -47,6 +55,7 @@ const INITIAL: Etat = {
   fading: false,
   confetti: false,
   banner: true,
+  discret: false,
   ts: null,
   chap: 0,
   tourDone: false,
@@ -185,11 +194,12 @@ export default function Ceremonie() {
   const goChap = useCallback(
     (n: number) => {
       if (n > 4) {
-        // Fin de visite : bandeau horodaté, retiré à 10 s ou au premier scroll.
+        // Fin de visite : bandeau PERMANENT ; à 10 s l'horodatage décoratif
+        // s'efface et le bandeau passe en mode discret (jamais masqué).
         patch({ chap: 0, tourDone: true, banner: true });
         setTimeout(() => {
           const e = etatRef.current;
-          if (e.phase === "reveal" && e.tourDone) patch({ banner: false });
+          if (e.phase === "reveal" && e.tourDone) patch({ discret: true });
         }, 10000);
         return;
       }
@@ -259,10 +269,11 @@ export default function Ceremonie() {
     return () => clearTimeout(t);
   }, []);
 
-  // Premier scroll après la visite : le bandeau décoratif s'efface.
+  // Premier scroll après la visite : l'horodatage décoratif s'efface, le
+  // bandeau passe en mode discret — il reste TOUJOURS affiché et cliquable.
   useEffect(() => {
     const onScroll = () =>
-      setS((prev) => (prev.phase === "reveal" && prev.tourDone && prev.banner ? { ...prev, banner: false } : prev));
+      setS((prev) => (prev.phase === "reveal" && prev.tourDone && !prev.discret ? { ...prev, discret: true } : prev));
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -300,28 +311,32 @@ export default function Ceremonie() {
             background: "#0e3947",
             color: "#f3ecdd",
             borderRadius: 100,
-            padding: "12px 22px",
+            padding: s.discret ? "8px 10px" : "12px 22px",
             display: "flex",
             alignItems: "center",
-            gap: 14,
+            gap: s.discret ? 8 : 14,
             boxShadow: "0 24px 48px -20px rgba(14,57,71,.6)",
             animation: "alm-i-fadeup .5s ease both",
           }}
         >
-          <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#f0c173", flex: "0 0 auto" }} />
-          <span
-            className="alm-i-bandeau-texte"
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 12,
-              letterSpacing: ".02em",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          >
-            Site ouvert par Audrey Depouilly et Victorien Thebault, {quand}
-          </span>
+          {!s.discret && (
+            <>
+              <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#f0c173", flex: "0 0 auto" }} />
+              <span
+                className="alm-i-bandeau-texte"
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 12,
+                  letterSpacing: ".02em",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                Site ouvert par Audrey Depouilly et Victorien Thebault, {quand}
+              </span>
+            </>
+          )}
           <button
             type="button"
             onClick={() => patch({ phase: "certif" })}
