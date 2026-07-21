@@ -1,0 +1,4 @@
+# Forcer le traitement TEXTE des scripts .mjs : sans cela, l'heuristique de git
+# les classe parfois en binaire (accents FR + array[...]::text[]) et n'affiche
+# plus de diff lisible (cf. scripts/import-catalogue-chefs.mjs).
+*.mjs text
