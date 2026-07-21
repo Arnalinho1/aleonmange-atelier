@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import Image from "next/image";
 import { signIn, type AuthState } from "./actions";
 
@@ -13,6 +13,22 @@ import { signIn, type AuthState } from "./actions";
  */
 export default function LoginPage() {
   const [state, formAction, pending] = useActionState<AuthState, FormData>(signIn, undefined);
+
+  // Deeplink du guide d'onboarding : le middleware préserve ?guide=1 jusqu'ici
+  // (chef pas encore connecté) ; le flag repart avec la soumission pour que la
+  // redirection post-connexion rouvre le hub. Lu au montage (pas de
+  // useSearchParams : éviterait une frontière Suspense sur une page statique).
+  const [guide, setGuide] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => {
+      try {
+        setGuide(new URLSearchParams(window.location.search).get("guide") === "1");
+      } catch {
+        // Sans query lisible : pas de flag, connexion normale.
+      }
+    }, 0);
+    return () => clearTimeout(t);
+  }, []);
 
   return (
     <div className="min-h-screen grid place-items-center" style={{ padding: 24 }}>
@@ -40,6 +56,7 @@ export default function LoginPage() {
           </p>
 
           <form action={formAction} className="flex flex-col gap-3">
+            {guide && <input type="hidden" name="guide" value="1" />}
             <Field name="email" label="E-mail" type="email" placeholder="vous@aleonmange.fr" required />
             <Field name="password" label="Mot de passe" type="password" placeholder="••••••••" required />
 

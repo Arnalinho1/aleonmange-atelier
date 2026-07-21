@@ -68,10 +68,13 @@ export async function updateSession(request: NextRequest) {
     return redir;
   }
 
-  // Deja equipe sur /login -> tableau de bord.
+  // Deja equipe sur /login -> tableau de bord. Le flag ?guide=1 (deeplink du
+  // guide d'onboarding, contrat d'URL fige) survit a la redirection — flag
+  // booleen WHITELISTE, on ne reporte jamais la query entiere.
   if (estEquipe && isAuthRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
+    url.search = request.nextUrl.searchParams.get("guide") === "1" ? "?guide=1" : "";
     return NextResponse.redirect(url);
   }
 

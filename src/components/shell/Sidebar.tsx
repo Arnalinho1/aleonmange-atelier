@@ -5,7 +5,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { NAV_GROUPS } from "@/lib/nav";
+import { useGuide } from "@/components/guide/GuideContext";
 import { signOut } from "@/app/login/actions";
+
+/** Slug ASCII d'un titre de groupe (« Activité » -> "activite") pour l'ancre data-g. */
+function slugGroupe(titre: string): string {
+  return titre.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+}
 
 /**
  * Sidebar persistante (250px, fond canard #0E3947). Structure & groupes exacts
@@ -47,10 +53,10 @@ export function Sidebar({
         </div>
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1" style={{ padding: "14px 12px" }}>
+      {/* Nav — ancres data-g stables pour le guide d'onboarding (spotlight). */}
+      <nav className="flex-1" style={{ padding: "14px 12px" }} data-g="nav">
         {NAV_GROUPS.map((group) => (
-          <div key={group.titre}>
+          <div key={group.titre} data-g={`nav-${slugGroupe(group.titre)}`}>
             <p className="font-mono uppercase" style={{ fontSize: 9.5, letterSpacing: ".12em", color: "#5c8593", margin: "10px 10px 4px" }}>
               {group.titre}
             </p>
@@ -63,6 +69,7 @@ export function Sidebar({
                   key={item.id}
                   href={item.href}
                   onClick={onNavigate}
+                  data-g={`nav-${item.id}`}
                   className="flex items-center gap-[11px] w-full transition-all"
                   style={{
                     padding: "9px 12px",
@@ -89,6 +96,9 @@ export function Sidebar({
           </div>
         ))}
       </nav>
+
+      {/* Entrée permanente du guide d'onboarding — « Guide · X% » (pied de sidebar). */}
+      <GuideEntree onNavigate={onNavigate} />
 
       {/* Pied avatar — cliquable → Mon profil (handoff Profil & Stock §01) */}
       <div className="flex items-center gap-[10px]" style={{ padding: 14, borderTop: "1px solid rgba(255,255,255,.08)" }}>
@@ -124,5 +134,33 @@ export function Sidebar({
         </form>
       </div>
     </aside>
+  );
+}
+
+/** Bouton « Guide · X% » — ouvre le hub du guide (progression via useGuide). */
+function GuideEntree({ onNavigate }: { onNavigate?: () => void }) {
+  const guide = useGuide();
+  if (!guide) return null;
+  return (
+    <div style={{ padding: "10px 12px", borderTop: "1px solid rgba(255,255,255,.08)" }}>
+      <button
+        type="button"
+        data-g="nav-guide"
+        onClick={() => {
+          guide.ouvrirHub();
+          onNavigate?.();
+        }}
+        className="flex items-center gap-[11px] w-full rounded-lg transition-colors hover:bg-white/10"
+        style={{ padding: "9px 12px", color: "#bfdce7", cursor: "pointer", textAlign: "left" }}
+      >
+        <span className="grid place-items-center shrink-0" style={{ width: 20 }}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f0c173" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <circle cx="12" cy="12" r="10" />
+            <path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01" />
+          </svg>
+        </span>
+        <span style={{ fontSize: 14, fontWeight: 600 }}>Guide · {guide.pct}</span>
+      </button>
+    </div>
   );
 }

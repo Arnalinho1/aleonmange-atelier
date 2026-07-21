@@ -230,6 +230,8 @@ export function ProdBoard({
 
       {/* Plan du jour + besoins dérivés + lots */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(320px,1fr))", gap: 16, alignItems: "start" }}>
+        {/* data-g : cibles du guide d'onboarding (B3) — le plan et ses lignes. */}
+        <div data-g="prod-plan">
         <Card style={{ overflow: "hidden" }}>
           <SectionHeader
             titre="Plan de production du jour"
@@ -240,7 +242,7 @@ export function ProdBoard({
               <p style={{ fontSize: 12.5, color: "#6b7469" }}>Rien à planifier sur ce filtre.</p>
             ) : (
               prevision.map((p) => (
-                <div key={p.produit_id} className="flex items-center gap-2" style={{ padding: "6px 0", borderBottom: "1px solid #efe7d6" }}>
+                <div key={p.produit_id} data-g="prod-ligne" className="flex items-center gap-2" style={{ padding: "6px 0", borderBottom: "1px solid #efe7d6" }}>
                   <span style={{ flex: 1, fontSize: 13, fontWeight: 600, color: "#0e3947" }}>{p.nom}</span>
                   {p.kg != null && portionG.get(p.recette_id) != null && (
                     <span className="font-mono" style={{ fontSize: 10, color: "#a79b84" }}>
@@ -253,6 +255,7 @@ export function ProdBoard({
             )}
           </div>
         </Card>
+        </div>
 
         <Card style={{ overflow: "hidden" }}>
           <SectionHeader
