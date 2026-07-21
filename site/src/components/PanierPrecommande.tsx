@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Carte, SurTitre, BadgeMono, Stepper } from "@/components/ui";
 import { Champ, ChampSelect, BoutonSubmit } from "@/components/forms";
 import type { FamilleCarte } from "@/lib/data/carte";
 import type { CreneauProposable } from "@/lib/data/creneaux";
+import { trackEvent } from "@/lib/analytics";
 
 /** Prix affiche (INDICATIF) — le montant reel est recalcule en base. */
 function fmtEuro(n: number): string {
@@ -89,6 +90,10 @@ export function PanierPrecommande({
       setEnAttente(false);
     }
   }
+
+  useEffect(() => {
+    if (resultat) trackEvent("precommande_envoyee", { canal });
+  }, [resultat, canal]);
 
   if (resultat) {
     return (
