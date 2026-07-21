@@ -9,6 +9,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Script from "next/script";
 import { Consentement } from "@/components/Consentement";
+import { Inauguration } from "@/components/inauguration/Inauguration";
 import "./globals.css";
 
 /**
@@ -65,6 +66,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <PiedDePage horaires={horaires} />
         <LettreInfo />
         <Consentement />
+        <Inauguration />
         <Analytics />
         <SpeedInsights />
       </body>

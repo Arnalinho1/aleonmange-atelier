@@ -70,3 +70,77 @@ body {
 .alm-defile::-webkit-scrollbar {
   display: none;
 }
+
+/* ============================================================================
+   CÉRÉMONIE D'INAUGURATION (?inauguration) — grammaire spotlight commune avec
+   le guide de l'Atelier. Les styles des écrans restent inline (idiome des
+   overlays du site) ; seuls les @keyframes et les règles d'impression du
+   certificat vivent ici.
+   ========================================================================== */
+@keyframes alm-i-fadeup {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes alm-i-fall {
+  0% {
+    transform: translateY(-4vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(105vh) rotate(720deg);
+    opacity: 0.85;
+  }
+}
+@keyframes alm-i-sheen {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 300% 0;
+  }
+}
+
+/* « Garder un souvenir » : seul le certificat sort à l'impression, chrome du
+   site masqué (la classe alm-i-print est posée sur <body> pendant l'écran). */
+@media print {
+  body.alm-i-print > *:not(.alm-i-racine) {
+    display: none !important;
+  }
+  body.alm-i-print .alm-i-noprint {
+    display: none !important;
+  }
+  body.alm-i-print .alm-i-certif-scene {
+    position: static !important;
+    background: none !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+  body.alm-i-print .alm-i-certif {
+    box-shadow: none !important;
+    margin: 0 auto;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}
+
+/* Bandeau horodaté : au téléphone (<640px), les deux boutons ne laissent
+   aucune place au texte en nowrap -> passage en multi-lignes centrées
+   (l'inline ne porte pas de @media ; !important bat l'inline). */
+@media (max-width: 639px) {
+  .alm-i-bandeau {
+    flex-wrap: wrap;
+    justify-content: center;
+    border-radius: 18px !important;
+    text-align: center;
+  }
+  .alm-i-bandeau-texte {
+    white-space: normal !important;
+    flex: 1 1 100%;
+  }
+}
