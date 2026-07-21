@@ -126,11 +126,11 @@ function gabaritEmail(titre: string, corps: string): string {
 export function renduPrecommandeRecue(o: { reference: string; retraitLabel: string }): { subject: string; html: string } {
   return {
     subject: "Votre demande de precommande a bien ete recue",
-    html: gabaritEmail("Demande bien recue", `
-      <p>Merci ! Votre demande de precommande est <strong>en attente de confirmation par l'atelier</strong>. Nous revenons vers vous rapidement.</p>
-      <p><strong>Retrait souhaite :</strong> ${o.retraitLabel}<br>
-      Le montant est <strong>a regler au retrait</strong>.</p>
-      <p style="font-size:13px;color:#6b7469">Reference : ${o.reference}</p>`),
+    html: gabaritEmail("Demande bien reçue", `
+      <p>Merci ! Votre demande de précommande est <strong>en attente de confirmation par l'atelier</strong>. Nous revenons vers vous rapidement.</p>
+      <p><strong>Retrait souhaité :</strong> ${o.retraitLabel}<br>
+      Le montant est <strong>à régler au retrait</strong>.</p>
+      <p style="font-size:13px;color:#6b7469">Référence : ${o.reference}</p>`),
   };
 }
 
@@ -138,8 +138,8 @@ export function renduPrecommandeRecue(o: { reference: string; retraitLabel: stri
 export function renduDevisRecu(o: { contactNom: string }): { subject: string; html: string } {
   return {
     subject: "Votre demande de devis a bien ete envoyee",
-    html: gabaritEmail("Demande envoyee", `
-      <p>Bonjour ${o.contactNom}, votre demande de devis est bien arrivee. <strong>Aucun paiement maintenant</strong> : nous etudions votre projet et vous repondons <strong>sous 48h</strong>.</p>`),
+    html: gabaritEmail("Demande envoyée", `
+      <p>Bonjour ${o.contactNom}, votre demande de devis est bien arrivée. <strong>Aucun paiement maintenant</strong> : nous étudions votre projet et vous répondons <strong>sous 48h</strong>.</p>`),
   };
 }
 

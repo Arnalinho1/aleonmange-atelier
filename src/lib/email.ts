@@ -25,9 +25,9 @@ const DEST_TEST = process.env.RESEND_DEST_TEST ?? "";
 
 /** Phrases DOUCES exposées au client (jamais le détail interne du motif). */
 const MOTIF_CLIENT: Record<string, string> = {
-  rupture: "un ingredient essentiel nous manque pour cette date",
-  capacite: "nous sommes malheureusement complets sur ce creneau",
-  fermeture: "nous serons exceptionnellement fermes ce jour-la",
+  rupture: "un ingrédient essentiel nous manque pour cette date",
+  capacite: "nous sommes malheureusement complets sur ce créneau",
+  fermeture: "nous serons exceptionnellement fermés ce jour-là",
   autre: "nous ne pouvons pas honorer cette commande cette fois-ci",
 };
 
@@ -125,11 +125,11 @@ function gabaritEmail(titre: string, corps: string): string {
 export function renduCommandeConfirmee(o: { retraitLabel: string }): { subject: string; html: string } {
   return {
     subject: "Votre commande est confirmee",
-    html: gabaritEmail("Commande confirmee", `
-      <p>Bonne nouvelle : votre commande est <strong>confirmee</strong> par l'atelier.</p>
-      <p><strong>A retirer :</strong> ${o.retraitLabel}<br>
-      Le montant est <strong>a regler au retrait</strong>.</p>
-      <p>A tres bientot !</p>`),
+    html: gabaritEmail("Commande confirmée", `
+      <p>Bonne nouvelle : votre commande est <strong>confirmée</strong> par l'atelier.</p>
+      <p><strong>À retirer :</strong> ${o.retraitLabel}<br>
+      Le montant est <strong>à régler au retrait</strong>.</p>
+      <p>À très bientôt !</p>`),
   };
 }
 
@@ -138,11 +138,11 @@ export function renduCommandeRefusee(o: { motifCode: string }): { subject: strin
   const raison = MOTIF_CLIENT[o.motifCode] ?? MOTIF_CLIENT.autre;
   return {
     subject: "Au sujet de votre commande",
-    html: gabaritEmail("Nous sommes desoles", `
-      <p>Merci pour votre commande. Nous ne pouvons malheureusement pas la preparer : ${raison}.</p>
+    html: gabaritEmail("Nous sommes désolés", `
+      <p>Merci pour votre commande. Nous ne pouvons malheureusement pas la préparer : ${raison}.</p>
       <p>Nous aimerions trouver une solution avec vous (une autre date, un autre produit) :
       appelez-nous au <strong>${TELEPHONE}</strong>, nous ferons au mieux.</p>
-      <p>A tres vite, nous l'esperons.</p>`),
+      <p>À très vite, nous l'espérons.</p>`),
   };
 }
 
