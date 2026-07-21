@@ -77,6 +77,7 @@ export function LettreInfo() {
           <form onSubmit={envoyer} className="mt-5 flex flex-col gap-2.5">
             <input
               type="email"
+              aria-label="Votre adresse email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}

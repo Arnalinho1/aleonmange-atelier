@@ -72,7 +72,7 @@ function CarteCommande({ v }: { v: VenteClient }) {
 
       <div className="flex gap-3 items-center">
         <span className="w-[56px] h-[56px] rounded-xl shrink-0 bg-voile grid place-items-center text-terracotta/60">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+          <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
             <rect x="3" y="4" width="18" height="16" rx="2" />
             <circle cx="8.5" cy="9.5" r="1.8" />
             <path d="m4 18 5-5 3.5 3.5L16 13l4 4" />

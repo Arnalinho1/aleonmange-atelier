@@ -97,6 +97,7 @@ export function ReCommande({
           <select
             value={choix}
             onChange={(e) => setChoix(e.target.value)}
+            aria-label={boutique ? "Créneau de retrait" : "Emplacement du marché"}
             className="w-full rounded-xl border border-bord-3 bg-surface-2 px-3.5 py-3 text-[14px] text-canard outline-none focus:border-[var(--accent)]"
           >
             <option value="">{boutique ? "Choisir un créneau" : "Choisir un emplacement"}</option>
