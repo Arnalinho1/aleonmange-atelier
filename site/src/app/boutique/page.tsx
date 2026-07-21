@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { BadgeMono, Carte, Photo, SurTitre } from "@/components/ui";
+import { PanierFrais } from "@/components/PanierFrais";
 import { COORDONNEES } from "@/lib/contenu";
 import { carteDuCanal } from "@/lib/data/carte";
 import { horairesBoutique } from "@/lib/data/horaires";
+import { panierFraisTeasingActif } from "@/lib/data/panierFrais";
 import { buildMetadata } from "@/lib/seo";
 
 /** ISR : fraicheur des lectures (emplacement du jour, carte pilotee par l'Atelier). */
@@ -21,7 +23,11 @@ export const metadata = buildMetadata({
  * lue du catalogue Atelier, pilotee par les chefs), CTA click & collect.
  */
 export default async function Boutique() {
-  const [familles, horaires] = await Promise.all([carteDuCanal("boutique"), horairesBoutique()]);
+  const [familles, horaires, teasingActif] = await Promise.all([
+    carteDuCanal("boutique"),
+    horairesBoutique(),
+    panierFraisTeasingActif(),
+  ]);
   // Recettes signatures = produits du catalogue portant une image (0033). Pilote par la
   // donnee : aucune galerie en dur ; fallback etat vide propre si aucune image posee.
   const signatures = familles.flatMap((f) => f.articles).filter((a) => a.image);
@@ -90,6 +96,14 @@ export default async function Boutique() {
           </div>
         )}
       </section>
+
+      {/* Teasing « Panier frais » — pilote par le flag config-source (parametre_site).
+          Flag OFF => section ABSENTE => /boutique strictement identique. */}
+      {teasingActif && (
+        <section className="mx-auto max-w-[1280px] px-4 md:px-8 py-12">
+          <PanierFrais />
+        </section>
+      )}
 
       {/* Infos pratiques + carte vitrine */}
       <section className="mx-auto max-w-[1280px] px-4 md:px-8 py-12 grid gap-6 lg:grid-cols-[1fr_1.4fr] items-start">

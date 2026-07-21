@@ -149,6 +149,29 @@ export type NewsletterAbonne = {
   created_at: string;
 };
 
+/** Intention « Panier frais » teasing (0043) — double opt-in STRICT propre + vote facultatif. */
+export type PanierFraisIntention = {
+  id: string;
+  email: string;
+  taille: string | null;
+  rythme: string | null;
+  contenu: string | null;
+  source: string;
+  token: string;
+  statut: string;
+  consentement_le: string | null;
+  demande_le: string;
+  confirme_le: string | null;
+  created_at: string;
+};
+
+/** Paramètres site (0043) — singleton, flag de pilotage du bloc « Panier frais » (OFF par défaut). */
+export type ParametreSite = {
+  id: boolean;
+  panier_frais_teasing_actif: boolean;
+  updated_le: string;
+};
+
 export type Client = {
   id: string;
   nom: string;
@@ -469,6 +492,8 @@ export type Database = {
       notification: TableDef<Notification, MakeInsert<Notification, "categorie" | "titre">>;
       parametre_fidelite: TableDef<ParametreFidelite, MakeInsert<ParametreFidelite, never>>;
       fidelite_redemption: TableDef<FideliteRedemption, MakeInsert<FideliteRedemption, "client_id">>;
+      panier_frais_intention: TableDef<PanierFraisIntention, MakeInsert<PanierFraisIntention, "email">>;
+      parametre_site: TableDef<ParametreSite, MakeInsert<ParametreSite, never>>;
     };
     Views: {
       /** CA FACTURÉ — ventes remises, imputées à occurred_at (= livre_le). Colonnes 0016-0017 exposées en fin (0018). */

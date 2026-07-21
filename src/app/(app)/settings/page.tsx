@@ -10,6 +10,7 @@ import type {
   FamilleCarte,
   HoraireBoutique,
   ParametreRentabilite,
+  ParametreSite,
 } from "@/lib/supabase/database.types";
 import { MapPin } from "lucide-react";
 import { EmplacementsManager } from "./EmplacementsManager";
@@ -17,6 +18,7 @@ import { FamillesCarteManager } from "./FamillesCarteManager";
 import { HorairesBoutiqueForm } from "./HorairesBoutiqueForm";
 import { CreneauRetraitForm } from "./CreneauRetraitForm";
 import { RentabiliteForm } from "./RentabiliteForm";
+import { PanierFraisReglages, type AgregatPanierFrais } from "./PanierFraisReglages";
 
 export const metadata = { title: "Réglages de l'atelier — Atelier ALM" };
 
@@ -34,11 +36,13 @@ export default async function SettingsPage() {
   let horaires: HoraireBoutique[] = [];
   let creneau: CreneauRetrait | null = null;
   let parametres: ParametreRentabilite | null = null;
+  let panierFraisActif = false;
+  let agregatPanierFrais: AgregatPanierFrais = { totalConfirmes: 0, totalEnAttente: 0, taille: {}, rythme: {}, contenu: {} };
   const categoriesParCanal: Record<Canal, string[]> = { truck: [], boutique: [], traiteur: [] };
 
   if (isSupabaseConfigured()) {
     const supabase = await createClient();
-    const [{ data }, fam, hor, cre, cats, params] = await Promise.all([
+    const [{ data }, fam, hor, cre, cats, params, site, intentions] = await Promise.all([
       supabase
         .from("emplacement")
         .select("*")
@@ -50,12 +54,31 @@ export default async function SettingsPage() {
       supabase.from("creneau_retrait").select("*").eq("actif", true).order("created_at").limit(1).maybeSingle(),
       supabase.from("produit").select("canal, categorie").eq("actif", true),
       supabase.from("parametre_rentabilite").select("*").maybeSingle(),
+      supabase.from("parametre_site").select("panier_frais_teasing_actif").maybeSingle(),
+      supabase.from("panier_frais_intention").select("taille, rythme, contenu, statut"),
     ]);
     emplacements = data ?? [];
     familles = (fam.data as FamilleCarte[] | null) ?? [];
     horaires = (hor.data as HoraireBoutique[] | null) ?? [];
     creneau = (cre.data as CreneauRetrait | null) ?? null;
     parametres = (params.data as ParametreRentabilite | null) ?? null;
+    panierFraisActif = (site.data as Pick<ParametreSite, "panier_frais_teasing_actif"> | null)?.panier_frais_teasing_actif ?? false;
+    // Agrégat panier frais : demande = CONFIRMÉS uniquement (double opt-in) ; en attente à part.
+    const votes = (intentions.data as { taille: string | null; rythme: string | null; contenu: string | null; statut: string }[] | null) ?? [];
+    const confirmes = votes.filter((v) => v.statut === "confirme");
+    const compter = (cle: "taille" | "rythme" | "contenu") =>
+      confirmes.reduce<Record<string, number>>((acc, v) => {
+        const val = v[cle];
+        if (val) acc[val] = (acc[val] ?? 0) + 1;
+        return acc;
+      }, {});
+    agregatPanierFrais = {
+      totalConfirmes: confirmes.length,
+      totalEnAttente: votes.filter((v) => v.statut === "en_attente").length,
+      taille: compter("taille"),
+      rythme: compter("rythme"),
+      contenu: compter("contenu"),
+    };
     // Catégories EN USAGE par canal (aide au rapprochement famille ↔ categorie).
     for (const p of (cats.data as { canal: Canal; categorie: string | null }[] | null) ?? []) {
       const cat = p.categorie?.trim();
@@ -87,6 +110,11 @@ export default async function SettingsPage() {
       </div>
       <div style={{ marginTop: 20 }}>
         <CreneauRetraitForm creneau={creneau} />
+      </div>
+
+      {/* Teasing « Panier frais » : flag d'affichage du bloc /boutique + agrégat des votes. */}
+      <div style={{ marginTop: 20 }}>
+        <PanierFraisReglages actif={panierFraisActif} agregat={agregatPanierFrais} />
       </div>
 
       {/* La saisie des paramètres vit ICI (Réglages configure, Finances consulte). */}

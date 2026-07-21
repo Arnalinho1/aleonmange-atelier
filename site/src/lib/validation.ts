@@ -55,5 +55,17 @@ export const newsletterSchema = z.object({
   email: z.email().max(180),
 });
 
+/**
+ * Intention « Panier frais » (teasing) : email + vote FACULTATIF (choix unique par
+ * question, nullable). Aucun prix, aucune reservation : on collecte une intention.
+ * nullish() = le client peut envoyer null (option non choisie) ou omettre le champ.
+ */
+export const panierFraisSchema = z.object({
+  email: z.email().max(180),
+  taille: z.enum(["petit", "grand"]).nullish(),
+  rythme: z.enum(["hebdo", "quinzaine"]).nullish(),
+  contenu: z.enum(["legumes", "fruits", "mixte"]).nullish(),
+});
+
 export type CommandePayload = z.infer<typeof commandeSchema>;
 export type DevisPayload = z.infer<typeof devisSchema>;

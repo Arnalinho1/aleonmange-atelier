@@ -284,3 +284,20 @@ export async function saveCreneauRetrait(
   revalidatePath("/settings");
   return { ok: true };
 }
+
+/**
+ * Flag de pilotage du bloc « Panier frais » (teasing) sur le SITE public (0043, singleton
+ * `parametre_site`). Toggle équipe. Config-source : jamais un booléen codé en dur.
+ * ⚠ Le SITE est une autre app Vercel : il se rafraîchit par son propre ISR (revalidate=300),
+ * pas de revalidation cross-app depuis l'Atelier. Activation prod = seulement après RESEND_PROD=1.
+ */
+export async function togglePanierFraisTeasing(actif: boolean): Promise<EmplacementFormState> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("parametre_site")
+    .update({ panier_frais_teasing_actif: actif, updated_le: new Date().toISOString() })
+    .eq("id", true);
+  if (error) return { error: error.message };
+  revalidatePath("/settings");
+  return { ok: true };
+}
