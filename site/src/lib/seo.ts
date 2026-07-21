@@ -98,3 +98,6 @@ export function buildJsonLd(openingHours: OpeningSpec[]): Record<string, unknown
     ...(openingHours.length ? { openingHoursSpecification: openingHours } : {}),
   };
 }
+
+// NB : SITE_URL est la source unique du domaine (metadataBase, sitemap, robots,
+// JSON-LD, et llms.txt en COPIE STATIQUE) — cf. le backlog de synchro dans CLAUDE.md.
