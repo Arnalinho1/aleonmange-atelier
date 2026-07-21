@@ -146,7 +146,7 @@ export function renduDevisRecu(o: { contactNom: string }): { subject: string; ht
 /** Newsletter : double opt-in, lien de confirmation. */
 export function renduNewsletterConfirmer(o: { lien: string }): { subject: string; html: string } {
   return {
-    subject: "Confirmez votre inscription à la lettre À Léon Mange",
+    subject: "Confirmez votre inscription à la lettre A Léon Mange",
     html: gabaritEmail("Une derniere etape", `
       <p>Pour recevoir nos nouvelles, confirmez votre inscription :</p>
       <p><a href="${o.lien}" style="display:inline-block;background:#D81020;color:#fff;padding:11px 18px;border-radius:999px;text-decoration:none;font-weight:700">Confirmer mon inscription</a></p>
