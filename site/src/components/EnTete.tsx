@@ -70,7 +70,7 @@ export function EnTete() {
             href="/compte"
             className="hidden sm:inline-flex items-center gap-1.5 h-[42px] px-[15px] rounded-pille border border-bord-2 bg-surface text-canard font-display font-bold text-[13.5px] transition-colors hover:border-bord-4"
           >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="8" r="4" />
               <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
             </svg>
@@ -136,7 +136,7 @@ export function EnTete() {
               onClick={() => setMenuOuvert(false)}
               className="w-full inline-flex items-center justify-center gap-2 h-[52px] rounded-pille border border-bord-2 bg-surface text-canard font-display font-bold text-[15px]"
             >
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="8" r="4" />
                 <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
               </svg>

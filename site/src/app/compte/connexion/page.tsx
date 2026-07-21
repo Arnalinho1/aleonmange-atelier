@@ -6,6 +6,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Mon compte",
   description: "Connexion et création de compte client A Léon Mange.",
+  robots: { index: false, follow: false },
 };
 
 /** Ecran connexion / creation (espace client, Vague 4), conforme maquette CD d-login :
@@ -78,7 +79,7 @@ function Atout({
   return (
     <div className="flex gap-[13px]">
       <span className="w-[30px] h-[30px] shrink-0 rounded-[9px] bg-or/15 flex items-center justify-center">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F0C173" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F0C173" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           {children}
         </svg>
       </span>

@@ -1,11 +1,13 @@
 import { Carte, Photo, SurTitre } from "@/components/ui";
 import { CHEFS, COORDONNEES } from "@/lib/contenu";
+import { buildMetadata } from "@/lib/seo";
 
-export const metadata = {
+export const metadata = buildMetadata({
+  path: "/histoire",
   title: "Notre histoire · deux chefs en Beaujolais",
   description:
     "L'histoire d'A Léon Mange : Audrey et Victorien, deux chefs, un laboratoire à Létra et une cuisine faite maison avec les producteurs du Beaujolais.",
-};
+});
 
 const PILIERS = [
   { titre: "Local", detail: "Producteurs du Beaujolais" },

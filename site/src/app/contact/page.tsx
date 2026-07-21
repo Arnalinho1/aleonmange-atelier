@@ -1,15 +1,17 @@
 import { BadgeMono, Carte, SurTitre } from "@/components/ui";
 import { COORDONNEES } from "@/lib/contenu";
 import { horairesBoutique } from "@/lib/data/horaires";
+import { buildMetadata } from "@/lib/seo";
 
 /** ISR : les horaires affiches sont pilotes par l'Atelier (0023). */
 export const revalidate = 300;
 
-export const metadata = {
+export const metadata = buildMetadata({
+  path: "/contact",
   title: "Contact · A Léon Mange à Létra",
   description:
     "Contacter A Léon Mange : 1923 route de la vallée à Létra (Beaujolais), téléphone, email, horaires de la boutique et plan d'accès.",
-};
+});
 
 /**
  * Contact (d-contact) : coordonnees REELLES (§06), horaires, plan d'acces.

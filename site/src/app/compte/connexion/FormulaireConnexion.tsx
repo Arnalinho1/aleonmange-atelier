@@ -140,6 +140,7 @@ function Champ({
       name={name}
       type={type}
       placeholder={placeholder}
+      aria-label={placeholder}
       required={required}
       autoComplete={autoComplete}
       className="w-full rounded-xl border border-bord-3 bg-surface px-[15px] py-3.5 text-[14px] text-canard outline-none focus:border-[var(--accent)]"

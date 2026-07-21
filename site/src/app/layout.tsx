@@ -3,7 +3,10 @@ import { Bricolage_Grotesque, Hanken_Grotesk, Spline_Sans_Mono } from "next/font
 import { EnTete } from "@/components/EnTete";
 import { PiedDePage } from "@/components/PiedDePage";
 import { LettreInfo } from "@/components/LettreInfo";
-import { horairesBoutique } from "@/lib/data/horaires";
+import { horairesBoutique, horairesBoutiqueSpec } from "@/lib/data/horaires";
+import { SITE_URL, buildJsonLd } from "@/lib/seo";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
 /**
@@ -30,8 +33,9 @@ const splineMono = Spline_Sans_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "A Léon Mange · Boutique, food truck et traiteur en Beaujolais",
+    default: "A Léon Mange · plats maison & traiteur en Beaujolais",
     template: "%s · A Léon Mange",
   },
   description:
@@ -41,14 +45,19 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   // Le pied de page est un composant client : les horaires (lecture serveur)
   // lui sont passes en prop depuis ce layout serveur.
-  const horaires = await horairesBoutique();
+  // Les memes horaires (version machine) alimentent le JSON-LD FoodEstablishment.
+  const [horaires, horairesSpec] = await Promise.all([horairesBoutique(), horairesBoutiqueSpec()]);
+  const jsonLd = buildJsonLd(horairesSpec);
   return (
     <html lang="fr">
       <body className={`${bricolage.variable} ${hanken.variable} ${splineMono.variable} min-h-screen flex flex-col`}>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <EnTete />
         <main className="flex-1">{children}</main>
         <PiedDePage horaires={horaires} />
         <LettreInfo />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

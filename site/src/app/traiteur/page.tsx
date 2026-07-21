@@ -1,15 +1,17 @@
 import Link from "next/link";
 import { BadgeMono, Carte, Photo, SurTitre } from "@/components/ui";
 import { carteDuCanal, fmtPrix } from "@/lib/data/carte";
+import { buildMetadata } from "@/lib/seo";
 
 /** ISR : fraicheur des lectures (emplacement du jour, carte pilotee par l'Atelier). */
 export const revalidate = 300;
 
-export const metadata = {
-  title: "Le Traiteur · réceptions faites maison en Beaujolais",
+export const metadata = buildMetadata({
+  path: "/traiteur",
+  title: "Traiteur en Beaujolais · réceptions maison",
   description:
     "Traiteur artisanal en Beaujolais : mariages, entreprises, cocktails et repas de famille. Un devis sur mesure, sans engagement.",
-};
+});
 
 const RECEPTIONS = [
   { titre: "Mariages", detail: "Cocktail et repas assis", img: "/images/reception-mariage.webp", alt: "Table de mariage dressée avec fleurs en extérieur" },

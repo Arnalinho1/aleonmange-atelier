@@ -1,0 +1,16 @@
+# A Léon Mange
+
+> Cuisine artisanale du Beaujolais. Plats cuisinés faits maison par Audrey et Victorien, à Létra (69620). Trois canaux : boutique à emporter (click and collect), food truck sur les marchés du Beaujolais, et traiteur pour vos réceptions.
+
+## Contact
+- Boutique : 1923 route de la vallée, 69620 Létra (Beaujolais, France)
+- Téléphone : 06 75 36 23 26
+- Email : aleonmange@yahoo.com
+
+## Pages
+- [Accueil](https://aleonmange.app/) : la maison et ses trois canaux.
+- [Boutique](https://aleonmange.app/boutique) : plats à emporter, click and collect à Létra.
+- [Food truck](https://aleonmange.app/food-truck) : marchés du Beaujolais, précommande.
+- [Traiteur](https://aleonmange.app/traiteur) : réceptions et devis.
+- [Notre histoire](https://aleonmange.app/histoire) : Audrey et Victorien.
+- [Contact](https://aleonmange.app/contact) : adresse, horaires, téléphone.
