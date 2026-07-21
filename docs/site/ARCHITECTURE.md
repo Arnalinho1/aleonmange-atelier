@@ -80,6 +80,11 @@ FINITION du 2026-07-18 (apres les migrations) : UI Atelier livree — Catalogue 
 
 Import du catalogue chefs : 85 produits (45 boutique sans prix, 40 traiteur avec prix) inseres `visible_site=false`, `actif=true` ; script rejouable `scripts/import-catalogue-chefs.mjs` (insert-only `on conflict do nothing`, ne touche jamais une ligne existante). Prix suggeres de marche = UNIQUEMENT dans `docs/imports/RAPPORT_SAISIE_CHEFS.md`, jamais en base.
 
+**0042 `prix_selon_mode` relachee (2026-07-20)** : l'ancienne `prix_selon_mode` exigeait un prix pour TOUT produit (mode -> sa colonne de prix NOT NULL), ce qui interdisait les brouillons sans prix de l'import 0041. Relachee. **COUPLE DE CONTRAINTES `produit` (invariant global)** :
+- `prix_selon_mode` = **coherence mode / colonne de prix** : `check ((mode='unite' and prix_kg is null) or (mode='poids' and prix_unitaire is null))`. Le mode INTERDIT la colonne de prix de l'autre mode et AUTORISE la sienne a NULL (brouillon).
+- `produit_visible_requiert_prix` (0041) = **un produit VISIBLE a toujours un prix** (`prix_unitaire` ou `prix_kg`).
+Ensemble : un produit visible a un prix CORRECT pour son mode ; **le seul cas relache = un brouillon INVISIBLE sans prix** (a completer par les chefs). Les 101 lignes demo passent la version relachee (prouve au dry-run avant apply : 0 violation, `produit_visible_requiert_prix` conservee).
+
 ## Risques identifies pour les Vagues 2-3 (a traiter aux STOP migrations)
 
 - `fulfillment` n'a pas d'etat `web_a_confirmer` et `source_vente` n'a pas `'web'` : migrations d'enum supervisees.
