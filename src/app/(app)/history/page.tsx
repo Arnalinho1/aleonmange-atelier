@@ -12,21 +12,26 @@ export const metadata = { title: "Historique des ventes — Atelier ALM" };
 
 /**
  * Historique — lit v_vente_remise, LA même source que Finances (HANDOFF §03 :
- * le CA n'est compté qu'une fois, sur fulfillment=remis). Lecture seule.
+ * le CA n'est compté qu'une fois, sur fulfillment=remis). Un seul geste d'écriture :
+ * rattacher une vente ANONYME à un client (documentaire, 0044 — jamais de crédit
+ * fidélité) ; tout le reste est en lecture seule.
  * Les ventes issues de l'import caisse portent le badge « Import ».
  */
 export default async function HistoryPage() {
   const m = SCREEN_META.history;
   let ventes: VenteRemise[] = [];
   let emplacements: Emplacement[] = [];
+  let clientsActifs: { id: string; nom: string }[] = [];
 
   if (isSupabaseConfigured()) {
     const supabase = await createClient();
-    const [v, e] = await Promise.all([
+    const [v, e, ca] = await Promise.all([
       supabase.from("v_vente_remise").select("*").order("occurred_at", { ascending: false }),
       supabase.from("emplacement").select("*").eq("actif", true).order("jour_semaine"),
+      supabase.from("client").select("id, nom").eq("actif", true).order("nom"),
     ]);
     emplacements = e.data ?? [];
+    clientsActifs = ca.data ?? [];
     const remises = (v.data ?? []) as Omit<Vente, "fulfillment" | "created_at">[];
 
     if (remises.length > 0) {
@@ -65,6 +70,8 @@ export default async function HistoryPage() {
           moyen_paiement: x.moyen_paiement,
           montant_total: x.montant_total,
           source_vente: x.source_vente,
+          client_id: x.client_id,
+          client_rattache_le: x.client_rattache_le,
           client_nom: x.client_id ? clientParId.get(x.client_id) ?? null : null,
           lignes: lignes
             .filter((li) => li.vente_id === x.id)
@@ -90,7 +97,7 @@ export default async function HistoryPage() {
           message="Les ventes remises apparaîtront ici, groupées par jour, avec leurs KPI (CA, nombre, panier moyen). Même source que Finances — jamais de recompte parallèle."
         />
       ) : (
-        <HistoryList ventes={ventes} emplacements={emplacements} />
+        <HistoryList ventes={ventes} emplacements={emplacements} clientsActifs={clientsActifs} />
       )}
     </>
   );

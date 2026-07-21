@@ -8,6 +8,7 @@ import { Card, SectionHeader } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import type { Client } from "@/lib/supabase/database.types";
 import { createClientFiche, updateClientFiche, toggleClientActif, appliquerRecompense } from "./actions";
+import { VentesClient } from "./VentesClient";
 
 /** Agrégats transactionnels par client (dérivés de v_vente_remise — source unique). */
 export type ClientStats = Record<string, { commandes: number; ca: number; derniere: string | null }>;
@@ -234,6 +235,10 @@ export function ClientsManager({
                 pending={pending}
                 onRecompense={() => onRecompense(edition.id)}
               />
+            )}
+
+            {edition && (
+              <VentesClient key={edition.id} clientId={edition.id} totalRemises={stats[edition.id]?.commandes ?? 0} />
             )}
 
             <form action={onSubmit} className="flex flex-col gap-4" style={{ padding: 20 }}>
