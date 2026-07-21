@@ -301,3 +301,5 @@ export async function togglePanierFraisTeasing(actif: boolean): Promise<Emplacem
   revalidatePath("/settings");
   return { ok: true };
 }
+
+// Re-trigger deploiement (ATELIER) du merge 415ab24 : le webhook Vercel a manque le push.

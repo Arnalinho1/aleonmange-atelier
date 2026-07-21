@@ -17,3 +17,5 @@ export async function panierFraisTeasingActif(): Promise<boolean> {
   if (error || !data) return false;
   return data.panier_frais_teasing_actif === true;
 }
+
+// Re-trigger deploiement (SITE) du merge 415ab24 : le webhook Vercel a manque le push.
