@@ -74,6 +74,17 @@ Chaque table 1-5 recoit son `grant select` + policy `site_lecteur` dans sa propr
 
 FINITION du 2026-07-18 (apres les migrations) : UI Atelier livree — Catalogue (description, interrupteur « Visible sur le site », badge « Masqué du site ») et Reglages (emplacements enrichis ville/lieu/horaire, section Horaires boutique 7 jours a 2 plages time, section Familles de carte avec datalist des categories en usage et badge « Sans catégorie ») ; consommation cote site activee (filtre visible_site, descriptions, ordre/notes de familles, precisions d'emplacement, horaires en base) avec fallbacks integrals. ISR : `revalidate = 300` au niveau LAYOUT (le pied de page affiche les horaires en base sur toutes les routes) — toutes les pages suivent la fraicheur 5 min.
 
+**0041 `produit` contenu import (2026-07-20)** : colonnes additives pour l'import du catalogue reel des chefs (JSON V2, `docs/imports/`) en brouillons invisibles. `tags text[]`, `import_ref text` (index unique partiel : cle stable = id JSON, idempotence + tracabilite + detection de collision avec la demo qui a `import_ref` NULL), `allergenes text[]`, `allergenes_verifies boolean not null default false`. Additive, RLS inchangee, `site_lecteur` lit via le grant de table (0019/0020/0033). DEUX REGLES PERMANENTES gravees :
+- **Allergenes** : le site public n'affiche JAMAIS les allergenes d'un produit dont `allergenes_verifies = false`. Les allergenes importes du JSON sont AUTO-GENERES, NON verifies ; la verification (passer `verifies=true`) se fait par les chefs dans l'Atelier. Aucun affichage n'existe aujourd'hui : la regle vaut pour tout futur cablage.
+- **Contrainte `produit_visible_requiert_prix`** : `check (not visible_site or prix_unitaire is not null or prix_kg is not null)`. Invariant grave EN BASE (pas seulement en consigne) : un produit VISIBLE a TOUJOURS un prix ; un brouillon sans prix ne peut pas devenir visible tant que le chef n'a pas saisi le sien. Prouve au dry-run : les 101 lignes demo passent (0 violation).
+
+Import du catalogue chefs : 85 produits (45 boutique sans prix, 40 traiteur avec prix) inseres `visible_site=false`, `actif=true` ; script rejouable `scripts/import-catalogue-chefs.mjs` (insert-only `on conflict do nothing`, ne touche jamais une ligne existante). Prix suggeres de marche = UNIQUEMENT dans `docs/imports/RAPPORT_SAISIE_CHEFS.md`, jamais en base.
+
+**0042 `prix_selon_mode` relachee (2026-07-20)** : l'ancienne `prix_selon_mode` exigeait un prix pour TOUT produit (mode -> sa colonne de prix NOT NULL), ce qui interdisait les brouillons sans prix de l'import 0041. Relachee. **COUPLE DE CONTRAINTES `produit` (invariant global)** :
+- `prix_selon_mode` = **coherence mode / colonne de prix** : `check ((mode='unite' and prix_kg is null) or (mode='poids' and prix_unitaire is null))`. Le mode INTERDIT la colonne de prix de l'autre mode et AUTORISE la sienne a NULL (brouillon).
+- `produit_visible_requiert_prix` (0041) = **un produit VISIBLE a toujours un prix** (`prix_unitaire` ou `prix_kg`).
+Ensemble : un produit visible a un prix CORRECT pour son mode ; **le seul cas relache = un brouillon INVISIBLE sans prix** (a completer par les chefs). Les 101 lignes demo passent la version relachee (prouve au dry-run avant apply : 0 violation, `produit_visible_requiert_prix` conservee).
+
 ## Risques identifies pour les Vagues 2-3 (a traiter aux STOP migrations)
 
 - `fulfillment` n'a pas d'etat `web_a_confirmer` et `source_vente` n'a pas `'web'` : migrations d'enum supervisees.
