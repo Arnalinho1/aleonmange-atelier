@@ -1,4 +1,8 @@
-import { sendGAEvent } from "@next/third-parties/google";
+declare global {
+  interface Window {
+    gtag?: (...args: unknown[]) => void;
+  }
+}
 
 /**
  * Mesure d'audience GA4 soumise au consentement (CNIL). Le Measurement ID est
@@ -46,6 +50,7 @@ export function ecrireConsentement(v: Consent) {
  * jamais d'email/nom/telephone/reference client en parametre.
  */
 export function trackEvent(nom: string, params?: Record<string, string | number>) {
-  if (lireConsentement() !== "granted") return;
-  sendGAEvent("event", nom, params ?? {});
+  if (typeof window === "undefined") return;
+  if (lireConsentement() !== "granted") return; // double garde (GA n'est charge qu'apres accord)
+  window.gtag?.("event", nom, params ?? {});
 }
