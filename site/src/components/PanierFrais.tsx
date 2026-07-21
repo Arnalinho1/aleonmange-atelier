@@ -53,11 +53,11 @@ export function PanierFrais() {
         setMessage(data?.error ?? "Une erreur est survenue.");
       } else {
         setEtat("ok");
-        setMessage(data?.message ?? "Verifiez votre boite mail pour confirmer votre inscription.");
+        setMessage(data?.message ?? "Vérifiez votre boîte mail pour confirmer votre inscription.");
       }
     } catch {
       setEtat("erreur");
-      setMessage("Impossible de contacter le serveur. Reessayez.");
+      setMessage("Impossible de contacter le serveur. Réessayez.");
     }
   }
 

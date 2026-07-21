@@ -11,14 +11,14 @@ import { emailPanierFraisConfirmer } from "@/lib/email";
  */
 export async function POST(request: Request) {
   if (!autorise(`panier-frais:${ipDe(request)}`)) {
-    return Response.json({ error: "Trop de demandes, reessayez dans un instant." }, { status: 429 });
+    return Response.json({ error: "Trop de demandes, réessayez dans un instant." }, { status: 429 });
   }
 
   let body: unknown;
   try {
     body = await request.json();
   } catch {
-    return Response.json({ error: "Requete invalide." }, { status: 400 });
+    return Response.json({ error: "Requête invalide." }, { status: 400 });
   }
   const parsed = panierFraisSchema.safeParse(body);
   if (!parsed.success) {
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
 
   const ecriture = clientEcriture();
   if (!ecriture) {
-    return Response.json({ error: "Service momentanement indisponible." }, { status: 503 });
+    return Response.json({ error: "Service momentanément indisponible." }, { status: 503 });
   }
 
   const { data, error } = await ecriture.rpc("web_intention_panier_frais", {
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
   });
   if (error) {
     console.error("[site ALM] web_intention_panier_frais echec:", error.message);
-    return Response.json({ error: "L'enregistrement n'a pas pu aboutir. Reessayez." }, { status: 400 });
+    return Response.json({ error: "L'enregistrement n'a pas pu aboutir. Réessayez." }, { status: 400 });
   }
 
   const ligne = Array.isArray(data) ? data[0] : data;
@@ -48,5 +48,5 @@ export async function POST(request: Request) {
   }
 
   // Generique dans TOUS les cas (nouvelle intention, deja en attente, ou deja confirmee).
-  return Response.json({ ok: true, message: "Verifiez votre boite mail pour confirmer votre inscription." });
+  return Response.json({ ok: true, message: "Vérifiez votre boîte mail pour confirmer votre inscription." });
 }

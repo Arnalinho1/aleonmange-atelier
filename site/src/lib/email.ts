@@ -110,10 +110,10 @@ export function emailNewsletterConfirmer(to: string, o: { lien: string }): Promi
 export function emailPanierFraisConfirmer(to: string, o: { lien: string }): Promise<boolean> {
   return envoyer({
     to,
-    subject: "Confirmez votre interet pour le Panier frais",
-    html: enveloppe("Une derniere etape", `
-      <p>Merci de votre interet pour le <strong>Panier frais du Beaujolais</strong> ! Pour etre prevenu(e) du lancement, confirmez votre demande :</p>
+    subject: "Confirmez votre intérêt pour le Panier frais",
+    html: enveloppe("Une dernière étape", `
+      <p>Merci de votre intérêt pour le <strong>Panier frais du Beaujolais</strong> ! Pour être prévenu(e) du lancement, confirmez votre demande :</p>
       <p><a href="${o.lien}" style="display:inline-block;background:#D81020;color:#fff;padding:11px 18px;border-radius:999px;text-decoration:none;font-weight:700">Confirmer ma demande</a></p>
-      <p style="font-size:12px;color:#9a927f">Ce n'est pas une reservation : vous nous aidez a preparer le lancement. Si vous n'etes pas a l'origine de cette demande, ignorez cet email.</p>`),
+      <p style="font-size:12px;color:#9a927f">Ce n'est pas une réservation : vous nous aidez à préparer le lancement. Si vous n'êtes pas à l'origine de cette demande, ignorez cet email.</p>`),
   });
 }
