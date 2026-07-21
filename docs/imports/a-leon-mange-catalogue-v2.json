@@ -1,0 +1,2793 @@
+{
+  "schemaVersion": "2.0.0",
+  "brand": {
+    "id": "a-leon-mange",
+    "name": "À Léon Mange",
+    "defaultLocale": "fr-FR",
+    "currency": "EUR"
+  },
+  "catalogs": [
+    {
+      "id": "boutique",
+      "name": "Carte Boutique",
+      "type": "retail",
+      "description": "Produits artisanaux, plats cuisinés, entrées, fromages et desserts disponibles en boutique.",
+      "categories": [
+        {
+          "id": "boutique-charcuteries",
+          "name": "Charcuteries Artisanales",
+          "description": "Des charcuteries soigneusement sélectionnées, idéales pour l'apéritif, les planches ou les repas gourmands.",
+          "order": 1,
+          "products": [
+            {
+              "id": "boutique-charcuteries-saucisson-sec-artisanal",
+              "name": "Saucisson sec artisanal",
+              "description": "Des charcuteries soigneusement sélectionnées, idéales pour l'apéritif, les planches ou les repas gourmands.",
+              "categoryId": "boutique-charcuteries",
+              "order": 1,
+              "tags": [
+                "charcuterie",
+                "aperitif",
+                "planche"
+              ],
+              "allergens": [],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/boutique-charcuteries/saucisson-sec-artisanal.jpg",
+                "alt": "Saucisson sec artisanal"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Saucisson sec artisanal | À Léon Mange",
+                "description": "Des charcuteries soigneusement sélectionnées, idéales pour l'apéritif, les planches ou les repas gourmands."
+              }
+            },
+            {
+              "id": "boutique-charcuteries-jambon-blanc-a-la-truffe",
+              "name": "Jambon blanc à la truffe",
+              "description": "Des charcuteries soigneusement sélectionnées, idéales pour l'apéritif, les planches ou les repas gourmands.",
+              "categoryId": "boutique-charcuteries",
+              "order": 2,
+              "tags": [
+                "charcuterie",
+                "aperitif",
+                "planche"
+              ],
+              "allergens": [],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/boutique-charcuteries/jambon-blanc-a-la-truffe.jpg",
+                "alt": "Jambon blanc à la truffe"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Jambon blanc à la truffe | À Léon Mange",
+                "description": "Des charcuteries soigneusement sélectionnées, idéales pour l'apéritif, les planches ou les repas gourmands."
+              }
+            },
+            {
+              "id": "boutique-charcuteries-jambon-serrano-affine",
+              "name": "Jambon Serrano affiné",
+              "description": "Des charcuteries soigneusement sélectionnées, idéales pour l'apéritif, les planches ou les repas gourmands.",
+              "categoryId": "boutique-charcuteries",
+              "order": 3,
+              "tags": [
+                "charcuterie",
+                "aperitif",
+                "planche"
+              ],
+              "allergens": [],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/boutique-charcuteries/jambon-serrano-affine.jpg",
+                "alt": "Jambon Serrano affiné"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Jambon Serrano affiné | À Léon Mange",
+                "description": "Des charcuteries soigneusement sélectionnées, idéales pour l'apéritif, les planches ou les repas gourmands."
+              }
+            },
+            {
+              "id": "boutique-charcuteries-mortadelle-italienne-aux-pistaches",
+              "name": "Mortadelle italienne aux pistaches",
+              "description": "Des charcuteries soigneusement sélectionnées, idéales pour l'apéritif, les planches ou les repas gourmands.",
+              "categoryId": "boutique-charcuteries",
+              "order": 4,
+              "tags": [
+                "charcuterie",
+                "aperitif",
+                "planche"
+              ],
+              "allergens": [
+                "fruits-a-coque"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/boutique-charcuteries/mortadelle-italienne-aux-pistaches.jpg",
+                "alt": "Mortadelle italienne aux pistaches"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Mortadelle italienne aux pistaches | À Léon Mange",
+                "description": "Des charcuteries soigneusement sélectionnées, idéales pour l'apéritif, les planches ou les repas gourmands."
+              }
+            },
+            {
+              "id": "boutique-charcuteries-coppa-affinee",
+              "name": "Coppa affinée",
+              "description": "Des charcuteries soigneusement sélectionnées, idéales pour l'apéritif, les planches ou les repas gourmands.",
+              "categoryId": "boutique-charcuteries",
+              "order": 5,
+              "tags": [
+                "charcuterie",
+                "aperitif",
+                "planche"
+              ],
+              "allergens": [],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/boutique-charcuteries/coppa-affinee.jpg",
+                "alt": "Coppa affinée"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Coppa affinée | À Léon Mange",
+                "description": "Des charcuteries soigneusement sélectionnées, idéales pour l'apéritif, les planches ou les repas gourmands."
+              }
+            },
+            {
+              "id": "boutique-charcuteries-viande-des-grisons",
+              "name": "Viande des Grisons",
+              "description": "Des charcuteries soigneusement sélectionnées, idéales pour l'apéritif, les planches ou les repas gourmands.",
+              "categoryId": "boutique-charcuteries",
+              "order": 6,
+              "tags": [
+                "charcuterie",
+                "aperitif",
+                "planche"
+              ],
+              "allergens": [],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/boutique-charcuteries/viande-des-grisons.jpg",
+                "alt": "Viande des Grisons"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Viande des Grisons | À Léon Mange",
+                "description": "Des charcuteries soigneusement sélectionnées, idéales pour l'apéritif, les planches ou les repas gourmands."
+              }
+            }
+          ]
+        },
+        {
+          "id": "boutique-tartinables",
+          "name": "Tartinables & Apéritifs",
+          "description": "Des recettes maison à partager autour d'un apéritif convivial.",
+          "order": 2,
+          "products": [
+            {
+              "id": "boutique-tartinables-caviar-d-aubergines-grillees",
+              "name": "Caviar d'aubergines grillées",
+              "description": "Des recettes maison à partager autour d'un apéritif convivial.",
+              "categoryId": "boutique-tartinables",
+              "order": 1,
+              "tags": [
+                "aperitif",
+                "tartinable",
+                "maison"
+              ],
+              "allergens": [],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/boutique-tartinables/caviar-d-aubergines-grillees.jpg",
+                "alt": "Caviar d'aubergines grillées"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Caviar d'aubergines grillées | À Léon Mange",
+                "description": "Des recettes maison à partager autour d'un apéritif convivial."
+              }
+            },
+            {
+              "id": "boutique-tartinables-creme-de-chorizo",
+              "name": "Crème de chorizo",
+              "description": "Des recettes maison à partager autour d'un apéritif convivial.",
+              "categoryId": "boutique-tartinables",
+              "order": 2,
+              "tags": [
+                "aperitif",
+                "tartinable",
+                "maison"
+              ],
+              "allergens": [
+                "lait"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/boutique-tartinables/creme-de-chorizo.jpg",
+                "alt": "Crème de chorizo"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Crème de chorizo | À Léon Mange",
+                "description": "Des recettes maison à partager autour d'un apéritif convivial."
+              }
+            },
+            {
+              "id": "boutique-tartinables-tapenade-d-olives-noires",
+              "name": "Tapenade d'olives noires",
+              "description": "Des recettes maison à partager autour d'un apéritif convivial.",
+              "categoryId": "boutique-tartinables",
+              "order": 3,
+              "tags": [
+                "aperitif",
+                "tartinable",
+                "maison"
+              ],
+              "allergens": [],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/boutique-tartinables/tapenade-d-olives-noires.jpg",
+                "alt": "Tapenade d'olives noires"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Tapenade d'olives noires | À Léon Mange",
+                "description": "Des recettes maison à partager autour d'un apéritif convivial."
+              }
+            },
+            {
+              "id": "boutique-tartinables-houmous-traditionnel",
+              "name": "Houmous traditionnel",
+              "description": "Des recettes maison à partager autour d'un apéritif convivial.",
+              "categoryId": "boutique-tartinables",
+              "order": 4,
+              "tags": [
+                "aperitif",
+                "tartinable",
+                "maison"
+              ],
+              "allergens": [
+                "sésame"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/boutique-tartinables/houmous-traditionnel.jpg",
+                "alt": "Houmous traditionnel"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Houmous traditionnel | À Léon Mange",
+                "description": "Des recettes maison à partager autour d'un apéritif convivial."
+              }
+            }
+          ]
+        },
+        {
+          "id": "boutique-salades",
+          "name": "Salades Fraîches & Entrées",
+          "description": "Des préparations maison qui évoluent au fil des saisons.",
+          "order": 3,
+          "products": [
+            {
+              "id": "boutique-salades-taboule-a-la-francaise",
+              "name": "Taboulé à la française",
+              "description": "Des préparations maison qui évoluent au fil des saisons.",
+              "categoryId": "boutique-salades",
+              "order": 1,
+              "tags": [
+                "entree",
+                "salade",
+                "frais",
+                "saisonnier"
+              ],
+              "allergens": [
+                "gluten"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": true
+              },
+              "image": {
+                "src": "/images/boutique-salades/taboule-a-la-francaise.jpg",
+                "alt": "Taboulé à la française"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Taboulé à la française | À Léon Mange",
+                "description": "Des préparations maison qui évoluent au fil des saisons."
+              }
+            },
+            {
+              "id": "boutique-salades-lentilles-aux-lardons-ufs",
+              "name": "Lentilles aux lardons & œufs",
+              "description": "Des préparations maison qui évoluent au fil des saisons.",
+              "categoryId": "boutique-salades",
+              "order": 2,
+              "tags": [
+                "entree",
+                "salade",
+                "frais",
+                "saisonnier"
+              ],
+              "allergens": [
+                "œufs"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": true
+              },
+              "image": {
+                "src": "/images/boutique-salades/lentilles-aux-lardons-ufs.jpg",
+                "alt": "Lentilles aux lardons & œufs"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Lentilles aux lardons & œufs | À Léon Mange",
+                "description": "Des préparations maison qui évoluent au fil des saisons."
+              }
+            },
+            {
+              "id": "boutique-salades-salade-mediterraneenne-de-tomates",
+              "name": "Salade méditerranéenne de tomates",
+              "description": "Des préparations maison qui évoluent au fil des saisons.",
+              "categoryId": "boutique-salades",
+              "order": 3,
+              "tags": [
+                "entree",
+                "salade",
+                "frais",
+                "saisonnier"
+              ],
+              "allergens": [],
+              "availability": {
+                "status": "available",
+                "seasonal": true
+              },
+              "image": {
+                "src": "/images/boutique-salades/salade-mediterraneenne-de-tomates.jpg",
+                "alt": "Salade méditerranéenne de tomates"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Salade méditerranéenne de tomates | À Léon Mange",
+                "description": "Des préparations maison qui évoluent au fil des saisons."
+              }
+            },
+            {
+              "id": "boutique-salades-salade-de-fruits-de-saison",
+              "name": "Salade de fruits de saison",
+              "description": "Des préparations maison qui évoluent au fil des saisons.",
+              "categoryId": "boutique-salades",
+              "order": 4,
+              "tags": [
+                "entree",
+                "salade",
+                "frais",
+                "saisonnier"
+              ],
+              "allergens": [],
+              "availability": {
+                "status": "available",
+                "seasonal": true
+              },
+              "image": {
+                "src": "/images/boutique-salades/salade-de-fruits-de-saison.jpg",
+                "alt": "Salade de fruits de saison"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Salade de fruits de saison | À Léon Mange",
+                "description": "Des préparations maison qui évoluent au fil des saisons."
+              }
+            }
+          ]
+        },
+        {
+          "id": "boutique-legumes",
+          "name": "Légumes Cuisinés & Accompagnements",
+          "description": "Des recettes gourmandes préparées avec des légumes de saison.",
+          "order": 4,
+          "products": [
+            {
+              "id": "boutique-legumes-artichauts-a-la-barigoule",
+              "name": "Artichauts à la Barigoule",
+              "description": "Des recettes gourmandes préparées avec des légumes de saison.",
+              "categoryId": "boutique-legumes",
+              "order": 1,
+              "tags": [
+                "accompagnement",
+                "legumes",
+                "saisonnier",
+                "saisonnier"
+              ],
+              "allergens": [],
+              "availability": {
+                "status": "available",
+                "seasonal": true
+              },
+              "image": {
+                "src": "/images/boutique-legumes/artichauts-a-la-barigoule.jpg",
+                "alt": "Artichauts à la Barigoule"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Artichauts à la Barigoule | À Léon Mange",
+                "description": "Des recettes gourmandes préparées avec des légumes de saison."
+              }
+            },
+            {
+              "id": "boutique-legumes-tian-de-legumes-du-soleil",
+              "name": "Tian de légumes du soleil",
+              "description": "Des recettes gourmandes préparées avec des légumes de saison.",
+              "categoryId": "boutique-legumes",
+              "order": 2,
+              "tags": [
+                "accompagnement",
+                "legumes",
+                "saisonnier",
+                "saisonnier"
+              ],
+              "allergens": [],
+              "availability": {
+                "status": "available",
+                "seasonal": true
+              },
+              "image": {
+                "src": "/images/boutique-legumes/tian-de-legumes-du-soleil.jpg",
+                "alt": "Tian de légumes du soleil"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Tian de légumes du soleil | À Léon Mange",
+                "description": "Des recettes gourmandes préparées avec des légumes de saison."
+              }
+            },
+            {
+              "id": "boutique-legumes-gratin-dauphinois-traditionnel",
+              "name": "Gratin dauphinois traditionnel",
+              "description": "Des recettes gourmandes préparées avec des légumes de saison.",
+              "categoryId": "boutique-legumes",
+              "order": 3,
+              "tags": [
+                "accompagnement",
+                "legumes",
+                "saisonnier",
+                "saisonnier"
+              ],
+              "allergens": [
+                "lait"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": true
+              },
+              "image": {
+                "src": "/images/boutique-legumes/gratin-dauphinois-traditionnel.jpg",
+                "alt": "Gratin dauphinois traditionnel"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Gratin dauphinois traditionnel | À Léon Mange",
+                "description": "Des recettes gourmandes préparées avec des légumes de saison."
+              }
+            },
+            {
+              "id": "boutique-legumes-gratin-de-ravioles-du-dauphine",
+              "name": "Gratin de ravioles du Dauphiné",
+              "description": "Des recettes gourmandes préparées avec des légumes de saison.",
+              "categoryId": "boutique-legumes",
+              "order": 4,
+              "tags": [
+                "accompagnement",
+                "legumes",
+                "saisonnier",
+                "saisonnier"
+              ],
+              "allergens": [
+                "gluten",
+                "lait",
+                "œufs"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": true
+              },
+              "image": {
+                "src": "/images/boutique-legumes/gratin-de-ravioles-du-dauphine.jpg",
+                "alt": "Gratin de ravioles du Dauphiné"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Gratin de ravioles du Dauphiné | À Léon Mange",
+                "description": "Des recettes gourmandes préparées avec des légumes de saison."
+              }
+            }
+          ]
+        },
+        {
+          "id": "boutique-poissons",
+          "name": "Poissons & Produits de la Mer",
+          "description": "Une sélection de recettes fraîches élaborées selon les arrivages.",
+          "order": 5,
+          "products": [
+            {
+              "id": "boutique-poissons-filet-de-bar-a-l-escabeche",
+              "name": "Filet de bar à l'escabèche",
+              "description": "Une sélection de recettes fraîches élaborées selon les arrivages.",
+              "categoryId": "boutique-poissons",
+              "order": 1,
+              "tags": [
+                "poisson",
+                "produits-de-la-mer",
+                "frais",
+                "saisonnier"
+              ],
+              "allergens": [
+                "poisson"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": true
+              },
+              "image": {
+                "src": "/images/boutique-poissons/filet-de-bar-a-l-escabeche.jpg",
+                "alt": "Filet de bar à l'escabèche"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Filet de bar à l'escabèche | À Léon Mange",
+                "description": "Une sélection de recettes fraîches élaborées selon les arrivages."
+              }
+            },
+            {
+              "id": "boutique-poissons-salade-de-poulpe-a-la-mediterraneenne",
+              "name": "Salade de poulpe à la méditerranéenne",
+              "description": "Une sélection de recettes fraîches élaborées selon les arrivages.",
+              "categoryId": "boutique-poissons",
+              "order": 2,
+              "tags": [
+                "poisson",
+                "produits-de-la-mer",
+                "frais",
+                "saisonnier"
+              ],
+              "allergens": [
+                "mollusques"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": true
+              },
+              "image": {
+                "src": "/images/boutique-poissons/salade-de-poulpe-a-la-mediterraneenne.jpg",
+                "alt": "Salade de poulpe à la méditerranéenne"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Salade de poulpe à la méditerranéenne | À Léon Mange",
+                "description": "Une sélection de recettes fraîches élaborées selon les arrivages."
+              }
+            },
+            {
+              "id": "boutique-poissons-tataki-de-thon-rouge",
+              "name": "Tataki de thon rouge",
+              "description": "Une sélection de recettes fraîches élaborées selon les arrivages.",
+              "categoryId": "boutique-poissons",
+              "order": 3,
+              "tags": [
+                "poisson",
+                "produits-de-la-mer",
+                "frais",
+                "saisonnier"
+              ],
+              "allergens": [
+                "poisson",
+                "soja",
+                "sésame"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": true
+              },
+              "image": {
+                "src": "/images/boutique-poissons/tataki-de-thon-rouge.jpg",
+                "alt": "Tataki de thon rouge"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Tataki de thon rouge | À Léon Mange",
+                "description": "Une sélection de recettes fraîches élaborées selon les arrivages."
+              }
+            },
+            {
+              "id": "boutique-poissons-thon-rouge-marine-aux-herbes",
+              "name": "Thon rouge mariné aux herbes",
+              "description": "Une sélection de recettes fraîches élaborées selon les arrivages.",
+              "categoryId": "boutique-poissons",
+              "order": 4,
+              "tags": [
+                "poisson",
+                "produits-de-la-mer",
+                "frais",
+                "saisonnier"
+              ],
+              "allergens": [
+                "poisson"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": true
+              },
+              "image": {
+                "src": "/images/boutique-poissons/thon-rouge-marine-aux-herbes.jpg",
+                "alt": "Thon rouge mariné aux herbes"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Thon rouge mariné aux herbes | À Léon Mange",
+                "description": "Une sélection de recettes fraîches élaborées selon les arrivages."
+              }
+            },
+            {
+              "id": "boutique-poissons-saumon-gravlax-maison",
+              "name": "Saumon gravlax maison",
+              "description": "Une sélection de recettes fraîches élaborées selon les arrivages.",
+              "categoryId": "boutique-poissons",
+              "order": 5,
+              "tags": [
+                "poisson",
+                "produits-de-la-mer",
+                "frais",
+                "saisonnier"
+              ],
+              "allergens": [
+                "poisson"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": true
+              },
+              "image": {
+                "src": "/images/boutique-poissons/saumon-gravlax-maison.jpg",
+                "alt": "Saumon gravlax maison"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Saumon gravlax maison | À Léon Mange",
+                "description": "Une sélection de recettes fraîches élaborées selon les arrivages."
+              }
+            },
+            {
+              "id": "boutique-poissons-saumon-marine-aux-agrumes",
+              "name": "Saumon mariné aux agrumes",
+              "description": "Une sélection de recettes fraîches élaborées selon les arrivages.",
+              "categoryId": "boutique-poissons",
+              "order": 6,
+              "tags": [
+                "poisson",
+                "produits-de-la-mer",
+                "frais",
+                "saisonnier"
+              ],
+              "allergens": [
+                "poisson"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": true
+              },
+              "image": {
+                "src": "/images/boutique-poissons/saumon-marine-aux-agrumes.jpg",
+                "alt": "Saumon mariné aux agrumes"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Saumon mariné aux agrumes | À Léon Mange",
+                "description": "Une sélection de recettes fraîches élaborées selon les arrivages."
+              }
+            },
+            {
+              "id": "boutique-poissons-pave-de-saumon-roti",
+              "name": "Pavé de saumon rôti",
+              "description": "Une sélection de recettes fraîches élaborées selon les arrivages.",
+              "categoryId": "boutique-poissons",
+              "order": 7,
+              "tags": [
+                "poisson",
+                "produits-de-la-mer",
+                "frais",
+                "saisonnier"
+              ],
+              "allergens": [
+                "poisson"
+              ],
+              "availability": {
+                "status": "limited",
+                "seasonal": true,
+                "note": "Selon disponibilité"
+              },
+              "image": {
+                "src": "/images/boutique-poissons/pave-de-saumon-roti.jpg",
+                "alt": "Pavé de saumon rôti"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Pavé de saumon rôti | À Léon Mange",
+                "description": "Une sélection de recettes fraîches élaborées selon les arrivages."
+              }
+            }
+          ]
+        },
+        {
+          "id": "boutique-viandes",
+          "name": "Viandes Cuisinées",
+          "description": "Des plats généreux préparés maison, prêts à être dégustés.",
+          "order": 6,
+          "products": [
+            {
+              "id": "boutique-viandes-saute-de-veau-mijote",
+              "name": "Sauté de veau mijoté",
+              "description": "Des plats généreux préparés maison, prêts à être dégustés.",
+              "categoryId": "boutique-viandes",
+              "order": 1,
+              "tags": [
+                "viande",
+                "plat-cuisine",
+                "maison"
+              ],
+              "allergens": [],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/boutique-viandes/saute-de-veau-mijote.jpg",
+                "alt": "Sauté de veau mijoté"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Sauté de veau mijoté | À Léon Mange",
+                "description": "Des plats généreux préparés maison, prêts à être dégustés."
+              }
+            },
+            {
+              "id": "boutique-viandes-escalope-milanaise",
+              "name": "Escalope Milanaise",
+              "description": "Des plats généreux préparés maison, prêts à être dégustés.",
+              "categoryId": "boutique-viandes",
+              "order": 2,
+              "tags": [
+                "viande",
+                "plat-cuisine",
+                "maison"
+              ],
+              "allergens": [
+                "gluten",
+                "œufs"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/boutique-viandes/escalope-milanaise.jpg",
+                "alt": "Escalope Milanaise"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Escalope Milanaise | À Léon Mange",
+                "description": "Des plats généreux préparés maison, prêts à être dégustés."
+              }
+            },
+            {
+              "id": "boutique-viandes-cordon-bleu-maison",
+              "name": "Cordon Bleu maison",
+              "description": "Des plats généreux préparés maison, prêts à être dégustés.",
+              "categoryId": "boutique-viandes",
+              "order": 3,
+              "tags": [
+                "viande",
+                "plat-cuisine",
+                "maison"
+              ],
+              "allergens": [
+                "gluten",
+                "lait",
+                "œufs"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/boutique-viandes/cordon-bleu-maison.jpg",
+                "alt": "Cordon Bleu maison"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Cordon Bleu maison | À Léon Mange",
+                "description": "Des plats généreux préparés maison, prêts à être dégustés."
+              }
+            },
+            {
+              "id": "boutique-viandes-buf-facon-thai",
+              "name": "Bœuf façon thaï",
+              "description": "Des plats généreux préparés maison, prêts à être dégustés.",
+              "categoryId": "boutique-viandes",
+              "order": 4,
+              "tags": [
+                "viande",
+                "plat-cuisine",
+                "maison"
+              ],
+              "allergens": [
+                "soja"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/boutique-viandes/buf-facon-thai.jpg",
+                "alt": "Bœuf façon thaï"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Bœuf façon thaï | À Léon Mange",
+                "description": "Des plats généreux préparés maison, prêts à être dégustés."
+              }
+            },
+            {
+              "id": "boutique-viandes-poulet-roti-fermier",
+              "name": "Poulet rôti fermier",
+              "description": "Des plats généreux préparés maison, prêts à être dégustés.",
+              "categoryId": "boutique-viandes",
+              "order": 5,
+              "tags": [
+                "viande",
+                "plat-cuisine",
+                "maison"
+              ],
+              "allergens": [],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/boutique-viandes/poulet-roti-fermier.jpg",
+                "alt": "Poulet rôti fermier"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Poulet rôti fermier | À Léon Mange",
+                "description": "Des plats généreux préparés maison, prêts à être dégustés."
+              }
+            },
+            {
+              "id": "boutique-viandes-emince-de-volaille-a-la-creme",
+              "name": "Émincé de volaille à la crème",
+              "description": "Des plats généreux préparés maison, prêts à être dégustés.",
+              "categoryId": "boutique-viandes",
+              "order": 6,
+              "tags": [
+                "viande",
+                "plat-cuisine",
+                "maison"
+              ],
+              "allergens": [
+                "lait"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/boutique-viandes/emince-de-volaille-a-la-creme.jpg",
+                "alt": "Émincé de volaille à la crème"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Émincé de volaille à la crème | À Léon Mange",
+                "description": "Des plats généreux préparés maison, prêts à être dégustés."
+              }
+            },
+            {
+              "id": "boutique-viandes-carre-de-cochon-roti",
+              "name": "Carré de cochon rôti",
+              "description": "Des plats généreux préparés maison, prêts à être dégustés.",
+              "categoryId": "boutique-viandes",
+              "order": 7,
+              "tags": [
+                "viande",
+                "plat-cuisine",
+                "maison"
+              ],
+              "allergens": [],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/boutique-viandes/carre-de-cochon-roti.jpg",
+                "alt": "Carré de cochon rôti"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Carré de cochon rôti | À Léon Mange",
+                "description": "Des plats généreux préparés maison, prêts à être dégustés."
+              }
+            }
+          ]
+        },
+        {
+          "id": "boutique-fromages",
+          "name": "Fromages",
+          "description": "Une sélection qui évolue selon les saisons et les producteurs.",
+          "order": 7,
+          "products": [
+            {
+              "id": "boutique-fromages-fromages-regionaux",
+              "name": "Fromages régionaux",
+              "description": "Une sélection qui évolue selon les saisons et les producteurs.",
+              "categoryId": "boutique-fromages",
+              "order": 1,
+              "tags": [
+                "fromage",
+                "regional",
+                "affine"
+              ],
+              "allergens": [
+                "lait"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/boutique-fromages/fromages-regionaux.jpg",
+                "alt": "Fromages régionaux"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Fromages régionaux | À Léon Mange",
+                "description": "Une sélection qui évolue selon les saisons et les producteurs."
+              }
+            },
+            {
+              "id": "boutique-fromages-fromages-affines",
+              "name": "Fromages affinés",
+              "description": "Une sélection qui évolue selon les saisons et les producteurs.",
+              "categoryId": "boutique-fromages",
+              "order": 2,
+              "tags": [
+                "fromage",
+                "regional",
+                "affine"
+              ],
+              "allergens": [
+                "lait"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/boutique-fromages/fromages-affines.jpg",
+                "alt": "Fromages affinés"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Fromages affinés | À Léon Mange",
+                "description": "Une sélection qui évolue selon les saisons et les producteurs."
+              }
+            },
+            {
+              "id": "boutique-fromages-fromages-de-chevre",
+              "name": "Fromages de chèvre",
+              "description": "Une sélection qui évolue selon les saisons et les producteurs.",
+              "categoryId": "boutique-fromages",
+              "order": 3,
+              "tags": [
+                "fromage",
+                "regional",
+                "affine"
+              ],
+              "allergens": [
+                "lait"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/boutique-fromages/fromages-de-chevre.jpg",
+                "alt": "Fromages de chèvre"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Fromages de chèvre | À Léon Mange",
+                "description": "Une sélection qui évolue selon les saisons et les producteurs."
+              }
+            },
+            {
+              "id": "boutique-fromages-fromages-a-pate-molle",
+              "name": "Fromages à pâte molle",
+              "description": "Une sélection qui évolue selon les saisons et les producteurs.",
+              "categoryId": "boutique-fromages",
+              "order": 4,
+              "tags": [
+                "fromage",
+                "regional",
+                "affine"
+              ],
+              "allergens": [
+                "lait"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/boutique-fromages/fromages-a-pate-molle.jpg",
+                "alt": "Fromages à pâte molle"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Fromages à pâte molle | À Léon Mange",
+                "description": "Une sélection qui évolue selon les saisons et les producteurs."
+              }
+            },
+            {
+              "id": "boutique-fromages-fromages-a-pate-pressee-cuite",
+              "name": "Fromages à pâte pressée cuite",
+              "description": "Une sélection qui évolue selon les saisons et les producteurs.",
+              "categoryId": "boutique-fromages",
+              "order": 5,
+              "tags": [
+                "fromage",
+                "regional",
+                "affine"
+              ],
+              "allergens": [
+                "lait"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/boutique-fromages/fromages-a-pate-pressee-cuite.jpg",
+                "alt": "Fromages à pâte pressée cuite"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Fromages à pâte pressée cuite | À Léon Mange",
+                "description": "Une sélection qui évolue selon les saisons et les producteurs."
+              }
+            },
+            {
+              "id": "boutique-fromages-selection-du-moment",
+              "name": "Sélection du moment",
+              "description": "Une sélection qui évolue selon les saisons et les producteurs.",
+              "categoryId": "boutique-fromages",
+              "order": 6,
+              "tags": [
+                "fromage",
+                "regional",
+                "affine",
+                "saisonnier"
+              ],
+              "allergens": [
+                "lait"
+              ],
+              "availability": {
+                "status": "limited",
+                "seasonal": true,
+                "note": "Selon disponibilité"
+              },
+              "image": {
+                "src": "/images/boutique-fromages/selection-du-moment.jpg",
+                "alt": "Sélection du moment"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Sélection du moment | À Léon Mange",
+                "description": "Une sélection qui évolue selon les saisons et les producteurs."
+              }
+            }
+          ]
+        },
+        {
+          "id": "boutique-desserts",
+          "name": "Desserts Maison",
+          "description": "Des desserts gourmands préparés avec des ingrédients de qualité.",
+          "order": 8,
+          "products": [
+            {
+              "id": "boutique-desserts-tiramisu",
+              "name": "Tiramisu",
+              "description": "Des desserts gourmands préparés avec des ingrédients de qualité.",
+              "categoryId": "boutique-desserts",
+              "order": 1,
+              "tags": [
+                "dessert",
+                "maison",
+                "gourmand"
+              ],
+              "allergens": [
+                "gluten",
+                "lait",
+                "œufs"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/boutique-desserts/tiramisu.jpg",
+                "alt": "Tiramisu"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Tiramisu | À Léon Mange",
+                "description": "Des desserts gourmands préparés avec des ingrédients de qualité."
+              }
+            },
+            {
+              "id": "boutique-desserts-gateau-au-chocolat",
+              "name": "Gâteau au chocolat",
+              "description": "Des desserts gourmands préparés avec des ingrédients de qualité.",
+              "categoryId": "boutique-desserts",
+              "order": 2,
+              "tags": [
+                "dessert",
+                "maison",
+                "gourmand"
+              ],
+              "allergens": [
+                "gluten",
+                "lait",
+                "œufs"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/boutique-desserts/gateau-au-chocolat.jpg",
+                "alt": "Gâteau au chocolat"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Gâteau au chocolat | À Léon Mange",
+                "description": "Des desserts gourmands préparés avec des ingrédients de qualité."
+              }
+            },
+            {
+              "id": "boutique-desserts-tarte-aux-pommes",
+              "name": "Tarte aux pommes",
+              "description": "Des desserts gourmands préparés avec des ingrédients de qualité.",
+              "categoryId": "boutique-desserts",
+              "order": 3,
+              "tags": [
+                "dessert",
+                "maison",
+                "gourmand"
+              ],
+              "allergens": [
+                "gluten",
+                "lait"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/boutique-desserts/tarte-aux-pommes.jpg",
+                "alt": "Tarte aux pommes"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Tarte aux pommes | À Léon Mange",
+                "description": "Des desserts gourmands préparés avec des ingrédients de qualité."
+              }
+            },
+            {
+              "id": "boutique-desserts-salade-de-fruits-de-saison",
+              "name": "Salade de fruits de saison",
+              "description": "Des desserts gourmands préparés avec des ingrédients de qualité.",
+              "categoryId": "boutique-desserts",
+              "order": 4,
+              "tags": [
+                "dessert",
+                "maison",
+                "gourmand",
+                "saisonnier"
+              ],
+              "allergens": [],
+              "availability": {
+                "status": "available",
+                "seasonal": true
+              },
+              "image": {
+                "src": "/images/boutique-desserts/salade-de-fruits-de-saison.jpg",
+                "alt": "Salade de fruits de saison"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Salade de fruits de saison | À Léon Mange",
+                "description": "Des desserts gourmands préparés avec des ingrédients de qualité."
+              }
+            },
+            {
+              "id": "boutique-desserts-verrines-gourmandes",
+              "name": "Verrines gourmandes",
+              "description": "Des desserts gourmands préparés avec des ingrédients de qualité.",
+              "categoryId": "boutique-desserts",
+              "order": 5,
+              "tags": [
+                "dessert",
+                "maison",
+                "gourmand"
+              ],
+              "allergens": [
+                "lait",
+                "œufs"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/boutique-desserts/verrines-gourmandes.jpg",
+                "alt": "Verrines gourmandes"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Verrines gourmandes | À Léon Mange",
+                "description": "Des desserts gourmands préparés avec des ingrédients de qualité."
+              }
+            },
+            {
+              "id": "boutique-desserts-entremets-du-moment",
+              "name": "Entremets du moment",
+              "description": "Des desserts gourmands préparés avec des ingrédients de qualité.",
+              "categoryId": "boutique-desserts",
+              "order": 6,
+              "tags": [
+                "dessert",
+                "maison",
+                "gourmand",
+                "saisonnier"
+              ],
+              "allergens": [
+                "gluten",
+                "lait",
+                "œufs"
+              ],
+              "availability": {
+                "status": "limited",
+                "seasonal": true,
+                "note": "Selon disponibilité"
+              },
+              "image": {
+                "src": "/images/boutique-desserts/entremets-du-moment.jpg",
+                "alt": "Entremets du moment"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Entremets du moment | À Léon Mange",
+                "description": "Des desserts gourmands préparés avec des ingrédients de qualité."
+              }
+            },
+            {
+              "id": "boutique-desserts-dessert-de-la-semaine",
+              "name": "Dessert de la semaine",
+              "description": "Des desserts gourmands préparés avec des ingrédients de qualité.",
+              "categoryId": "boutique-desserts",
+              "order": 7,
+              "tags": [
+                "dessert",
+                "maison",
+                "gourmand",
+                "saisonnier"
+              ],
+              "allergens": [],
+              "availability": {
+                "status": "limited",
+                "seasonal": true,
+                "note": "Selon disponibilité"
+              },
+              "image": {
+                "src": "/images/boutique-desserts/dessert-de-la-semaine.jpg",
+                "alt": "Dessert de la semaine"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Dessert de la semaine | À Léon Mange",
+                "description": "Des desserts gourmands préparés avec des ingrédients de qualité."
+              }
+            }
+          ]
+        }
+      ],
+      "editorialBlocks": [
+        {
+          "id": "marche-du-moment",
+          "title": "Le Marché du Moment",
+          "order": 999,
+          "content": "Chez À Léon Mange, la boutique évolue au rythme des saisons et des inspirations du chef. Selon les arrivages et les produits locaux, découvrez chaque semaine de nouvelles recettes, des plats cuisinés maison, des salades fraîches, des desserts gourmands et une sélection de produits artisanaux. Il y a toujours une bonne raison de revenir découvrir les nouveautés !"
+        }
+      ]
+    },
+    {
+      "id": "traiteur",
+      "name": "Carte Traiteur",
+      "type": "catering",
+      "description": "Pièces apéritives, plats, garnitures et desserts préparés pour vos événements.",
+      "categories": [
+        {
+          "id": "traiteur-pieces-aperitives",
+          "name": "Pièces apéritives",
+          "description": "Plateaux et assortiments à partager.",
+          "order": 1,
+          "products": [
+            {
+              "id": "traiteur-pieces-aperitives-plateau-de-wraps",
+              "name": "Plateau de wraps",
+              "description": "Plateaux et assortiments à partager.",
+              "categoryId": "traiteur-pieces-aperitives",
+              "order": 1,
+              "pricing": {
+                "amount": 40.0,
+                "currency": "EUR",
+                "unit": "plateau"
+              },
+              "pieces": 50,
+              "tags": [
+                "traiteur",
+                "aperitif",
+                "a-partager"
+              ],
+              "allergens": [
+                "gluten",
+                "lait",
+                "poisson"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-pieces-aperitives/plateau-de-wraps.jpg",
+                "alt": "Plateau de wraps"
+              },
+              "composition": [
+                "Saumon",
+                "Chèvre",
+                "Jambon",
+                "Poulet"
+              ],
+              "seo": {
+                "title": "Plateau de wraps | À Léon Mange",
+                "description": "Plateaux et assortiments à partager."
+              }
+            },
+            {
+              "id": "traiteur-pieces-aperitives-plateau-de-navettes",
+              "name": "Plateau de navettes",
+              "description": "Plateaux et assortiments à partager.",
+              "categoryId": "traiteur-pieces-aperitives",
+              "order": 2,
+              "pricing": {
+                "amount": 45.0,
+                "currency": "EUR",
+                "unit": "plateau"
+              },
+              "pieces": 32,
+              "tags": [
+                "traiteur",
+                "aperitif",
+                "a-partager"
+              ],
+              "allergens": [
+                "gluten",
+                "poisson"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-pieces-aperitives/plateau-de-navettes.jpg",
+                "alt": "Plateau de navettes"
+              },
+              "composition": [
+                "Rosette",
+                "Cornichon",
+                "Saumon aneth",
+                "Chorizo"
+              ],
+              "seo": {
+                "title": "Plateau de navettes | À Léon Mange",
+                "description": "Plateaux et assortiments à partager."
+              }
+            },
+            {
+              "id": "traiteur-pieces-aperitives-plateau-de-burgers",
+              "name": "Plateau de burgers",
+              "description": "Plateaux et assortiments à partager.",
+              "categoryId": "traiteur-pieces-aperitives",
+              "order": 3,
+              "pricing": {
+                "amount": 45.0,
+                "currency": "EUR",
+                "unit": "plateau"
+              },
+              "pieces": 24,
+              "tags": [
+                "traiteur",
+                "aperitif",
+                "a-partager"
+              ],
+              "allergens": [
+                "gluten"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-pieces-aperitives/plateau-de-burgers.jpg",
+                "alt": "Plateau de burgers"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Plateau de burgers | À Léon Mange",
+                "description": "Plateaux et assortiments à partager."
+              }
+            },
+            {
+              "id": "traiteur-pieces-aperitives-plateau-de-bun-s",
+              "name": "Plateau de bun's",
+              "description": "Plateaux et assortiments à partager.",
+              "categoryId": "traiteur-pieces-aperitives",
+              "order": 4,
+              "pricing": {
+                "amount": 45.0,
+                "currency": "EUR",
+                "unit": "plateau"
+              },
+              "pieces": 24,
+              "tags": [
+                "traiteur",
+                "aperitif",
+                "a-partager"
+              ],
+              "allergens": [
+                "gluten",
+                "lait",
+                "poisson"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-pieces-aperitives/plateau-de-bun-s.jpg",
+                "alt": "Plateau de bun's"
+              },
+              "composition": [
+                "Poulet curry",
+                "Chèvre",
+                "Oignons confits",
+                "Thon",
+                "Légumes"
+              ],
+              "seo": {
+                "title": "Plateau de bun's | À Léon Mange",
+                "description": "Plateaux et assortiments à partager."
+              }
+            },
+            {
+              "id": "traiteur-pieces-aperitives-plateau-de-croques-monsieur",
+              "name": "Plateau de croques-monsieur",
+              "description": "Plateaux et assortiments à partager.",
+              "categoryId": "traiteur-pieces-aperitives",
+              "order": 5,
+              "pricing": {
+                "amount": 30.0,
+                "currency": "EUR",
+                "unit": "plateau"
+              },
+              "pieces": 24,
+              "tags": [
+                "traiteur",
+                "aperitif",
+                "a-partager"
+              ],
+              "allergens": [
+                "gluten",
+                "lait"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-pieces-aperitives/plateau-de-croques-monsieur.jpg",
+                "alt": "Plateau de croques-monsieur"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Plateau de croques-monsieur | À Léon Mange",
+                "description": "Plateaux et assortiments à partager."
+              }
+            },
+            {
+              "id": "traiteur-pieces-aperitives-plaque-de-quiche",
+              "name": "Plaque de quiche",
+              "description": "Plateaux et assortiments à partager.",
+              "categoryId": "traiteur-pieces-aperitives",
+              "order": 6,
+              "pricing": {
+                "amount": 30.0,
+                "currency": "EUR",
+                "unit": "plateau"
+              },
+              "pieces": 60,
+              "tags": [
+                "traiteur",
+                "aperitif",
+                "a-partager"
+              ],
+              "allergens": [
+                "gluten",
+                "lait",
+                "œufs"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-pieces-aperitives/plaque-de-quiche.jpg",
+                "alt": "Plaque de quiche"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Plaque de quiche | À Léon Mange",
+                "description": "Plateaux et assortiments à partager."
+              }
+            },
+            {
+              "id": "traiteur-pieces-aperitives-plaque-de-pizza",
+              "name": "Plaque de pizza",
+              "description": "Plateaux et assortiments à partager.",
+              "categoryId": "traiteur-pieces-aperitives",
+              "order": 7,
+              "pricing": {
+                "amount": 30.0,
+                "currency": "EUR",
+                "unit": "plateau"
+              },
+              "pieces": 60,
+              "tags": [
+                "traiteur",
+                "aperitif",
+                "a-partager"
+              ],
+              "allergens": [
+                "gluten",
+                "lait"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-pieces-aperitives/plaque-de-pizza.jpg",
+                "alt": "Plaque de pizza"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Plaque de pizza | À Léon Mange",
+                "description": "Plateaux et assortiments à partager."
+              }
+            },
+            {
+              "id": "traiteur-pieces-aperitives-plateau-de-verrines-assorties",
+              "name": "Plateau de verrines assorties",
+              "description": "Plateaux et assortiments à partager.",
+              "categoryId": "traiteur-pieces-aperitives",
+              "order": 8,
+              "pricing": {
+                "amount": 45.0,
+                "currency": "EUR",
+                "unit": "plateau"
+              },
+              "pieces": 24,
+              "tags": [
+                "traiteur",
+                "aperitif",
+                "a-partager"
+              ],
+              "allergens": [
+                "crustacés",
+                "lait",
+                "sésame"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-pieces-aperitives/plateau-de-verrines-assorties.jpg",
+                "alt": "Plateau de verrines assorties"
+              },
+              "composition": [
+                "Houmous",
+                "Crevette",
+                "Aubergine",
+                "Mozzarella",
+                "Brocolis",
+                "Jambon cru"
+              ],
+              "seo": {
+                "title": "Plateau de verrines assorties | À Léon Mange",
+                "description": "Plateaux et assortiments à partager."
+              }
+            },
+            {
+              "id": "traiteur-pieces-aperitives-plateau-de-charcuteries",
+              "name": "Plateau de charcuteries",
+              "description": "Plateaux et assortiments à partager.",
+              "categoryId": "traiteur-pieces-aperitives",
+              "order": 9,
+              "pricing": {
+                "amount": 38.0,
+                "currency": "EUR",
+                "unit": "plateau"
+              },
+              "weight": "900 g",
+              "tags": [
+                "traiteur",
+                "aperitif",
+                "a-partager"
+              ],
+              "allergens": [
+                "gluten"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-pieces-aperitives/plateau-de-charcuteries.jpg",
+                "alt": "Plateau de charcuteries"
+              },
+              "composition": [
+                "Rosette",
+                "Mortadelle",
+                "Jambon cru",
+                "Jambon blanc",
+                "Terrine",
+                "Mini pâté croûte"
+              ],
+              "seo": {
+                "title": "Plateau de charcuteries | À Léon Mange",
+                "description": "Plateaux et assortiments à partager."
+              }
+            }
+          ]
+        },
+        {
+          "id": "traiteur-plats-complets",
+          "name": "Plats complets",
+          "description": "Plats complets servis en portions de 400 g.",
+          "order": 2,
+          "products": [
+            {
+              "id": "traiteur-plats-complets-couscous",
+              "name": "Couscous",
+              "description": "Plats complets servis en portions de 400 g.",
+              "categoryId": "traiteur-plats-complets",
+              "order": 1,
+              "pricing": {
+                "amount": 12.0,
+                "currency": "EUR",
+                "unit": "portion"
+              },
+              "portion": "400 g",
+              "minimumPersons": 6,
+              "tags": [
+                "traiteur",
+                "plat-complet"
+              ],
+              "allergens": [
+                "gluten"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-plats-complets/couscous.jpg",
+                "alt": "Couscous"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Couscous | À Léon Mange",
+                "description": "Plats complets servis en portions de 400 g."
+              }
+            },
+            {
+              "id": "traiteur-plats-complets-chili-con-carne",
+              "name": "Chili con carne",
+              "description": "Plats complets servis en portions de 400 g.",
+              "categoryId": "traiteur-plats-complets",
+              "order": 2,
+              "pricing": {
+                "amount": 12.0,
+                "currency": "EUR",
+                "unit": "portion"
+              },
+              "portion": "400 g",
+              "minimumPersons": 6,
+              "tags": [
+                "traiteur",
+                "plat-complet"
+              ],
+              "allergens": [],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-plats-complets/chili-con-carne.jpg",
+                "alt": "Chili con carne"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Chili con carne | À Léon Mange",
+                "description": "Plats complets servis en portions de 400 g."
+              }
+            },
+            {
+              "id": "traiteur-plats-complets-croziflette",
+              "name": "Croziflette",
+              "description": "Plats complets servis en portions de 400 g.",
+              "categoryId": "traiteur-plats-complets",
+              "order": 3,
+              "pricing": {
+                "amount": 12.0,
+                "currency": "EUR",
+                "unit": "portion"
+              },
+              "portion": "400 g",
+              "minimumPersons": 6,
+              "tags": [
+                "traiteur",
+                "plat-complet"
+              ],
+              "allergens": [
+                "gluten",
+                "lait"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-plats-complets/croziflette.jpg",
+                "alt": "Croziflette"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Croziflette | À Léon Mange",
+                "description": "Plats complets servis en portions de 400 g."
+              }
+            },
+            {
+              "id": "traiteur-plats-complets-tartiflette",
+              "name": "Tartiflette",
+              "description": "Plats complets servis en portions de 400 g.",
+              "categoryId": "traiteur-plats-complets",
+              "order": 4,
+              "pricing": {
+                "amount": 12.0,
+                "currency": "EUR",
+                "unit": "portion"
+              },
+              "portion": "400 g",
+              "minimumPersons": 6,
+              "tags": [
+                "traiteur",
+                "plat-complet"
+              ],
+              "allergens": [
+                "lait"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-plats-complets/tartiflette.jpg",
+                "alt": "Tartiflette"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Tartiflette | À Léon Mange",
+                "description": "Plats complets servis en portions de 400 g."
+              }
+            },
+            {
+              "id": "traiteur-plats-complets-lasagnes-de-buf",
+              "name": "Lasagnes de bœuf",
+              "description": "Plats complets servis en portions de 400 g.",
+              "categoryId": "traiteur-plats-complets",
+              "order": 5,
+              "pricing": {
+                "amount": 12.0,
+                "currency": "EUR",
+                "unit": "portion"
+              },
+              "portion": "400 g",
+              "minimumPersons": 6,
+              "tags": [
+                "traiteur",
+                "plat-complet"
+              ],
+              "allergens": [
+                "gluten",
+                "lait",
+                "œufs"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-plats-complets/lasagnes-de-buf.jpg",
+                "alt": "Lasagnes de bœuf"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Lasagnes de bœuf | À Léon Mange",
+                "description": "Plats complets servis en portions de 400 g."
+              }
+            },
+            {
+              "id": "traiteur-plats-complets-paella",
+              "name": "Paëlla",
+              "description": "Plats complets servis en portions de 400 g.",
+              "categoryId": "traiteur-plats-complets",
+              "order": 6,
+              "pricing": {
+                "amount": 12.0,
+                "currency": "EUR",
+                "unit": "portion"
+              },
+              "portion": "400 g",
+              "minimumPersons": 6,
+              "tags": [
+                "traiteur",
+                "plat-complet"
+              ],
+              "allergens": [
+                "crustacés",
+                "mollusques"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-plats-complets/paella.jpg",
+                "alt": "Paëlla"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Paëlla | À Léon Mange",
+                "description": "Plats complets servis en portions de 400 g."
+              }
+            },
+            {
+              "id": "traiteur-plats-complets-choucroute",
+              "name": "Choucroute",
+              "description": "Plats complets servis en portions de 400 g.",
+              "categoryId": "traiteur-plats-complets",
+              "order": 7,
+              "pricing": {
+                "amount": 12.0,
+                "currency": "EUR",
+                "unit": "portion"
+              },
+              "portion": "400 g",
+              "minimumPersons": 6,
+              "tags": [
+                "traiteur",
+                "plat-complet"
+              ],
+              "allergens": [],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-plats-complets/choucroute.jpg",
+                "alt": "Choucroute"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Choucroute | À Léon Mange",
+                "description": "Plats complets servis en portions de 400 g."
+              }
+            }
+          ]
+        },
+        {
+          "id": "traiteur-plats",
+          "name": "Plats",
+          "description": "Plats servis en portions de 250 g.",
+          "order": 3,
+          "products": [
+            {
+              "id": "traiteur-plats-saucisson-lyonnais-sauce-vin-rouge",
+              "name": "Saucisson lyonnais, sauce vin rouge",
+              "description": "Plats servis en portions de 250 g.",
+              "categoryId": "traiteur-plats",
+              "order": 1,
+              "pricing": {
+                "amount": 9.0,
+                "currency": "EUR",
+                "unit": "portion"
+              },
+              "portion": "250 g",
+              "minimumPersons": 6,
+              "tags": [
+                "traiteur",
+                "plat"
+              ],
+              "allergens": [],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-plats/saucisson-lyonnais-sauce-vin-rouge.jpg",
+                "alt": "Saucisson lyonnais, sauce vin rouge"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Saucisson lyonnais, sauce vin rouge | À Léon Mange",
+                "description": "Plats servis en portions de 250 g."
+              }
+            },
+            {
+              "id": "traiteur-plats-mijote-de-cochon-sauce-porto",
+              "name": "Mijoté de cochon, sauce porto",
+              "description": "Plats servis en portions de 250 g.",
+              "categoryId": "traiteur-plats",
+              "order": 2,
+              "pricing": {
+                "amount": 9.0,
+                "currency": "EUR",
+                "unit": "portion"
+              },
+              "portion": "250 g",
+              "minimumPersons": 6,
+              "tags": [
+                "traiteur",
+                "plat"
+              ],
+              "allergens": [],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-plats/mijote-de-cochon-sauce-porto.jpg",
+                "alt": "Mijoté de cochon, sauce porto"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Mijoté de cochon, sauce porto | À Léon Mange",
+                "description": "Plats servis en portions de 250 g."
+              }
+            },
+            {
+              "id": "traiteur-plats-magret-de-canard-sauce-au-miel",
+              "name": "Magret de canard, sauce au miel",
+              "description": "Plats servis en portions de 250 g.",
+              "categoryId": "traiteur-plats",
+              "order": 3,
+              "pricing": {
+                "amount": 14.0,
+                "currency": "EUR",
+                "unit": "portion"
+              },
+              "portion": "250 g",
+              "minimumPersons": 6,
+              "tags": [
+                "traiteur",
+                "plat"
+              ],
+              "allergens": [],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-plats/magret-de-canard-sauce-au-miel.jpg",
+                "alt": "Magret de canard, sauce au miel"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Magret de canard, sauce au miel | À Léon Mange",
+                "description": "Plats servis en portions de 250 g."
+              }
+            },
+            {
+              "id": "traiteur-plats-pave-de-saumon-sauce-moules-safranee",
+              "name": "Pavé de saumon, sauce moules safranée",
+              "description": "Plats servis en portions de 250 g.",
+              "categoryId": "traiteur-plats",
+              "order": 4,
+              "pricing": {
+                "amount": 14.0,
+                "currency": "EUR",
+                "unit": "portion"
+              },
+              "portion": "250 g",
+              "minimumPersons": 6,
+              "tags": [
+                "traiteur",
+                "plat"
+              ],
+              "allergens": [
+                "poisson",
+                "mollusques",
+                "lait"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-plats/pave-de-saumon-sauce-moules-safranee.jpg",
+                "alt": "Pavé de saumon, sauce moules safranée"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Pavé de saumon, sauce moules safranée | À Léon Mange",
+                "description": "Plats servis en portions de 250 g."
+              }
+            },
+            {
+              "id": "traiteur-plats-saute-de-veau-aux-olives-et-citron-confit",
+              "name": "Sauté de veau aux olives et citron confit",
+              "description": "Plats servis en portions de 250 g.",
+              "categoryId": "traiteur-plats",
+              "order": 5,
+              "pricing": {
+                "amount": 12.5,
+                "currency": "EUR",
+                "unit": "portion"
+              },
+              "portion": "250 g",
+              "minimumPersons": 6,
+              "tags": [
+                "traiteur",
+                "plat"
+              ],
+              "allergens": [],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-plats/saute-de-veau-aux-olives-et-citron-confit.jpg",
+                "alt": "Sauté de veau aux olives et citron confit"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Sauté de veau aux olives et citron confit | À Léon Mange",
+                "description": "Plats servis en portions de 250 g."
+              }
+            },
+            {
+              "id": "traiteur-plats-buf-bourguignon",
+              "name": "Bœuf bourguignon",
+              "description": "Plats servis en portions de 250 g.",
+              "categoryId": "traiteur-plats",
+              "order": 6,
+              "pricing": {
+                "amount": 12.0,
+                "currency": "EUR",
+                "unit": "portion"
+              },
+              "portion": "250 g",
+              "minimumPersons": 6,
+              "tags": [
+                "traiteur",
+                "plat"
+              ],
+              "allergens": [],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-plats/buf-bourguignon.jpg",
+                "alt": "Bœuf bourguignon"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Bœuf bourguignon | À Léon Mange",
+                "description": "Plats servis en portions de 250 g."
+              }
+            },
+            {
+              "id": "traiteur-plats-blanquette-de-veau-a-l-ancienne",
+              "name": "Blanquette de veau à l'ancienne",
+              "description": "Plats servis en portions de 250 g.",
+              "categoryId": "traiteur-plats",
+              "order": 7,
+              "pricing": {
+                "amount": 12.0,
+                "currency": "EUR",
+                "unit": "portion"
+              },
+              "portion": "250 g",
+              "minimumPersons": 6,
+              "tags": [
+                "traiteur",
+                "plat"
+              ],
+              "allergens": [
+                "gluten",
+                "lait"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-plats/blanquette-de-veau-a-l-ancienne.jpg",
+                "alt": "Blanquette de veau à l'ancienne"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Blanquette de veau à l'ancienne | À Léon Mange",
+                "description": "Plats servis en portions de 250 g."
+              }
+            },
+            {
+              "id": "traiteur-plats-poulet-facon-tajine-bouillon-leger",
+              "name": "Poulet façon tajine, bouillon léger",
+              "description": "Plats servis en portions de 250 g.",
+              "categoryId": "traiteur-plats",
+              "order": 8,
+              "pricing": {
+                "amount": 9.0,
+                "currency": "EUR",
+                "unit": "portion"
+              },
+              "portion": "250 g",
+              "minimumPersons": 6,
+              "tags": [
+                "traiteur",
+                "plat"
+              ],
+              "allergens": [],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-plats/poulet-facon-tajine-bouillon-leger.jpg",
+                "alt": "Poulet façon tajine, bouillon léger"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Poulet façon tajine, bouillon léger | À Léon Mange",
+                "description": "Plats servis en portions de 250 g."
+              }
+            },
+            {
+              "id": "traiteur-plats-poulet-aux-champignons-sauce-creme",
+              "name": "Poulet aux champignons, sauce crème",
+              "description": "Plats servis en portions de 250 g.",
+              "categoryId": "traiteur-plats",
+              "order": 9,
+              "pricing": {
+                "amount": 11.0,
+                "currency": "EUR",
+                "unit": "portion"
+              },
+              "portion": "250 g",
+              "minimumPersons": 6,
+              "tags": [
+                "traiteur",
+                "plat"
+              ],
+              "allergens": [
+                "lait"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-plats/poulet-aux-champignons-sauce-creme.jpg",
+                "alt": "Poulet aux champignons, sauce crème"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Poulet aux champignons, sauce crème | À Léon Mange",
+                "description": "Plats servis en portions de 250 g."
+              }
+            },
+            {
+              "id": "traiteur-plats-filet-de-poulet-sauce-curry",
+              "name": "Filet de poulet, sauce curry",
+              "description": "Plats servis en portions de 250 g.",
+              "categoryId": "traiteur-plats",
+              "order": 10,
+              "pricing": {
+                "amount": 9.0,
+                "currency": "EUR",
+                "unit": "portion"
+              },
+              "portion": "250 g",
+              "minimumPersons": 6,
+              "tags": [
+                "traiteur",
+                "plat"
+              ],
+              "allergens": [
+                "lait"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-plats/filet-de-poulet-sauce-curry.jpg",
+                "alt": "Filet de poulet, sauce curry"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Filet de poulet, sauce curry | À Léon Mange",
+                "description": "Plats servis en portions de 250 g."
+              }
+            },
+            {
+              "id": "traiteur-plats-filet-mignon-sauce-armagnac",
+              "name": "Filet mignon, sauce Armagnac",
+              "description": "Plats servis en portions de 250 g.",
+              "categoryId": "traiteur-plats",
+              "order": 11,
+              "pricing": {
+                "amount": 10.0,
+                "currency": "EUR",
+                "unit": "portion"
+              },
+              "portion": "250 g",
+              "minimumPersons": 6,
+              "tags": [
+                "traiteur",
+                "plat"
+              ],
+              "allergens": [
+                "lait"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-plats/filet-mignon-sauce-armagnac.jpg",
+                "alt": "Filet mignon, sauce Armagnac"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Filet mignon, sauce Armagnac | À Léon Mange",
+                "description": "Plats servis en portions de 250 g."
+              }
+            }
+          ]
+        },
+        {
+          "id": "traiteur-garnitures",
+          "name": "Garnitures",
+          "description": "Accompagnements servis en portions de 200 g.",
+          "order": 4,
+          "products": [
+            {
+              "id": "traiteur-garnitures-gratin-dauphinois",
+              "name": "Gratin dauphinois",
+              "description": "Accompagnements servis en portions de 200 g.",
+              "categoryId": "traiteur-garnitures",
+              "order": 1,
+              "pricing": {
+                "amount": 3.5,
+                "currency": "EUR",
+                "unit": "portion"
+              },
+              "portion": "200 g",
+              "minimumPersons": 6,
+              "tags": [
+                "traiteur",
+                "garniture"
+              ],
+              "allergens": [
+                "lait"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-garnitures/gratin-dauphinois.jpg",
+                "alt": "Gratin dauphinois"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Gratin dauphinois | À Léon Mange",
+                "description": "Accompagnements servis en portions de 200 g."
+              }
+            },
+            {
+              "id": "traiteur-garnitures-mousseline-de-patates-douces",
+              "name": "Mousseline de patates douces",
+              "description": "Accompagnements servis en portions de 200 g.",
+              "categoryId": "traiteur-garnitures",
+              "order": 2,
+              "pricing": {
+                "amount": 3.0,
+                "currency": "EUR",
+                "unit": "portion"
+              },
+              "portion": "200 g",
+              "minimumPersons": 6,
+              "tags": [
+                "traiteur",
+                "garniture"
+              ],
+              "allergens": [
+                "lait"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-garnitures/mousseline-de-patates-douces.jpg",
+                "alt": "Mousseline de patates douces"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Mousseline de patates douces | À Léon Mange",
+                "description": "Accompagnements servis en portions de 200 g."
+              }
+            },
+            {
+              "id": "traiteur-garnitures-ecrase-de-pommes-de-terre-aux-herbes",
+              "name": "Écrasé de pommes de terre aux herbes",
+              "description": "Accompagnements servis en portions de 200 g.",
+              "categoryId": "traiteur-garnitures",
+              "order": 3,
+              "pricing": {
+                "amount": 3.0,
+                "currency": "EUR",
+                "unit": "portion"
+              },
+              "portion": "200 g",
+              "minimumPersons": 6,
+              "tags": [
+                "traiteur",
+                "garniture"
+              ],
+              "allergens": [
+                "lait"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-garnitures/ecrase-de-pommes-de-terre-aux-herbes.jpg",
+                "alt": "Écrasé de pommes de terre aux herbes"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Écrasé de pommes de terre aux herbes | À Léon Mange",
+                "description": "Accompagnements servis en portions de 200 g."
+              }
+            },
+            {
+              "id": "traiteur-garnitures-pommes-duchesse",
+              "name": "Pommes Duchesse",
+              "description": "Accompagnements servis en portions de 200 g.",
+              "categoryId": "traiteur-garnitures",
+              "order": 4,
+              "pricing": {
+                "amount": 3.0,
+                "currency": "EUR",
+                "unit": "portion"
+              },
+              "portion": "200 g",
+              "minimumPersons": 6,
+              "tags": [
+                "traiteur",
+                "garniture"
+              ],
+              "allergens": [
+                "lait",
+                "œufs"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-garnitures/pommes-duchesse.jpg",
+                "alt": "Pommes Duchesse"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Pommes Duchesse | À Léon Mange",
+                "description": "Accompagnements servis en portions de 200 g."
+              }
+            },
+            {
+              "id": "traiteur-garnitures-gratin-de-macaronis",
+              "name": "Gratin de macaronis",
+              "description": "Accompagnements servis en portions de 200 g.",
+              "categoryId": "traiteur-garnitures",
+              "order": 5,
+              "pricing": {
+                "amount": 3.0,
+                "currency": "EUR",
+                "unit": "portion"
+              },
+              "portion": "200 g",
+              "minimumPersons": 6,
+              "tags": [
+                "traiteur",
+                "garniture"
+              ],
+              "allergens": [
+                "gluten",
+                "lait"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-garnitures/gratin-de-macaronis.jpg",
+                "alt": "Gratin de macaronis"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Gratin de macaronis | À Léon Mange",
+                "description": "Accompagnements servis en portions de 200 g."
+              }
+            },
+            {
+              "id": "traiteur-garnitures-riz-saute",
+              "name": "Riz sauté",
+              "description": "Accompagnements servis en portions de 200 g.",
+              "categoryId": "traiteur-garnitures",
+              "order": 6,
+              "pricing": {
+                "amount": 3.0,
+                "currency": "EUR",
+                "unit": "portion"
+              },
+              "portion": "200 g",
+              "minimumPersons": 6,
+              "tags": [
+                "traiteur",
+                "garniture"
+              ],
+              "allergens": [],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-garnitures/riz-saute.jpg",
+                "alt": "Riz sauté"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Riz sauté | À Léon Mange",
+                "description": "Accompagnements servis en portions de 200 g."
+              }
+            },
+            {
+              "id": "traiteur-garnitures-legumes-du-soleil",
+              "name": "Légumes du soleil",
+              "description": "Accompagnements servis en portions de 200 g.",
+              "categoryId": "traiteur-garnitures",
+              "order": 7,
+              "pricing": {
+                "amount": 3.5,
+                "currency": "EUR",
+                "unit": "portion"
+              },
+              "portion": "200 g",
+              "minimumPersons": 6,
+              "tags": [
+                "traiteur",
+                "garniture"
+              ],
+              "allergens": [],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-garnitures/legumes-du-soleil.jpg",
+                "alt": "Légumes du soleil"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Légumes du soleil | À Léon Mange",
+                "description": "Accompagnements servis en portions de 200 g."
+              }
+            },
+            {
+              "id": "traiteur-garnitures-potimarron-roti",
+              "name": "Potimarron rôti",
+              "description": "Accompagnements servis en portions de 200 g.",
+              "categoryId": "traiteur-garnitures",
+              "order": 8,
+              "pricing": {
+                "amount": 3.5,
+                "currency": "EUR",
+                "unit": "portion"
+              },
+              "portion": "200 g",
+              "minimumPersons": 6,
+              "tags": [
+                "traiteur",
+                "garniture"
+              ],
+              "allergens": [],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-garnitures/potimarron-roti.jpg",
+                "alt": "Potimarron rôti"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Potimarron rôti | À Léon Mange",
+                "description": "Accompagnements servis en portions de 200 g."
+              }
+            },
+            {
+              "id": "traiteur-garnitures-mousseline-de-carottes-au-cumin",
+              "name": "Mousseline de carottes au cumin",
+              "description": "Accompagnements servis en portions de 200 g.",
+              "categoryId": "traiteur-garnitures",
+              "order": 9,
+              "pricing": {
+                "amount": 2.5,
+                "currency": "EUR",
+                "unit": "portion"
+              },
+              "portion": "200 g",
+              "minimumPersons": 6,
+              "tags": [
+                "traiteur",
+                "garniture"
+              ],
+              "allergens": [
+                "lait"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-garnitures/mousseline-de-carottes-au-cumin.jpg",
+                "alt": "Mousseline de carottes au cumin"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Mousseline de carottes au cumin | À Léon Mange",
+                "description": "Accompagnements servis en portions de 200 g."
+              }
+            },
+            {
+              "id": "traiteur-garnitures-champignons-poeles-en-persillade",
+              "name": "Champignons poêlés en persillade",
+              "description": "Accompagnements servis en portions de 200 g.",
+              "categoryId": "traiteur-garnitures",
+              "order": 10,
+              "pricing": {
+                "amount": 4.5,
+                "currency": "EUR",
+                "unit": "portion"
+              },
+              "portion": "200 g",
+              "minimumPersons": 6,
+              "tags": [
+                "traiteur",
+                "garniture"
+              ],
+              "allergens": [
+                "lait"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-garnitures/champignons-poeles-en-persillade.jpg",
+                "alt": "Champignons poêlés en persillade"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Champignons poêlés en persillade | À Léon Mange",
+                "description": "Accompagnements servis en portions de 200 g."
+              }
+            }
+          ]
+        },
+        {
+          "id": "traiteur-desserts",
+          "name": "Desserts",
+          "description": "Desserts individuels pour compléter votre menu.",
+          "order": 5,
+          "products": [
+            {
+              "id": "traiteur-desserts-gateau-au-chocolat-noir-cacahuetes-caramel",
+              "name": "Gâteau au chocolat noir, cacahuètes & caramel",
+              "description": "Desserts individuels pour compléter votre menu.",
+              "categoryId": "traiteur-desserts",
+              "order": 1,
+              "pricing": {
+                "amount": 3.0,
+                "currency": "EUR",
+                "unit": "portion"
+              },
+              "tags": [
+                "traiteur",
+                "dessert"
+              ],
+              "allergens": [
+                "gluten",
+                "lait",
+                "œufs",
+                "arachides"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-desserts/gateau-au-chocolat-noir-cacahuetes-caramel.jpg",
+                "alt": "Gâteau au chocolat noir, cacahuètes & caramel"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Gâteau au chocolat noir, cacahuètes & caramel | À Léon Mange",
+                "description": "Desserts individuels pour compléter votre menu."
+              }
+            },
+            {
+              "id": "traiteur-desserts-tiramisu",
+              "name": "Tiramisu",
+              "description": "Desserts individuels pour compléter votre menu.",
+              "categoryId": "traiteur-desserts",
+              "order": 2,
+              "pricing": {
+                "amount": 3.0,
+                "currency": "EUR",
+                "unit": "portion"
+              },
+              "tags": [
+                "traiteur",
+                "dessert"
+              ],
+              "allergens": [
+                "gluten",
+                "lait",
+                "œufs"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-desserts/tiramisu.jpg",
+                "alt": "Tiramisu"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Tiramisu | À Léon Mange",
+                "description": "Desserts individuels pour compléter votre menu."
+              }
+            },
+            {
+              "id": "traiteur-desserts-tarte-aux-pommes-feuilletee",
+              "name": "Tarte aux pommes feuilletée",
+              "description": "Desserts individuels pour compléter votre menu.",
+              "categoryId": "traiteur-desserts",
+              "order": 3,
+              "pricing": {
+                "amount": 2.5,
+                "currency": "EUR",
+                "unit": "portion"
+              },
+              "tags": [
+                "traiteur",
+                "dessert"
+              ],
+              "allergens": [
+                "gluten",
+                "lait"
+              ],
+              "availability": {
+                "status": "available",
+                "seasonal": false
+              },
+              "image": {
+                "src": "/images/traiteur-desserts/tarte-aux-pommes-feuilletee.jpg",
+                "alt": "Tarte aux pommes feuilletée"
+              },
+              "composition": [],
+              "seo": {
+                "title": "Tarte aux pommes feuilletée | À Léon Mange",
+                "description": "Desserts individuels pour compléter votre menu."
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
