@@ -231,6 +231,17 @@ Le backend 0036/0037 donne au client la LECTURE de ses donnees (policies SELECT)
 ### E2E local : playwright-core sans navigateurs telecharges
 - La racine du repo fournit `playwright-core` (pas de runner, pas de download auto) ; le cache `~/Library/Caches/ms-playwright` peut ne pas correspondre a la version. Lancer avec `chromium.launch({ channel: "chrome" })` pour utiliser le Chrome systeme, zero telechargement.
 
+## GA4 et consentement CNIL (livre sur `site-ga4-consent`)
+Google Analytics 4 (`NEXT_PUBLIC_GA_ID`, sur Vercel Production ; 1re var `NEXT_PUBLIC` du projet, un Measurement ID etant public par nature) via `@next/third-parties` (`<GoogleAnalytics>`), soumis a un consentement explicite (RGPD/CNIL) :
+- **Consent Mode v2, defaut DENIED** : un `<Script strategy="beforeInteractive">` (layout) pose `gtag('consent','default',{...,'analytics_storage':'denied'})` — script INLINE, AUCUNE requete reseau, gtag.js PAS charge.
+- **Chargement sur acceptation seulement** : `site/src/components/Consentement.tsx` (client, monte au layout apres `<LettreInfo/>`) ne rend `<GoogleAnalytics>` que si le choix = accepte, puis `gtag('consent','update',{analytics_storage:'granted'})`. Refus = GA jamais monte, zero cookie `_ga`, site pleinement fonctionnel.
+- **Memorisation 13 mois** : `localStorage['alm-consent'] = {v,t}` (horodate) ; au-dela de 13 mois la cle expire, la banniere revient (reco CNIL). Cle technique de consentement = exemptee.
+- **Banniere MAISON** (tokens du site, pas de CMP externe), sobre, bas d'ecran, non bloquante, « Accepter »/« Refuser » au MEME niveau visuel. Re-ouvrable via « Gerer les cookies » (barre legale du footer) -> `CustomEvent("alm:cookies")` (meme pattern que `ouvrirLettre`/`"alm:lettre"`).
+- **Vercel Analytics** (`<Analytics/>` + `<SpeedInsights/>`) RESTE, non gate (cookieless), coexiste.
+- **Evenements de conversion** (`site/src/lib/analytics.ts::trackEvent`) : client only, envoyes UNIQUEMENT si consentement, snake_case, ZERO PII en parametre. Les 5 : `precommande_envoyee` (canal), `devis_envoye`, `newsletter_inscription`, `compte_cree` (garde anti-double ; = inscription soumise, pas activation), `recommande_1_geste` (canal), cables au succes client de chaque action (useEffect). Noms alignes sur les evenements crees dans l'interface GA4.
+- **Mentions legales** : section « Cookies et mesure d'audience » (GA4 consenti, 13 mois, re-modifiable, Vercel cookieless).
+- **REGLE** : aucune conversion ne porte d'email/nom/telephone/reference client. GA ne se charge jamais avant « Accepter » (verifiable : aucune requete `googletagmanager.com` sans consentement).
+
 ## Decisions business ouvertes (ne jamais trancher seul)
 
 Creneaux click & collect (delai, cutoff, horizon) · horaires definitifs boutique · carte boutique reelle · affichage des conditions de reglement traiteur au prospect (le « Comment ca marche » affiche une etape « facturation » au libelle volontairement sobre) · contenus reels (photos — brief photo CD existant —, textes histoire, mentions legales : raison sociale, SIRET, hebergeur).
