@@ -1,0 +1,5 @@
+# Outillage veille concurrentielle (Python, isole des apps Next.js).
+# Installation : python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
+# Puis : scrapling install   (dependances navigateur des fetchers)
+scrapling[fetchers]==0.4.11
+pyyaml==6.0.3

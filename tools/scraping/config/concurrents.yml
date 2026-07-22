@@ -1,0 +1,29 @@
+# Concurrents suivis par la veille prix (tools/scraping/scripts/parse_prix.py).
+# LISTE VIDE A LA LIVRAISON : le remplissage des vrais concurrents est un geste
+# d'Arnaud (il connait son marche). Un concurrent = une entree du tableau ci-dessous.
+#
+# Champs :
+#   nom        : libelle court, stable dans le temps (cle des diffs)
+#   url        : la page CARTE / MENU (pas la homepage)
+#   fetcher    : simple (defaut, site statique) | dynamic (site JavaScript, navigateur)
+#   selecteurs : optionnel, pour aider l'extraction si les heuristiques ne suffisent pas
+#     plat     : selecteur CSS d'un bloc plat (ex ".menu-item")
+#     nom      : selecteur CSS du nom DANS le bloc (ex ".menu-item__title::text")
+#     prix     : selecteur CSS du prix DANS le bloc (ex ".menu-item__price::text")
+#   notes      : libre (jour de mise a jour de leur carte, particularites...)
+#
+# Exemple (commente) :
+# concurrents:
+#   - nom: "Traiteur Exemple"
+#     url: "https://www.traiteur-exemple.fr/notre-carte"
+#     fetcher: simple
+#     notes: "carte mise a jour le lundi"
+#   - nom: "Food truck Exemple"
+#     url: "https://www.foodtruck-exemple.fr/menu"
+#     fetcher: dynamic
+#     selecteurs:
+#       plat: ".menu-item"
+#       nom: ".menu-item__title::text"
+#       prix: ".menu-item__price::text"
+
+concurrents: []

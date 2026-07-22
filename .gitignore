@@ -49,3 +49,8 @@ site/.next
 site/*.tsbuildinfo
 site/next-env.d.ts
 !site/.env.local.example
+
+# Outillage veille concurrentielle (Python isole, cf. tools/scraping/README.md)
+tools/scraping/.venv/
+tools/scraping/data/*.json
+!tools/scraping/data/exemple_format.json

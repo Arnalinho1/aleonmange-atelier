@@ -1,0 +1,29 @@
+[
+  {
+    "concurrent": "Traiteur Exemple",
+    "url": "https://www.traiteur-exemple.fr/notre-carte",
+    "plat": "Terrine de campagne maison",
+    "prix": 6.5,
+    "prix_affiche": "6,50 €",
+    "categorie": "Entrées",
+    "horodatage": "2026-07-22T05:00:00+00:00"
+  },
+  {
+    "concurrent": "Traiteur Exemple",
+    "url": "https://www.traiteur-exemple.fr/notre-carte",
+    "plat": "Poulet fermier à la crème et champignons",
+    "prix": 12.9,
+    "prix_affiche": "12,90 €",
+    "categorie": "Plats",
+    "horodatage": "2026-07-22T05:00:00+00:00"
+  },
+  {
+    "concurrent": "Food truck Exemple",
+    "url": "https://www.foodtruck-exemple.fr/menu",
+    "plat": "Bowl du marché",
+    "prix": 11.0,
+    "prix_affiche": "11 €",
+    "categorie": null,
+    "horodatage": "2026-07-22T05:00:00+00:00"
+  }
+]
