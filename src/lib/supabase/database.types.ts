@@ -242,6 +242,8 @@ export type Vente = {
   montant_total: number;
   couverts: number | null;
   client_id: string | null;
+  /** Rattachement manuel APRÈS COUP d'une vente anonyme à un client (0044) — documentaire : v_fidelite_client ignore les ventes marquées. NULL = client posé à la saisie. Seules les ventes marquées sont détachables. */
+  client_rattache_le: string | null;
   moyen_paiement: Paiement;
   origine: Origine;
   mode_vente: ModeVente;
@@ -496,7 +498,7 @@ export type Database = {
       parametre_site: TableDef<ParametreSite, MakeInsert<ParametreSite, never>>;
     };
     Views: {
-      /** CA FACTURÉ — ventes remises, imputées à occurred_at (= livre_le). Colonnes 0016-0017 exposées en fin (0018). */
+      /** CA FACTURÉ — ventes remises, imputées à occurred_at (= livre_le). Colonnes 0016-0017 exposées en fin (0018), client_rattache_le en fin (0044). */
       v_vente_remise: { Row: Omit<Vente, "fulfillment" | "created_at">; Relationships: [] };
       v_commande_ouverte: { Row: Vente; Relationships: [] };
       /** Compteur fidélité DÉRIVÉ (0037) — passages remis boutique+truck depuis l'opt-in. */

@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { ChevronDown, ChevronRight, Search } from "lucide-react";
 import { CANAL_COLOR, CANAL_LABEL, CATEGORIE_COLOR, PAIEMENT_LABEL } from "@/lib/nav";
 import { Badge, Dot } from "@/components/ui/Badge";
@@ -9,6 +10,7 @@ import { KpiCard } from "@/components/ui/KpiCard";
 import { ChanFilter, type ChanFilterValue } from "@/components/ui/ChanFilter";
 import { fmtEuro } from "@/lib/calculs";
 import type { Canal, Emplacement, Paiement, SourceVente } from "@/lib/supabase/database.types";
+import { rattacherVenteClient } from "../clients/actions";
 
 /** Vente remise aplatie côté serveur (jour/heure précalculés en Europe/Paris). */
 export type VenteRemise = {
@@ -21,6 +23,9 @@ export type VenteRemise = {
   moyen_paiement: Paiement;
   montant_total: number;
   source_vente: SourceVente;
+  client_id: string | null;
+  /** Marqueur de rattachement documentaire (0044) — NULL = client posé à la saisie. */
+  client_rattache_le: string | null;
   client_nom: string | null;
   lignes: {
     libelle: string;
@@ -39,15 +44,43 @@ const PERIODES = [
 
 /**
  * Historique — lit v_vente_remise, la MÊME source que Finances (HANDOFF §03).
- * Lecture seule sur le passé : filtres + détail, aucune mutation.
+ * Un seul geste d'écriture : rattacher une vente ANONYME à un client
+ * (documentaire, 0044 — jamais de crédit fidélité) ; tout le reste est en
+ * lecture seule (filtres + détail).
  */
-export function HistoryList({ ventes, emplacements }: { ventes: VenteRemise[]; emplacements: Emplacement[] }) {
+export function HistoryList({
+  ventes,
+  emplacements,
+  clientsActifs,
+}: {
+  ventes: VenteRemise[];
+  emplacements: Emplacement[];
+  clientsActifs: { id: string; nom: string }[];
+}) {
+  const router = useRouter();
   const [periode, setPeriode] = useState<(typeof PERIODES)[number]["id"]>("7j");
   const [filtre, setFiltre] = useState<ChanFilterValue>({ canal: "all", emplacementId: "all" });
   const [recherche, setRecherche] = useState("");
   const [ouverte, setOuverte] = useState<string | null>(null);
+  // Rattachement : une seule ligne dépliée à la fois, un seul jeu d'états suffit.
+  const [cibleId, setCibleId] = useState("");
+  const [attachError, setAttachError] = useState<string | undefined>();
+  const [attachPending, startAttach] = useTransition();
   // Instant de référence capturé une fois (règle purity : pas de Date.now() au rendu).
   const [maintenant] = useState(() => Date.now());
+
+  function onRattacher(venteId: string) {
+    startAttach(async () => {
+      const res = await rattacherVenteClient(venteId, cibleId);
+      if (res?.error) {
+        setAttachError(res.error);
+      } else {
+        setAttachError(undefined);
+        setCibleId("");
+        router.refresh(); // La ligne affiche le client, le bloc de rattachement disparaît.
+      }
+    });
+  }
 
   const filtrees = useMemo(() => {
     const p = PERIODES.find((x) => x.id === periode)!;
@@ -141,7 +174,11 @@ export function HistoryList({ ventes, emplacements }: { ventes: VenteRemise[]; e
                     return (
                       <div key={v.id} style={{ borderBottom: "1px solid #efe7d6" }}>
                         <button
-                          onClick={() => setOuverte(depliee ? null : v.id)}
+                          onClick={() => {
+                            setOuverte(depliee ? null : v.id);
+                            setCibleId("");
+                            setAttachError(undefined);
+                          }}
                           className="flex items-center gap-3"
                           style={{ width: "100%", padding: "10px 16px", textAlign: "left" }}
                         >
@@ -189,6 +226,36 @@ export function HistoryList({ ventes, emplacements }: { ventes: VenteRemise[]; e
                                 </span>
                               </div>
                             ))}
+                            {v.client_id === null ? (
+                              <div className="flex items-center gap-2 flex-wrap" style={{ marginTop: 8, paddingTop: 8, borderTop: "1px solid #efe7d6" }}>
+                                <span className="font-mono uppercase" style={{ fontSize: 9.5, letterSpacing: ".08em", color: "#a79b84" }}>
+                                  Vente anonyme
+                                </span>
+                                <select
+                                  value={cibleId}
+                                  onChange={(e) => setCibleId(e.target.value)}
+                                  className="outline-none"
+                                  style={{ maxWidth: 220, background: "#fff", border: "1px solid #dfd4bf", borderRadius: 9, padding: "6px 8px", fontSize: 12.5, color: "#0e3947" }}
+                                >
+                                  <option value="">Rattacher à un client…</option>
+                                  {clientsActifs.map((c) => (
+                                    <option key={c.id} value={c.id}>{c.nom}</option>
+                                  ))}
+                                </select>
+                                <button
+                                  disabled={!cibleId || attachPending}
+                                  onClick={() => onRattacher(v.id)}
+                                  style={{ padding: "6px 12px", borderRadius: 9, background: "#1493be", color: "#f6f1e7", fontSize: 12.5, fontWeight: 600, opacity: !cibleId || attachPending ? 0.5 : 1 }}
+                                >
+                                  {attachPending ? "…" : "Rattacher"}
+                                </button>
+                                {attachError && <span style={{ fontSize: 12, color: "#c0442e" }}>{attachError}</span>}
+                              </div>
+                            ) : v.client_rattache_le ? (
+                              <p className="font-mono" style={{ marginTop: 8, fontSize: 10.5, color: "#8a7f6a" }}>
+                                Rattachée le {fmtRattache(v.client_rattache_le)} (documentaire, hors fidélité)
+                              </p>
+                            ) : null}
                           </div>
                         )}
                       </div>
@@ -202,6 +269,10 @@ export function HistoryList({ ventes, emplacements }: { ventes: VenteRemise[]; e
       )}
     </>
   );
+}
+
+function fmtRattache(iso: string): string {
+  return new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "2-digit", year: "2-digit", timeZone: "Europe/Paris" }).format(new Date(iso));
 }
 
 function libelleJour(iso: string): string {

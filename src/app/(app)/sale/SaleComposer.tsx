@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Minus, Plus, CheckCircle2 } from "lucide-react";
 import { CANAL_COLOR, CANAL_LABEL, CATEGORIE_COLOR, CATEGORIE_LABEL, PAIEMENT_LABEL } from "@/lib/nav";
 import { Badge, Dot } from "@/components/ui/Badge";
@@ -19,6 +20,7 @@ import type {
   Produit,
 } from "@/lib/supabase/database.types";
 import { createVente } from "./actions";
+import { NewClientDrawer } from "./NewClientDrawer";
 
 const CATEGORIES: CategorieComposant[] = ["proteine", "feculent", "legume", "sauce"];
 const ORIGINE_LABEL: Record<Origine, string> = {
@@ -56,6 +58,7 @@ export function SaleComposer({
   /** 1=lundi … 7=dimanche, calculé serveur en Europe/Paris (badge « AUJ. »). */
   jourSemaineAuj: number;
 }) {
+  const router = useRouter();
   const [canal, setCanal] = useState<Canal>(canalInitial ?? "truck");
   const [modeVente, setModeVente] = useState<ModeVente>(
     (canalInitial ?? "truck") === "traiteur" ? "precommande" : "instantane"
@@ -66,6 +69,8 @@ export function SaleComposer({
   const [bowls, setBowls] = useState<BowlPanier[]>([]);
   const [bowlKey, setBowlKey] = useState(1);
   const [clientId, setClientId] = useState("");
+  /** Clients créés depuis le drawer local, en attendant que router.refresh() resynchronise la prop. */
+  const [clientsExtra, setClientsExtra] = useState<{ id: string; nom: string; type: string }[]>([]);
   const [couverts, setCouverts] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [dueHeure, setDueHeure] = useState("");
@@ -102,6 +107,14 @@ export function SaleComposer({
   }, [produits, emplacements, jourSemaineAuj]);
 
   const prodParId = useMemo(() => new Map(produits.map((p) => [p.id, p])), [produits]);
+  // Props serveur + créations locales dédupliquées : la value du select est toujours présente (aucun flash).
+  const optionsClients = useMemo(() => {
+    const vus = new Set(clients.map((c) => c.id));
+    return [
+      ...clients.map((c) => ({ id: c.id, nom: c.nom, type: c.type as string })),
+      ...clientsExtra.filter((c) => !vus.has(c.id)),
+    ];
+  }, [clients, clientsExtra]);
   const duCanal = produits.filter((p) => p.canal === canal);
   const bowlsCatalogue = duCanal.filter((p) => p.is_bowl && p.mode === "unite");
   const finis = duCanal.filter((p) => !p.is_bowl);
@@ -506,13 +519,18 @@ export function SaleComposer({
                     style={{ minWidth: 220, background: "#fff", border: "1px solid #dfd4bf", borderRadius: 9, padding: "8px 10px", fontSize: 13.5, color: "#0e3947" }}
                   >
                     <option value="">— anonyme —</option>
-                    {clients.map((c) => (
+                    {optionsClients.map((c) => (
                       <option key={c.id} value={c.id}>{c.nom}{c.type === "pro" ? " (pro)" : ""}</option>
                     ))}
                   </select>
-                  <Link href="/clients" style={{ fontSize: 12.5, fontWeight: 600, color: "#1493be" }}>
-                    Nouveau client →
-                  </Link>
+                  <NewClientDrawer
+                    onCreated={(c) => {
+                      setClientsExtra((s) => [...s, c]);
+                      setClientId(c.id);
+                      // Resynchronise la prop clients ; l'état de la vente en cours (useState) survit.
+                      router.refresh();
+                    }}
+                  />
                 </div>
                 <div style={{ marginTop: 14 }}>
                   <p className="font-mono uppercase flex items-center gap-2" style={{ fontSize: 9.5, letterSpacing: ".09em", color: "#a79b84", marginBottom: 8 }}>
